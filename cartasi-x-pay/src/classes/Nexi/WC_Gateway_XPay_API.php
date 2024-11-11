@@ -239,6 +239,10 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             $params = array_merge($params, WC_Pagodil_Data_Provider::calculate_params($order));
         }
 
+        if ($selectedcard == "KLARNA") {
+            $params = array_merge($params, WC_Klarna_Data_Provider::calculate_params($order));
+        }
+
         update_post_meta($order->get_id(), "_xpay_" . "codTrans", $params['codTrans']);
 
         return array(
@@ -311,19 +315,20 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
 
     public function validate_return_mac($request_parameters)
     {
-        $mac = sha1('codTrans=' . $request_parameters['codTrans'] .
-            'esito=' . $request_parameters['esito'] .
-            'importo=' . $request_parameters['importo'] .
-            'divisa=' . $request_parameters['divisa'] .
-            'data=' . $request_parameters['data'] .
-            'orario=' . $request_parameters['orario'] .
-            'codAut=' . $request_parameters['codAut'] .
+        $mac = sha1('codTrans=' . ($request_parameters['codTrans'] ?? '') .
+            'esito=' . ($request_parameters['esito'] ?? '') .
+            'importo=' . ($request_parameters['importo'] ?? '') .
+            'divisa=' . ($request_parameters['divisa'] ?? '') .
+            'data=' . ($request_parameters['data'] ?? '') .
+            'orario=' . ($request_parameters['orario'] ?? '') .
+            'codAut=' . ($request_parameters['codAut'] ?? '') .
             $this->nexi_xpay_mac);
-        if ($mac == $request_parameters["mac"]) {
+
+        if ($mac == ($request_parameters["mac"] ?? '')) {
             return true;
         }
 
-        Log::actionWarning(__FUNCTION__ . ": error: " . $request_parameters["mac"] . " != " . $mac);
+        Log::actionWarning(__FUNCTION__ . ": error: " . ($request_parameters["mac"] ?? '') . " != " . $mac);
 
         return false;
     }

@@ -58,11 +58,6 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Generic_Method
      */
     public function process_payment($order_id)
     {
-        $order = new \WC_Order($order_id);
-        $result = 'failure';
-
-        $redirectLink = $this->get_return_url($order);
-
         $orderId = $_REQUEST["orderId"];
 
         try {
@@ -87,16 +82,23 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Generic_Method
                 throw new \Exception('Invalid state returned from payment finalize: ' . json_encode($res));
             }
 
-            $result = 'success';
-
             if ($res['state'] === "REDIRECTED_TO_EXTERNAL_DOMAIN") {
+                $result = 'success';
                 $redirectLink = $res['url'];
             } else {
                 if (isset($res['operation']) && !empty($res['operation'])) {
                     \Nexi\WC_Gateway_NPG_Process_Completion::change_order_status_by_operation($order_id, $res['operation']);
-                } else {
-                    $result = 'failure';
 
+                    $order = new \WC_Order($order_id);
+
+                    if (in_array($order->get_status(), ['failed', 'cancelled'])) {
+                        $result = 'failure';
+                        $redirectLink = $this->get_return_url($order);
+                    } else {
+                        $result = 'success';
+                        $redirectLink = $this->get_return_url($order);
+                    }
+                } else {
                     throw new \Exception('Operation not set on finalize response: ' . json_encode($res));
                 }
             }
@@ -104,6 +106,11 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Generic_Method
             Log::actionWarning(__FUNCTION__ . ': ' . $th->getMessage());
 
             wc_add_notice(__("Error during payment proccess", "woocommerce-gateway-nexi-xpay"), "error");
+
+            $order = new \WC_Order($order_id);
+
+            $result = 'failure';
+            $redirectLink = $this->get_return_url($order);
         }
 
         return array(

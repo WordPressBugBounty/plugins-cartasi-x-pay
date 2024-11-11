@@ -4,7 +4,7 @@
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 7.3.4
+ * Version: 7.4.0
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
@@ -25,12 +25,11 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "7.3.4");
+        define("WC_GATEWAY_XPAY_VERSION", "7.4.0");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
 
-        // The script build-plugin-variants.sh replaces xpay with 'xpay' or 'xpay_build'
         define('WC_GATEWAY_NEXI_PLUGIN_VARIANT', 'xpay');
         define('WC_GATEWAY_XPAY_PLUGIN_COLL', false);
 

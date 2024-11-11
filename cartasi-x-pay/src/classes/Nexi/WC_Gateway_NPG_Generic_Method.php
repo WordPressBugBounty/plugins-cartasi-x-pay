@@ -37,6 +37,7 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
             'AMEX',
             'JCB',
             //UPI
+            'DINERS',
         ];
 
         $image_list = array_fill(0, count($cards), null);

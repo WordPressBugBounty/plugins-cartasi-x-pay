@@ -212,7 +212,7 @@ class WC_Gateway_XPay_Process_Completion
         }
 
         Log::actionInfo(__FUNCTION__ . ": user redirect for order id " . $order_id . ' - ' . (array_key_exists('esito', $params) ? $params['esito'] : ''));
-        
+
         if ($order->needs_payment() || $order->get_status() == 'cancelled') {
             return new \WP_REST_Response(
                 "redirecting failed...",

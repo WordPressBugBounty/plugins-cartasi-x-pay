@@ -21,10 +21,6 @@
     transform: scale(2);
 }
 
-#payment .payment_methods li[class*="payment_method_xpay"] label img:where([src*="pagolight"]) {
-    transform: scale(2.5);
-}
-
 #payment .payment_methods li[class*="payment_method_xpay"] label img:where([src*="skrill"]) {
     max-width: 40px;
 }
@@ -55,6 +51,7 @@
 }
 
 #payment .payment_methods .nexixpay-loghi-container div.img-container {
+    width: 100%;
     max-width: 50px;
     max-height: 50px;
     padding: 5px;
@@ -106,6 +103,7 @@ div#SECURITY_CODE {
 .wc-payment-form .iframe-field {
     height: 50px;
     border: none;
+    width: 100%;
 }
 
 .npg-build-error-msg-container {

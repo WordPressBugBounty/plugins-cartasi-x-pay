@@ -4,10 +4,10 @@ Tags: nexi, nexi payments, xpay, payment gateway, e-commerce
 Author URI: https://ecommerce.nexi.it
 Author: Nexi Payments SpA
 Requires at least: 4.6
-Tested up to: 6.6.1
+Tested up to: 6.6.2
 WC Requires at least: 2.7.0
-WC Tested up to: 9.1.2
-Stable tag: 7.3.4
+WC Tested up to: 9.3.3
+Stable tag: 7.4.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -272,4 +272,8 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Fixed - Minor issues
  
 = 7.3.4 =
+ * Fixed - Minor issues
+ 
+= 7.4.0 =
+ * Added - New payment methods HeyLight, Klarna, PayPal Pay in 3 Installments
  * Fixed - Minor issues

@@ -34,6 +34,10 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
     public $id = WC_GATEWAY_NEXI_PLUGIN_VARIANT;
     private $nexi_npg_api_key;
     private $base_url = null;
+    private $nexi_xpay_accounting;
+    private $nexi_xpay_oneclick_enabled;
+    private $nexi_xpay_3ds20_enabled;
+    private $nexi_xpay_recurring_enabled;
 
     private function __construct()
     {
@@ -398,7 +402,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 continue;
             }
 
-            if ($operation['operationResult'] == NPG_OR_EXECUTED) {
+            if (in_array($operation['operationResult'], array(NPG_OR_AUTHORIZED, NPG_OR_EXECUTED))) {
                 return $operation['operationId'];
             }
         }

@@ -108,7 +108,7 @@ class WC_Gateway_Nexi_Register_Available
 
         $this->paymentGateways = array();
 
-        if (is_admin() && $pagenow == 'admin.php' && $_GET['page'] == 'wc-settings' && $_GET['tab'] == 'checkout') {
+        if (is_admin() && $pagenow == 'admin.php' && isset($_GET['page']) && $_GET['page'] == 'wc-settings' && isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
             $this->paymentGateways[] = new \Nexi\WC_Gateway_Admin();
         } else {
             $currentConfig = WC_Nexi_Helper::get_nexi_settings();
@@ -217,6 +217,14 @@ class WC_Gateway_Nexi_Register_Available
                     return;
                 }
             }
+        }
+
+        if ($am['selectedcard'] === 'PAGOLIGHT') {
+            $am['description'] = 'HeyLight';
+        }
+
+        if ($am['selectedcard'] === 'MY_BANK') {
+            $am['description'] = 'MyBank';
         }
 
         // If all tests are ok then add the APM to the array of gateways
@@ -411,11 +419,11 @@ class WC_Gateway_Nexi_Register_Available
                 'min_amount' => null,
                 'max_amount' => null,
             ],
-            'PAGOLIGHT' => [
-                'title' => 'PagoLight',
-                'description' => __('Pay in installments with PagoLight', 'woocommerce-gateway-nexi-xpay'),
+            'HEYLIGHT' => [
+                'title' => 'HeyLight',
+                'description' => __('Pay in installments with HeyLight', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 6000,
-                'max_amount' => 300000,
+                'max_amount' => 500000,
             ],
             'PAYPAL_BNPL' => [
                 'title' => 'PayPal BNPL',

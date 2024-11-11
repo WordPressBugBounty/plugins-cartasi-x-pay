@@ -85,7 +85,9 @@ class WC_Gateway_NPG_Process_Completion
 
             $error_message = get_post_meta($order_id, '_npg_' . 'last_error', true);
 
-            wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . ($error_message != "" ? " (" . htmlentities($error_message ?? "") . ")" : ""), 'error');
+            if ($error_message != "") {
+                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($error_message) . ")", 'error');
+            }
 
             $payment_error = get_post_meta($order_id, '_npg_' . 'payment_error', true);
 

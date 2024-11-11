@@ -9,6 +9,18 @@
  * @license     GNU General Public License v3.0
  */
 
+function checkApplePay($) {
+    if (!window.ApplePaySession) {
+        if ($(".payment_method_xpay_applepay").length) {
+            $(".payment_method_xpay_applepay").remove();
+        }
+
+        if ($(".payment_method_xpay_npg_applepay").length) {
+            $(".payment_method_xpay_npg_applepay").remove();
+        }
+    }
+}
+
 (function ($) {
     $(document).ready(function () {
         receipt_form = $("#nexi_xpay_receipt_form");
@@ -17,17 +29,11 @@
             receipt_form.submit();
         }
 
-        setTimeout(() => {
-            if (!window.ApplePaySession) {
-                if ($(".payment_method_xpay_applepay").length) {
-                    $(".payment_method_xpay_applepay").remove();
-                }
+        checkApplePay($);
 
-                if ($(".payment_method_xpay_npg_applepay").length) {
-                    $(".payment_method_xpay_npg_applepay").remove();
-                }
-            }
-        }, 500);
+        setInterval(function () {
+            checkApplePay($);
+        }, 700);
 
         $(document).on('change', '#pagodil-installments-number', function () {
             window.localStorage.setItem('lastSelectedInstallments', parseInt($('#pagodil-installments-number').val()));
