@@ -159,11 +159,11 @@
 
                             <input type="hidden" id="xpay_account_form_api_url" value=" <?php echo $accountUrl . ''; ?>">
                             <input type="hidden" id="xpay_account_form_currency_label" value="<?php echo $currencyLabel . ''; ?>">
-                            <input type="hidden" id="xpay_account_form_question" value=" <?php echo htmlentities(__('Do you confirm to account', 'woocommerce-gateway-nexi-xpay')); ?>">
-                            <input type="hidden" id="xpay_account_form_success_message" value="<?php echo htmlentities(__("Accounting successful", 'woocommerce-gateway-nexi-xpay')) . ''; ?>">
+                            <input type="hidden" id="xpay_account_form_question" value=" <?php echo htmlentities(__('Do you confirm to capture', 'woocommerce-gateway-nexi-xpay')); ?>">
+                            <input type="hidden" id="xpay_account_form_success_message" value="<?php echo htmlentities(__("Capture successful", 'woocommerce-gateway-nexi-xpay')) . ''; ?>">
 
                             <button type="button" id="xpay_account_form_btn" class="button button-primary accounting-btn">
-                                <?php echo __("Account", 'woocommerce-gateway-nexi-xpay') ?>
+                                <?php echo __("Capture", 'woocommerce-gateway-nexi-xpay') ?>
                             </button>
                         </div>
                     </div>

@@ -4,10 +4,11 @@
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 7.4.0
+ * Version: 7.4.1
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
+ * Text Domain: woocommerce-gateway-nexi-xpay
  * Copyright: © 2017-2024, Nexi SpA
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -25,7 +26,7 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "7.4.0");
+        define("WC_GATEWAY_XPAY_VERSION", "7.4.1");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
@@ -87,9 +88,6 @@ function nexi_xpay_plugins_loaded()
         // Register endpoint in the rest api for s2s notification API, for post payment redirect url and for cancel url
         add_action('rest_api_init', '\Nexi\WC_Gateway_XPay_Process_Completion::rest_api_init');
         add_action('rest_api_init', '\Nexi\WC_Gateway_NPG_Process_Completion::rest_api_init');
-
-        \Nexi\WC_Gateway_XPay_Process_Completion::register();
-        \Nexi\WC_Gateway_NPG_Process_Completion::register();
 
         \Nexi\WC_Pagodil_Widget::register();
 
@@ -316,3 +314,36 @@ function nexi_xpay_plugins_loaded()
         add_action('admin_notices', 'nexixpay_admin_warning');
     }
 }
+
+function add_message_to_cart_nexi()
+{
+    if (key_exists("order_id", $_GET)) {
+        $orderId = $_GET["order_id"];
+
+        $lastErrorXpay = get_post_meta($orderId, '_xpay_' . 'last_error', true);
+
+        if ($lastErrorXpay != "") {
+            wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
+        }
+
+        $paymentErrorXpay = get_post_meta($orderId, '_xpay_' . 'payment_error', true);
+
+        if ($paymentErrorXpay != "") {
+            wc_add_notice(htmlentities($paymentErrorXpay), 'error');
+        }
+
+        $lastErrorNpg = get_post_meta($orderId, '_npg_' . 'last_error', true);
+
+        if ($lastErrorNpg != "") {
+            wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorNpg) . ")", 'error');
+        }
+
+        $paymentErrorNpg = get_post_meta($orderId, '_npg_' . 'payment_error', true);
+
+        if ($paymentErrorNpg != "") {
+            wc_add_notice(htmlentities($paymentErrorNpg), 'error');
+        }
+    }
+}
+
+add_action('woocommerce_before_cart', 'add_message_to_cart_nexi');

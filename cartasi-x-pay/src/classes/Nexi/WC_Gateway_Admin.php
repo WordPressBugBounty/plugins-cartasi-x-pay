@@ -204,7 +204,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                 'description' => '<span class="xpay-only-text" >' . __('Please register at', 'woocommerce-gateway-nexi-xpay') . ' <a href="https://ecommerce.nexi.it/area-test" target="_blank">ecommerce.nexi.it/area-test</a> ' . __('to get the test credentials.', 'woocommerce-gateway-nexi-xpay') . '</span><span class="npg-only-text">' . __('Please refer to Dev Portal to get access to the Sandbox', 'woocommerce-gateway-nexi-xpay') . '</span>',
             ),
             'nexi_xpay_accounting' => array(
-                'title' => __('Accounting', 'woocommerce-gateway-nexi-xpay'),
+                'title' => __('Capture method', 'woocommerce-gateway-nexi-xpay'),
                 'type' => 'select',
                 'options' => array(
                     "C" => __('Immediate', 'woocommerce-gateway-nexi-xpay'),

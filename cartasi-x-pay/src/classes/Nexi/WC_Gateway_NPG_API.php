@@ -501,15 +501,15 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_post('operations/' . $operationId . '/captures', $payload, $extraHeaders);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Unablee to performe account - ' . json_encode(['payload' => $payload, 'response' => $response]));
+                throw new \Exception('Unablee to performe capture - ' . json_encode(['payload' => $payload, 'response' => $response]));
             }
-
+            
             return true;
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
         }
 
-        throw new \Exception(__('Unable to complete account operation.', 'woocommerce-gateway-nexi-xpay'));
+        throw new \Exception(__('Unable to complete capture operation.', 'woocommerce-gateway-nexi-xpay'));
     }
 
     public function recurring_payment($order, $contractId, $amount)

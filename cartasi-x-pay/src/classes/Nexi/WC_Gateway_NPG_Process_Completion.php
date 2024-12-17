@@ -73,30 +73,6 @@ class WC_Gateway_NPG_Process_Completion
         );
     }
 
-    public static function register()
-    {
-        add_action('woocommerce_before_cart', '\Nexi\WC_Gateway_NPG_Process_Completion::add_message_to_cart');
-    }
-
-    public static function add_message_to_cart()
-    {
-        if (key_exists("order_id", $_GET)) {
-            $order_id = $_GET["order_id"];
-
-            $error_message = get_post_meta($order_id, '_npg_' . 'last_error', true);
-
-            if ($error_message != "") {
-                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($error_message) . ")", 'error');
-            }
-
-            $payment_error = get_post_meta($order_id, '_npg_' . 'payment_error', true);
-
-            if ($payment_error != "") {
-                wc_add_notice(htmlentities($payment_error), 'error');
-            }
-        }
-    }
-
     /**
      * checks if the id is a npg build orderId and return the correct wc order_id
      * if it's not a build orderId then just return the id because already a wc order_id
@@ -308,12 +284,6 @@ class WC_Gateway_NPG_Process_Completion
                 Log::actionWarning(__FUNCTION__ . ': payment error');
 
                 $error = $operation['operationResult'];
-
-                foreach ($operation['warnings'] as $warning) {
-                    if ($warning['description'] != '') {
-                        $error .= ' - ' . $warning['description'];
-                    }
-                }
 
                 update_post_meta($order_id, '_npg_' . 'last_error', $error);
 

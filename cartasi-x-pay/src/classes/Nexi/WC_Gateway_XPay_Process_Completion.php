@@ -73,30 +73,6 @@ class WC_Gateway_XPay_Process_Completion
         );
     }
 
-    public static function register()
-    {
-        add_action('woocommerce_before_cart', '\Nexi\WC_Gateway_XPay_Process_Completion::add_message_to_cart');
-    }
-
-    public static function add_message_to_cart()
-    {
-        if (key_exists("order_id", $_GET)) {
-            $order_id = $_GET["order_id"];
-
-            $error_message = get_post_meta($order_id, '_xpay_' . 'last_error', true);
-
-            if ($error_message != "") {
-                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($error_message) . ")", 'error');
-            }
-
-            $payment_error = get_post_meta($order_id, '_xpay_' . 'payment_error', true);
-
-            if ($payment_error != "") {
-                wc_add_notice(htmlentities($payment_error), 'error');
-            }
-        }
-    }
-
     public static function s2s($data)
     {
         $params = $data->get_params();
@@ -271,7 +247,7 @@ class WC_Gateway_XPay_Process_Completion
             $codTrans = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
 
             if (empty($codTrans)) {
-                throw new \Exception(sprintf(__('Unable to account order %s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id));
+                throw new \Exception(sprintf(__('Unable to capture order %s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id));
             }
 
             return WC_Gateway_XPay_API::getInstance()->account($codTrans, $amount, $order->get_currency());
