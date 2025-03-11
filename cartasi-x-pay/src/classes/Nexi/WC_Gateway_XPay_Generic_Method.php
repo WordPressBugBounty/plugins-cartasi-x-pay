@@ -246,10 +246,22 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
             case 'de_DE':
                 $language_id = 'GER';
+
+                $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+
+                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
+                    $language_id = 'DEU';
+                }
                 break;
 
             case 'ja':
                 $language_id = 'GER';
+
+                $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+
+                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
+                    $language_id = 'DEU';
+                }
                 break;
 
             case 'pt_PT':

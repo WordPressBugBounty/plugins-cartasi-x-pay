@@ -66,19 +66,19 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
     {
         $this->init_settings();
 
-        $this->nexi_xpay_alias = $this->settings["nexi_xpay_alias"];
-        $this->nexi_xpay_mac = $this->settings["nexi_xpay_mac"];
+        $this->nexi_xpay_alias = $this->settings["nexi_xpay_alias"] ?? '';
+        $this->nexi_xpay_mac = $this->settings["nexi_xpay_mac"] ?? '';
 
-        $this->nexi_xpay_accounting = $this->settings["nexi_xpay_accounting"];
+        $this->nexi_xpay_accounting = $this->settings["nexi_xpay_accounting"] ?? '';
 
-        $this->nexi_xpay_oneclick_enabled = ($this->settings["nexi_xpay_oneclick_enabled"] == "yes");
+        $this->nexi_xpay_oneclick_enabled = (($this->settings["nexi_xpay_oneclick_enabled"] ?? '') == "yes");
 
-        $this->nexi_xpay_recurring_enabled = ($this->settings["nexi_xpay_recurring_enabled"] == "yes");
-        $this->nexi_xpay_recurring_alias = $this->settings["nexi_xpay_recurring_alias"];
-        $this->nexi_xpay_recurring_mac = $this->settings["nexi_xpay_recurring_mac"];
+        $this->nexi_xpay_recurring_enabled = (($this->settings["nexi_xpay_recurring_enabled"] ?? '') == "yes");
+        $this->nexi_xpay_recurring_alias = $this->settings["nexi_xpay_recurring_alias"] ?? '';
+        $this->nexi_xpay_recurring_mac = $this->settings["nexi_xpay_recurring_mac"] ?? '';
         $this->nexi_xpay_group = $this->settings["nexi_xpay_group"] ?? '';
 
-        $this->nexi_xpay_3ds20_enabled = ($this->settings['nexi_xpay_3ds20_enabled'] == 'yes');
+        $this->nexi_xpay_3ds20_enabled = (($this->settings['nexi_xpay_3ds20_enabled'] ?? '') == 'yes');
     }
 
     public function get_profile_info()

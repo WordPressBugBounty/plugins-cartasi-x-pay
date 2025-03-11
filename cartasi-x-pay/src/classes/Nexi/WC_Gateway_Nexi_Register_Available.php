@@ -41,6 +41,7 @@ class WC_Gateway_Nexi_Register_Available
             'KLARNA',
             'PAGOLIGHT',
             'PAYPAL_BNPL',
+            'FASTCHECKOUT',
         ),
         'CZK' => array(
             'PAYU'

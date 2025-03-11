@@ -1,0 +1,1185 @@
+# Copyright (C) 2024 Nexi SpA
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: Nexi XPay 7.4.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cartasi-x-pay\n"
+"Last-Translator: \n"
+"Language-Team: Hungarian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-12-16T13:23:23+00:00\n"
+"PO-Revision-Date: 2025-01-13 13:42+0000\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Domain: woocommerce-gateway-nexi-xpay\n"
+"Language: hu_HU\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Loco-Version: 2.6.14; wp-6.7.1"
+
+#. Plugin Name of the plugin
+#: src/classes/Nexi/WC_Gateway_Admin.php:22
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:66
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:78
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:52
+msgid "Nexi XPay"
+msgstr "Nexi XPay"
+
+#. Description of the plugin
+#: src/classes/Nexi/WC_Gateway_Admin.php:23
+msgid ""
+"Payment plugin for payment cards and alternative methods. Powered by Nexi."
+msgstr ""
+"Fizetési bővítmény fizetési kártyákhoz és alternatív módszerekhez. Powered "
+"by Nexi."
+
+#. Author of the plugin
+msgid "Nexi SpA"
+msgstr "Nexi SpA"
+
+#. Author URI of the plugin
+msgid "https://www.nexi.it"
+msgstr "https://www.nexi.it"
+
+#: src/classes/Nexi/WC_Admin_Page.php:121
+msgid "Nexi payment details"
+msgstr "Nexi fizetési részletek"
+
+#: src/classes/Nexi/WC_Admin_Page.php:132
+msgid "XPay payment details"
+msgstr "XPay fizetési részletek"
+
+#: src/classes/Nexi/WC_Admin_Page.php:154
+msgid "Euros"
+msgstr "eurót"
+
+#: src/classes/Nexi/WC_Admin_Page.php:155
+msgid "Czech Kurun"
+msgstr "cseh Kurun"
+
+#: src/classes/Nexi/WC_Admin_Page.php:156
+msgid "Zloty"
+msgstr "Zloty"
+
+#: src/classes/Nexi/WC_Admin_Page.php:157
+#: src/classes/Nexi/WC_Admin_Page.php:158
+msgid "Dollars"
+msgstr "dollár"
+
+#: src/classes/Nexi/WC_Admin_Page.php:171
+msgid "Missing codTrans"
+msgstr "Hiányzik a codTrans"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:25
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:28
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:29
+#: src/classes/Nexi/WC_Gateway_XPay_Cards.php:46
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:45
+msgid "Pay securely by credit, debit and prepaid card. Powered by Nexi."
+msgstr ""
+"Fizessen biztonságosan hitel-, betéti és előre fizetett kártyával. Powered "
+"by Nexi."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:69
+msgid "Invalid credentials. Check and try again."
+msgstr "Érvénytelen hitelesítő adatok. Ellenőrizze, és próbálja újra."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:78
+msgid "Invalid API Key. Check and try again."
+msgstr "Érvénytelen API-kulcs. Ellenőrizze, és próbálja újra."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:137
+msgid ""
+"For a correct behavior of the module, check in the configuration section of "
+"the Nexi back-office that the transaction cancellation in the event of a "
+"failed notification is set."
+msgstr ""
+"A modul helyes működéséhez ellenőrizze a Nexi back-office konfigurációs "
+"részében, hogy be van-e állítva a tranzakció törlése sikertelen értesítés "
+"esetén."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:138
+msgid ""
+"A POST notification by the Nexi servers is sent to the following address, "
+"containing information on the outcome of the payment."
+msgstr ""
+"A Nexi szerverek POST értesítést küldenek a következő címre, amely "
+"információkat tartalmaz a fizetés eredményéről."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:140
+msgid ""
+"The notification is essential for the functioning of the plugin, it is "
+"therefore necessary that it is not blocked or filtered by the site "
+"infrastructure."
+msgstr ""
+"Az értesítés elengedhetetlen a bővítmény működéséhez, ezért szükséges, hogy "
+"a webhely infrastruktúrája ne blokkolja vagy szűrje."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:143
+msgid ""
+"The 3D Secure 2 protocol adopted by the main international circuits (Visa, "
+"MasterCard, American Express), introduces new authentication methods, able "
+"to improve and speed up the cardholder's purchase experience."
+msgstr ""
+"A főbb nemzetközi hálózatok (Visa, MasterCard, American Express) által "
+"elfogadott 3D Secure 2 protokoll új hitelesítési módszereket vezet be, "
+"amelyek javíthatják és felgyorsíthatják a kártyabirtokos vásárlási élményét."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:145
+msgid ""
+"By activating this option it is established that the terms and conditions "
+"that you submit to your customers, with particular reference to the privacy "
+"policy, are foreseen to include the acquisition and processing of additional "
+"data provided by the"
+msgstr ""
+"Ennek az opciónak az aktiválásával megállapítható, hogy az Ön ügyfelei "
+"számára benyújtott feltételek és feltételek, különös tekintettel az "
+"adatvédelmi szabályzatra, tartalmazzák a szolgáltató által biztosított "
+"további adatok megszerzését és feldolgozását."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:146
+#: src/classes/Nexi/WC_Gateway_Admin.php:147
+msgid "3D Secure 2 Service"
+msgstr "3D Secure 2 szolgáltatás"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:148
+msgid ""
+"(for example, shipping and / or invoicing address, payment details). Nexi "
+"and the International Circuits use the additional data collected separately "
+"for the purpose of fraud prevention."
+msgstr ""
+"(például szállítási és/vagy számlázási cím, fizetési adatok). A Nexi és az "
+"International Circuits a külön gyűjtött további adatokat csalásmegelőzési "
+"célból használja fel."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:152
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:75
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:61
+msgid "Enable/Disable"
+msgstr "Engedélyezés/Letiltás"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:154
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:77
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:63
+msgid "Enable Nexi XPay payment plugin."
+msgstr "Engedélyezze a Nexi XPay fizetési bővítményt."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:162
+msgid "Choose the type of credentials you have available for XPay"
+msgstr "Válassza ki az XPayhez rendelkezésre álló hitelesítő adatok típusát"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:165
+msgid "Alias and MAC Key"
+msgstr "Alias és MAC kulcs"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:166
+msgid "APIKey"
+msgstr "APIKey"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:168
+msgid ""
+"Select \"Alias and MAC Key\" option if you received the credentials of the "
+"production environment in the Welcome Mail received from Nexi during the "
+"activation of the service"
+msgstr ""
+"Válassza az \"Alias és MAC Key\" opciót, ha a szolgáltatás aktiválása során "
+"megkapta az éles környezet hitelesítő adatait a Nexitől kapott üdvözlő "
+"levélben."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:169
+msgid ""
+"Select \"APIKey\" option if you use the API Key as the credential of the "
+"production environment generated from the Back Office XPay. Follow the "
+"directions in the developer portal for the correct generation process."
+msgstr ""
+"Válassza az \"APIKey\" lehetőséget, ha az API-kulcsot használja a Back "
+"Office XPay-ből előállított éles környezet hitelesítő adataként. Kövesse a "
+"fejlesztői portál utasításait a megfelelő generálási folyamathoz."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:176
+msgid "Alias"
+msgstr "Álnév"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:178
+#: src/classes/Nexi/WC_Gateway_Admin.php:184
+#: src/classes/Nexi/WC_Gateway_Admin.php:397
+#: src/classes/Nexi/WC_Gateway_Admin.php:403
+#: src/classes/Nexi/WC_Gateway_Admin.php:409
+msgid "Given to Merchant by Nexi."
+msgstr "Nexi adta a kereskedőnek."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:182
+msgid "Key MAC"
+msgstr "Kulcs MAC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:191
+msgid "API Key"
+msgstr "API kulcs"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:193
+msgid ""
+"Generated from the Back Office XPay. Follow the directions in the developer "
+"portal for the correct generation process."
+msgstr ""
+"A Back Office XPay-ből generálva. Kövesse a fejlesztői portál utasításait a "
+"megfelelő generálási folyamathoz."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:200
+msgid "Enable/Disable TEST Mode"
+msgstr "TEST mód engedélyezése/letiltása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:202
+msgid "Enable Nexi XPay plugin in testing mode."
+msgstr "Engedélyezze a Nexi XPay bővítményt tesztelési módban."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:204
+msgid "Please register at"
+msgstr "Kérjük, regisztráljon a címen"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:204
+msgid "to get the test credentials."
+msgstr "hogy megszerezze a teszt hitelesítő adatait."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:204
+msgid "Please refer to Dev Portal to get access to the Sandbox"
+msgstr "Kérjük, tekintse meg a Dev Portal-t a Sandbox eléréséhez"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:207
+msgid "Capture method"
+msgstr "Rögzítési módszer"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:210
+msgid "Immediate"
+msgstr "Azonnali"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:211
+msgid "Deferred"
+msgstr "Halasztott"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:213
+msgid ""
+"The field identifies the collection method that the merchant wants to apply "
+"to the single transaction, if valued with:<br>- I (immediate) the "
+"transaction if authorized is also collected without further intervention by "
+"the operator and without considering the default profile set on the terminal."
+"<br>- D (deferred) or the field is not inserted the transaction if "
+"authorized is managed according to what is defined by the terminal profile"
+msgstr ""
+"A mező azonosítja azt a begyűjtési módot, amelyet a kereskedő az egyetlen "
+"tranzakcióhoz szeretne alkalmazni, ha az értéke:<br>- I (azonnali) a "
+"tranzakciót, ha engedélyezte, szintén begyűjtésre kerül az üzemeltető "
+"további beavatkozása és a beállított alapértelmezett profil figyelembevétele "
+"nélkül. a terminál.<br>- D (halasztott) vagy a mező nincs beszúrva a "
+"tranzakció ha engedélyezett a terminálprofil által meghatározottak szerint "
+"kezeli"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:217
+msgid "Enable 3D Secure 2 service"
+msgstr "Engedélyezze a 3D Secure 2 szolgáltatást"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:219
+msgid "Enable the sending of the fields for the 3D Secure 2 service"
+msgstr "Engedélyezze a 3D Secure 2 szolgáltatás mezőinek küldését"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:224
+msgid "Enable/Disable OneClick"
+msgstr "A OneClick engedélyezése/letiltása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:226
+msgid "Enable Nexi XPay for OneClick payment"
+msgstr "A Nexi XPay engedélyezése OneClick fizetéshez"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:228
+msgid ""
+"Enable Nexi XPay for OneClick payment. Make sure that this option is also "
+"enabled on your terminal configuration."
+msgstr ""
+"A Nexi XPay engedélyezése OneClick fizetéshez. Győződjön meg arról, hogy ez "
+"az opció a terminál konfigurációjában is engedélyezve van."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:235
+msgid "Enable/Disable Multicurrency"
+msgstr "Több pénznem engedélyezése/letiltása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:237
+msgid "Enable Nexi XPay for Multicurrency payments"
+msgstr "A Nexi XPay engedélyezése több pénznemben történő fizetéshez"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:239
+msgid ""
+"Enable this option to make the payment methods available for different "
+"currencies. To have the complete list of the supported currencies, please "
+"visit the developer Portal. Make sure that this option is also enabled on "
+"your terminal configuration."
+msgstr ""
+"Engedélyezze ezt az opciót, ha a fizetési módokat különböző pénznemekhez "
+"szeretné elérhetővé tenni. A támogatott pénznemek teljes listájának "
+"megtekintéséhez keresse fel a fejlesztői portált. Győződjön meg arról, hogy "
+"ez az opció a terminál konfigurációjában is engedélyezve van."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:246
+#: src/classes/Nexi/WC_Gateway_Admin.php:248
+msgid "Enable/Disable Installment Payments"
+msgstr "Részletfizetés engedélyezése/letiltása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:250
+msgid ""
+"Enable this option to use installment payments via XPay. This functionality "
+"is only available to merchants with Greek VAT Number. Before enabling this "
+"functionality, make sure it is available on your terminal with your payment "
+"provider."
+msgstr ""
+"Engedélyezze ezt az opciót az XPay-en keresztüli részletfizetés "
+"használatához. Ez a funkció csak a görög adószámmal rendelkező kereskedők "
+"számára érhető el. Mielőtt engedélyezné ezt a funkciót, ellenőrizze, hogy a "
+"fizetési szolgáltatójánál elérhető-e a terminálján."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:263
+#: src/classes/Nexi/WC_Gateway_Admin.php:266
+msgid "Maximum number of installments regardless of the total order amount"
+msgstr ""
+"Részletfizetések maximális száma a rendelés teljes összegétől függetlenül"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:268
+msgid ""
+"1 to 99 installments, 1 for one shot payment. Before set up a configuration, "
+"make sure to check with your payment provider what is the maximum number "
+"accepted for your terminal."
+msgstr ""
+"1-99 részlet, 1 egyszeri fizetés. A konfiguráció beállítása előtt kérdezze "
+"meg fizetési szolgáltatóját, hogy mekkora maximális számot fogadnak el a "
+"terminálon."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:275
+#: src/classes/Nexi/WC_Gateway_Admin.php:277
+msgid "Maximum number of installments depending on the total order amount"
+msgstr "A részletfizetés maximális száma a rendelés teljes összegétől függően"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:279
+msgid "Add amount and installments for each row. The installments limit is 99"
+msgstr ""
+"Adja hozzá az összeget és a részleteket minden sorhoz. A törlesztőrészlet "
+"limit 99"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:287
+msgid "Style configuration"
+msgstr "Stíluskonfiguráció"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:289
+msgid ""
+"By using this configurator you can change the look and feel of your module"
+msgstr ""
+"Ezzel a konfigurátorral megváltoztathatja a modul megjelenését és hangulatát"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:293
+msgid "Preview"
+msgstr "Előnézet"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:299
+msgid "Font family"
+msgstr "Betűcsalád"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:301
+msgid "The font family in the CC Form"
+msgstr "A betűtípuscsalád a CC űrlapon"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:307
+msgid "Font size"
+msgstr "Betűméret"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:309
+msgid "The size of the font in the CC Form in pixel"
+msgstr "A betűméret a CC űrlapon pixelben"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:315
+msgid "Font style"
+msgstr "Betűstílus"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:317
+msgid "Font style in the CC Form"
+msgstr "Betűstílus a CC űrlapon"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:324
+msgid "Font variant"
+msgstr "Betűtípus változat"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:326
+msgid "Font variant in the CC Form"
+msgstr "Betűtípusváltozat a CC űrlapon"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:333
+msgid "Letter spacing"
+msgstr "Betűköz"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:335
+msgid "The space between letters in pixel"
+msgstr "A betűk közötti térköz pixelben"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:341
+msgid "Border Color"
+msgstr "Szegély színe"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:343
+msgid "When form is empty or correct"
+msgstr "Ha az űrlap üres vagy helyes"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:350
+msgid "Error Border Color"
+msgstr "Szegélyszín hiba"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:352
+msgid "When form has error"
+msgstr "Amikor az űrlap hibás"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:359
+msgid "Placeholder Color"
+msgstr "Helyőrző színe"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:361
+msgid "Text color of placeholder"
+msgstr "Helyőrző szöveg színe"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:368
+msgid "Text Color"
+msgstr "Szöveg színe"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:370
+msgid "Text color in input field"
+msgstr "Szöveg színe a beviteli mezőben"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:384
+msgid "Subscription configuration"
+msgstr "Előfizetés konfigurációja"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:388
+msgid "Enable/Disable Recurring"
+msgstr "Ismétlődő engedélyezése/letiltása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:390
+msgid "Enable Nexi XPay for subscription's payment"
+msgstr "A Nexi XPay engedélyezése az előfizetés kifizetéséhez"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:395
+msgid "Recurring Alias"
+msgstr "Ismétlődő Alias"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:401
+msgid "Recurring key MAC"
+msgstr "Ismétlődő kulcs MAC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:407
+msgid "Group"
+msgstr "Csoport"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:445
+msgid "Up to an amount of"
+msgstr "Egy összeg erejéig"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:446
+msgid "Maximum installments"
+msgstr "Maximális törlesztőrészlet"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:455
+msgid "Add rule"
+msgstr "Szabály hozzáadása"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:458
+msgid "Delete"
+msgstr "Töröl"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:134
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:135
+msgid "Invalid plugin variant value"
+msgstr "Érvénytelen bővítményváltozat értéke"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:286
+msgid ""
+"Simply pay by bank transfer directly from your home banking with PagoinConto"
+msgstr ""
+"Egyszerűen fizessen banki átutalással közvetlenül az otthoni bankfiókjából a "
+"PagoinConto segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:292
+msgid "Easily pay with your Google Pay wallet"
+msgstr "Fizessen egyszerűen Google Pay pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:298
+msgid "Easily pay with your Apple Pay wallet"
+msgstr "Fizessen egyszerűen Apple Pay pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:304
+msgid "Pay via BANCOMAT Pay just by entering your phone number"
+msgstr ""
+"Fizessen a BANCOMAT-on keresztül. Fizessen egyszerűen telefonszámának "
+"megadásával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:310
+msgid "Pay securely by bank transfer with MyBank"
+msgstr "Fizessen biztonságosan banki átutalással a MyBankkal"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:316
+msgid "Pay quickly and easily with your AliPay wallet"
+msgstr "Fizessen gyorsan és egyszerűen AliPay pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:322
+msgid "Pay quickly and easily with your WeChat Pay wallet"
+msgstr "Fizessen gyorsan és egyszerűen WeChat Pay pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:328
+msgid "Pay directly from your bank account with Giropay"
+msgstr "Fizessen közvetlenül bankszámlájáról a Giropay segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:334
+msgid "Pay directly from your bank account with iDEAL"
+msgstr "Fizessen közvetlenül bankszámlájáról az iDEAL segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:340
+msgid "Pay easily with Bancontact"
+msgstr "Fizessen egyszerűen a Bancontact segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:346
+msgid "Real time payment directly from your bank account with EPS"
+msgstr "Valós idejű fizetés közvetlenül a bankszámlájáról az EPS segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:352
+msgid "Secure payment directly from your bank account with Przelewy24"
+msgstr ""
+"Biztonságos fizetés közvetlenül a bankszámlájáról a Przelewy24 segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:358
+msgid "Pay quickly and easily with your Skrill wallet"
+msgstr "Fizessen gyorsan és egyszerűen Skrill pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:364
+msgid "Pay in one tap with your Skrill wallet"
+msgstr "Fizessen egy koppintással Skrill pénztárcájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:370
+msgid "Secure payment directly from your bank account with PayU"
+msgstr "Biztonságos fizetés közvetlenül a bankszámlájáról a PayU segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:376
+msgid "Secure payment directly from your home banking with Blik"
+msgstr "Biztonságos fizetés közvetlenül az otthoni bankból a Blik segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:382
+msgid "Secure payment directly from your home banking with Multibanco"
+msgstr ""
+"Biztonságos fizetés közvetlenül az otthoni bankból a Multibanco segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:388
+msgid "Pay easily with your Satispay account"
+msgstr "Fizessen egyszerűen Satispa számlájával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:394
+msgid "Pay easily with your Amazon account"
+msgstr "Fizessen egyszerűen Amazon-fiókjával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:400
+msgid "Pay securely with your PayPal account"
+msgstr "Fizessen biztonságosan PayPal-fiókjával"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:406
+msgid "Pay in 3 or 4 installments by credit, debit or Postepay card with Oney"
+msgstr ""
+"Fizessen 3 vagy 4 részletben hitel-, betéti vagy Postepay kártyával az Oney-"
+"val"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:412
+msgid "Pay in 3 installments with Klarna interest-free"
+msgstr "Fizessen 3 részletben a Klarnával kamatmentesen"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:418
+msgid "Buy now and pay a little by little with PagoDIL"
+msgstr "Vásároljon most, és fizessen apránként a PagoDIL-lel"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:424
+msgid "Pay in installments with HeyLight"
+msgstr "Fizessen részletekben a HeyLight segítségével"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:430
+msgid "Pay in 3 installments with PayPal"
+msgstr "Fizessen 3 részletben PayPal-lal"
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:91
+msgid "Error while checking credentials."
+msgstr "Hiba a hitelesítő adatok ellenőrzése közben."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:199
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:658
+msgid "Unable to initialize the payment."
+msgstr "Nem sikerült inicializálni a fizetést."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:320
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:341
+msgid "Unable to retrive customer related info."
+msgstr "Nem sikerült lekérni az ügyfelekkel kapcsolatos információkat."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:337
+msgid "Customer not found."
+msgstr "Ügyfél nem található."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:353
+msgid "NPG orderId not found for order: "
+msgstr "NPG orderId nem található a következő rendeléshez: "
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:360
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:368
+msgid "Unable to retrive order related info."
+msgstr "Nem sikerült lekérni a megrendeléssel kapcsolatos információkat."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:364
+msgid "Order not found."
+msgstr "A rendelés nem található."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:446
+msgid "Unable to complete refund operation."
+msgstr "A visszatérítési művelet nem hajtható végre."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:512
+msgid "Unable to complete capture operation."
+msgstr "Nem lehet befejezni a rögzítési műveletet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:562
+msgid "Unable to perform the recurring payment."
+msgstr "Nem sikerült végrehajtani az ismétlődő fizetést."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:679
+msgid "Unable to finalize the payment."
+msgstr "Nem sikerült véglegesíteni a fizetést."
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:63
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:75
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:49
+msgid "APMs do not have a custom configuration. "
+msgstr "Az APM-ek nem rendelkeznek egyéni konfigurációval. "
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:65
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:77
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:51
+msgid "Please use "
+msgstr "Kérjük, használja "
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:67
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:79
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:53
+msgid " configurations"
+msgstr " konfigurációk"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:24
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:25
+#: src/classes/Nexi/WC_Gateway_XPay_Cards.php:25
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:24
+msgid "Payment cards"
+msgstr "Fizetési kártyák"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:25
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:26
+#: src/classes/Nexi/WC_Gateway_XPay_Cards.php:26
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:25
+msgid "Payment gateway."
+msgstr "Fizetési átjáró."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:94
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:69
+msgid "New payment methods can only be added during checkout."
+msgstr "Új fizetési módok csak a fizetés során adhatók hozzá."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:108
+msgid "Installments"
+msgstr "Részletfizetés"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:111
+msgid "One time solution"
+msgstr "Egyszeri megoldás"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:130
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:48
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:173
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:74
+msgid ""
+"Attention, the order for which you are making payment contains recurring "
+"payments, payment data will be stored securely by Nexi."
+msgstr ""
+"Figyelem, a megrendelés, amelyre fizet, ismétlődő fizetéseket tartalmaz, a "
+"fizetési adatokat a Nexi biztonságosan tárolja."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:139
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:178
+msgid "Remember the payment option."
+msgstr "Emlékezzen a fizetési lehetőségre."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:39
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:117
+msgid "New payment methods can only be added during checkout"
+msgstr "Új fizetési módok csak a fizetés során adhatók hozzá"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:108
+msgid "Error during payment proccess"
+msgstr "Hiba a fizetési folyamat során"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Generic_Method.php:130
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:162
+msgid "Invalid refund amount."
+msgstr "Érvénytelen visszatérítési összeg."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:290
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:296
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:254
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:130
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:186
+#: woocommerce-gateway-nexi-xpay.php:196
+msgid "Payment error"
+msgstr "Fizetési hiba"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:347
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:221
+msgid "Payment has been cancelled."
+msgstr "A fizetést törölték."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:367
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:242
+msgid "Invalid amount."
+msgstr "Érvénytelen összeg."
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:118
+msgid "Response KO"
+msgstr "Válasz KO"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:131
+msgid "Mac verification failed"
+msgstr "A Mac ellenőrzése nem sikerült"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:389
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:430
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:475
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:528
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:625
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:691
+msgid "Error in the calculation of the return MAC parameter"
+msgstr "Hiba a visszatérési MAC paraméter kiszámításakor"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:545
+msgid "Can't connect!"
+msgstr "Nem lehet csatlakozni!"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:559
+msgid "CURL exec error: %s"
+msgstr "CURL végrehajtási hiba: %s"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:566
+msgid "JSON error"
+msgstr "JSON hiba"
+
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:28
+msgid "Pay in installments without interest"
+msgstr "Részletfizetés kamat nélkül"
+
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:33
+msgid " via Nexi XPay"
+msgstr " a Nexi XPay-en keresztül"
+
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:77
+#: src/classes/Nexi/WC_Pagodil_Widget.php:59
+msgid "Amount: %s installments of %s€"
+msgstr "Összeg: %s részlet, %s€"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:139
+msgid "The transaction has been declined, please retry."
+msgstr "A tranzakciót elutasították, kérjük, próbálja újra."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:223
+msgid "Nexi XPay payment and card tokenization successful"
+msgstr "Sikeres Nexi XPay fizetés és kártyatokenizálás"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:227
+msgid "Nexi XPay payment with tokenized card successful"
+msgstr "Sikeres Nexi XPay fizetés tokenizált kártyával"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:231
+msgid "Nexi XPay payment successful"
+msgstr "Sikeres Nexi XPay fizetés"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:257
+msgid "Payment denied, please retry the transaction using the same card."
+msgstr ""
+"Fizetés megtagadva, kérjük, próbálja meg újra a tranzakciót ugyanazzal a "
+"kártyával."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:259
+msgid ""
+"Thank you for shopping with us. However, the transaction has been declined."
+msgstr "Köszönjük, hogy nálunk vásárolt. A tranzakciót azonban elutasították."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:291
+msgid "%1$s ending in %2$s (expires %3$s/%4$s)"
+msgstr "%1$s a következőre végződik: %2$s (lejár: %3$s/%4$s)"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:216
+msgid ""
+"It was not possible to process the payment, check that the shipping address "
+"set is correct."
+msgstr ""
+"Nem sikerült feldolgozni a fizetést, ellenőrizze, hogy a beállított "
+"szállítási cím helyes-e."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:218
+msgid "Payment canceled: "
+msgstr "Törölt fizetés: "
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:250
+msgid "Unable to capture order %s. Order does not have XPay capture reference."
+msgstr ""
+"Nem sikerült rögzíteni a(z) %s rendelést. A megrendelés nem tartalmaz XPay "
+"rögzítési hivatkozást."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:37
+msgid "PagoDIL by Cofidis"
+msgstr "PagoDIL a Cofidis által"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:42
+msgid "Enable PagoDIL"
+msgstr "Engedélyezze a PagoDIL-t"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:44
+msgid "Activate the PagoDIL payment method within the store."
+msgstr "Aktiválja a PagoDIL fizetési módot az üzleten belül."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:49
+msgid "Minimum cart value"
+msgstr "A kosár minimális értéke"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:52
+msgid ""
+"Minimum cart value (in Euro) for which it will be possible to proceed "
+"through installment payments with PagoDIL. This value corresponds to the "
+"amount set in the XPay back office."
+msgstr ""
+"Minimális kosárérték (euróban), amelyre a PagoDIL-lel részletfizetéssel "
+"lehet majd fizetni. Ez az érték megfelel az XPay back office-ban beállított "
+"összegnek."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:56
+msgid "Maximum cart value"
+msgstr "Maximális kosárérték"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:59
+msgid ""
+"Maximum cart value (in Euro) for which it will be possible to proceed "
+"through installment payments with PagoDIL. This value corresponds to the "
+"amount set in the XPay back office."
+msgstr ""
+"Maximális kosárérték (euróban), amelyre a PagoDIL-lel részletfizetéssel "
+"lehet majd fizetni. Ez az érték megfelel az XPay back office-ban beállított "
+"összegnek."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:63
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:120
+msgid "Number of installments"
+msgstr "Részletfizetések száma"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:66
+msgid ""
+"Number of installments made available for payment via PagoDIL. The rates "
+"displayed correspond to the values set in the XPay back office."
+msgstr ""
+"A PagoDIL-en keresztüli fizetésre rendelkezésre bocsátott részletek száma. A "
+"megjelenített árfolyamok megfelelnek az XPay back office-ban beállított "
+"értékeknek."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:70
+msgid "Installment products"
+msgstr "Részletfizetési termékek"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:73
+msgid "For selected categories"
+msgstr "A kiválasztott kategóriákhoz"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:74
+msgid "All categories"
+msgstr "Minden kategória"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:76
+msgid ""
+"Setting up installment products:<br>- For selected categories: select the "
+"categories of products of the store that you want to set as payable in "
+"installments from the drop-down list below.<br>- All categories: all the "
+"products in the store will be configured as payable in installments."
+msgstr ""
+"Részletfizetési termékek beállítása:<br>- Kiválasztott kategóriákhoz: az "
+"alábbi legördülő listából válassza ki az üzlet azon termékkategóriáit, "
+"amelyeket részletfizetésként kíván beállítani.<br>- Minden kategória: az "
+"összes termék a az üzlet részletben fizetendőnek lesz beállítva."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:81
+msgid "Categories"
+msgstr "Kategóriák"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:84
+msgid "Select the categories on which you want to enable payment via PagoDIL."
+msgstr ""
+"Válassza ki azokat a kategóriákat, amelyekben engedélyezni szeretné a "
+"PagoDIL-en keresztüli fizetést."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:88
+msgid "Tax code"
+msgstr "Adószám"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:91
+msgid ""
+"Select the field of your shop that corresponds to the tax code, it will be "
+"used by the plugin during the payment phase with PagoDIl: in this way the "
+"customer will not have to enter this data manually on the PagoDIL payment "
+"page."
+msgstr ""
+"Válassza ki üzlete adószámának megfelelő mezőjét, ezt fogja használni a "
+"plugin a PagoDIl fizetési fázisban: így a vásárlónak nem kell ezeket az "
+"adatokat manuálisan megadnia a PagoDIL fizetési oldalon."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:96
+msgid "Number of products in the cart (Optional)"
+msgstr "A kosárban lévő termékek száma (opcionális)"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:98
+msgid ""
+"Maximum number of products in the cart for which it will be possible to "
+"proceed through installment payments with PagoDIL."
+msgstr ""
+"A kosárban lévő termékek maximális száma, amelyek esetében a PagoDIL-lel "
+"részletfizetéssel lehet majd haladni."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:102
+msgid "Cofidis product code (Optional)"
+msgstr "Cofidis termékkód (opcionális)"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:104
+msgid ""
+"If you have more than one Cofidis product code, enter the code that will be "
+"used by the plugin for payment via PagoDIL."
+msgstr ""
+"Ha egynél több Cofidis termékkódja van, adja meg azt a kódot, amelyet a "
+"bővítmény a PagoDIL-en keresztüli fizetéshez használ."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:108
+msgid "Widget PagoDIL"
+msgstr "Widget PagoDIL"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:113
+msgid "Show widget"
+msgstr "Widget megjelenítése"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:115
+msgid ""
+"Enable the PagoDIL widget on products that can be paid in installments. The "
+"widget shows information relating to the installment payments made available "
+"on the product."
+msgstr ""
+"Engedélyezze a PagoDIL widgetet azokon a termékeken, amelyek részletben "
+"fizethetők. A widget a terméken elérhető részletfizetéssel kapcsolatos "
+"információkat jelenít meg."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:123
+msgid ""
+"Number of installments displayed within the widget. It is possible to select "
+"only one value (e.g. or 5 interest-free installments)."
+msgstr ""
+"A widgeten belül megjelenő részletek száma. Lehetőség van csak egy érték "
+"kiválasztására (pl. vagy 5 kamatmentes részlet)."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:128
+msgid "Logo type"
+msgstr "Logó típusa"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:131
+msgid "Select the PagoDIL logo displayed in the widget."
+msgstr "Válassza ki a widgetben megjelenő PagoDIL logót."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:136
+msgid "\"Find out more\" link"
+msgstr "\"További információ\" link"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:138
+msgid ""
+"The PagoDIL widget has an information icon pointing to a predefined web "
+"address. It is possible to change the information section by entering a new "
+"address in the form."
+msgstr ""
+"A PagoDIL widget egy információs ikonnal rendelkezik, amely egy előre "
+"meghatározott webcímre mutat. Az információs rész megváltoztatására az "
+"űrlapon új cím megadásával van lehetőség."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:164
+msgid "select Tax Code Field"
+msgstr "válassza ki az Adószám mezőt"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:255
+msgid "PagoDIL institutional logo"
+msgstr "PagoDIL intézményi logó"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:256
+msgid "White"
+msgstr "Fehér"
+
+#: src/classes/Nexi/WC_Pagodil_Widget.php:202
+msgid ""
+"Do you want to pay convenient installments without interest with PagoDIL by "
+"Cofidis? Reach the minimum amount of %s€ in the cart"
+msgstr ""
+"Szeretne kényelmes, kamatmentes részleteket fizetni a PagoDIL by Cofidis "
+"segítségével? Érje el a minimális %s€ összeget a kosárban"
+
+#: src/classes/Nexi/WC_Pending_Status.php:22
+#: src/classes/Nexi/WC_Pending_Status.php:33
+msgid "Nexi: pending payment"
+msgstr "Nexi: függőben lévő fizetés"
+
+#: src/classes/Nexi/WC_Pending_Status.php:27
+msgid "Nexi: pending payment (%s)"
+msgid_plural "Nexi: pending payment (%s)"
+msgstr[0] "Nexi: függőben lévő fizetés (%s)"
+msgstr[1] "Nexi: függőben lévő fizetés (%s)"
+
+#: templates/build_preview.php:4
+msgid "Card Number"
+msgstr "Kártyaszám"
+
+#: templates/build_preview.php:5
+msgid "MM/YY"
+msgstr "HH/ÉÉ"
+
+#: templates/npg_build_payment.php:9
+msgid "Incorrect or missing data"
+msgstr "Hibás vagy hiányzó adatok"
+
+#: templates/npg_build_payment.php:10
+msgid "XPay Build session expired"
+msgstr "Az XPay Build munkamenet lejárt"
+
+#: templates/npg_payment_detail.php:36 templates/xpay_payment_detail.php:4
+msgid "Cardholder"
+msgstr "Kártyabirtokos"
+
+#: templates/npg_payment_detail.php:39 templates/xpay_payment_detail.php:7
+msgid "Name: "
+msgstr "Név: "
+
+#: templates/npg_payment_detail.php:43
+msgid "Mail: "
+msgstr "Felad: "
+
+#: templates/npg_payment_detail.php:51 templates/xpay_payment_detail.php:17
+msgid "Card detail"
+msgstr "Kártyarészlet"
+
+#: templates/npg_payment_detail.php:54 templates/xpay_payment_detail.php:20
+msgid "Card: "
+msgstr "Kártya: "
+
+#: templates/npg_payment_detail.php:57 templates/xpay_payment_detail.php:26
+msgid "Card pan: "
+msgstr "Kártyalap: "
+
+#: templates/npg_payment_detail.php:70 templates/xpay_payment_detail.php:35
+msgid "Transaction detail"
+msgstr "Tranzakció részletei"
+
+#: templates/npg_payment_detail.php:78 templates/xpay_payment_detail.php:38
+msgid "Date: "
+msgstr "Dátum: "
+
+#: templates/npg_payment_detail.php:85
+msgid "Installments: "
+msgstr "Részletfizetés: "
+
+#: templates/npg_payment_detail.php:90 templates/xpay_payment_detail.php:41
+msgid "Amount: "
+msgstr "Összeg: "
+
+#: templates/npg_payment_detail.php:93
+msgid "Order ID: "
+msgstr "Rendelési azonosító: "
+
+#: templates/npg_payment_detail.php:104 templates/xpay_payment_detail.php:62
+msgid "Accounting operations"
+msgstr "Számviteli műveletek"
+
+#: templates/npg_payment_detail.php:106 templates/xpay_payment_detail.php:64
+msgid "New accounting operation"
+msgstr "Új könyvelési művelet"
+
+#: templates/npg_payment_detail.php:114 templates/xpay_payment_detail.php:73
+msgid "Type of operation"
+msgstr "A művelet típusa"
+
+#: templates/npg_payment_detail.php:115
+msgid "Result"
+msgstr "Eredmény"
+
+#: templates/npg_payment_detail.php:116 templates/xpay_payment_detail.php:74
+msgid "Amount"
+msgstr "Összeg"
+
+#: templates/npg_payment_detail.php:117 templates/xpay_payment_detail.php:72
+msgid "Date"
+msgstr "Dátum"
+
+#: templates/npg_payment_detail.php:162 templates/xpay_payment_detail.php:110
+msgid "Do you confirm to capture"
+msgstr "Megerősíti a rögzítést"
+
+#: templates/npg_payment_detail.php:163
+msgid "Capture successful"
+msgstr "A rögzítés sikeres"
+
+#: templates/npg_payment_detail.php:166 templates/xpay_payment_detail.php:114
+msgid "Capture"
+msgstr "Elfog"
+
+#: templates/pagodil_checkout.php:4
+msgid ""
+"With PagoDIL by Cofidis, the merchant allows you to defer the payment in "
+"convenient installments without costs or interest."
+msgstr ""
+"A PagoDIL by Cofidis segítségével a kereskedő lehetővé teszi, hogy kényelmes "
+"részletekben halassza a fizetést költségek és kamat nélkül."
+
+#: templates/pagodil_checkout.php:22
+msgid "Choose the number of installments"
+msgstr "Válassza ki a törlesztőrészletek számát"
+
+#: templates/xpay_payment_detail.php:23
+msgid "Nationality: "
+msgstr "Állampolgárság: "
+
+#: templates/xpay_payment_detail.php:29
+msgid "Expiry date: "
+msgstr "Lejárati dátum: "
+
+#: templates/xpay_payment_detail.php:44
+msgid "Transaction code: "
+msgstr "Tranzakció kódja: "
+
+#: templates/xpay_payment_detail.php:48
+msgid "Contract number: "
+msgstr "Szerződés száma: "
+
+#: templates/xpay_payment_detail.php:51
+msgid "Status: "
+msgstr "Állapot: "
+
+#: templates/xpay_payment_detail.php:111
+msgid "Capture of transaction %s successful"
+msgstr "%s tranzakció rögzítése sikeres"
+
+#: woocommerce-gateway-nexi-xpay.php:306
+msgid ""
+"Warning, the PHP extension bcmath is not enabled. The amounts calculated by "
+"the plugin may be incorrect; please enable it to ensure correct calculations."
+msgstr ""
+"Figyelmeztetés, a bcmath PHP kiterjesztés nincs engedélyezve. A bővítmény "
+"által kiszámított összegek tévesek lehetnek; Kérjük, engedélyezze a helyes "
+"számítások érdekében."
+
+#: woocommerce-gateway-nexi-xpay.php:326 woocommerce-gateway-nexi-xpay.php:338
+msgid "Payment error, please try again"
+msgstr "Fizetési hiba, próbálkozzon újra"
