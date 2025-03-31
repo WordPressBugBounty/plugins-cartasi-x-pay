@@ -23,7 +23,7 @@ class WC_Gateway_NPG_APM_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
         $apmCode,
         $apmLabel,
         $apmDescription,
-        $isBuild = false,
+        $isBuild = false
     ) {
         parent::__construct($apmCode, $isBuild);
         $this->apmCode = $apmCode;

@@ -69,13 +69,14 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
         parent::init_form_fields();
     }
 
-    public function filter_saved_payment_methods_list( $list, $customer_id ) {
+    public function filter_saved_payment_methods_list($list, $customer_id)
+    {
         $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_build_settings') ?? [];
         if (empty($gatewaySettings) || ($gatewaySettings['nexi_xpay_oneclick_enabled'] ?? '') !== 'yes' || \Nexi\WC_Nexi_Helper::cart_contains_subscription()) {
             return [];
         }
-		return $list;
-	}
+        return $list;
+    }
 
     public function getBuildStyle()
     {

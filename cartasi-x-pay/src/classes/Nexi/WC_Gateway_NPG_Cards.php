@@ -28,16 +28,17 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
 
         $this->description = $this->get_sorted_cards_images() . __("Pay securely by credit, debit and prepaid card. Powered by Nexi.", 'woocommerce-gateway-nexi-xpay');
 
-        add_filter( 'woocommerce_saved_payment_methods_list', [ $this, 'filter_saved_payment_methods_list' ], 10, 2 );
+        add_filter('woocommerce_saved_payment_methods_list', [$this, 'filter_saved_payment_methods_list'], 10, 2);
     }
 
-    public function filter_saved_payment_methods_list( $list, $customer_id ) {
+    public function filter_saved_payment_methods_list($list, $customer_id)
+    {
         $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_settings') ?? [];
         if (empty($gatewaySettings) || ($gatewaySettings['nexi_xpay_oneclick_enabled'] ?? '') !== 'yes' || \Nexi\WC_Nexi_Helper::cart_contains_subscription()) {
             return [];
         }
-		return $list;
-	}
+        return $list;
+    }
 
     public function process_payment($order_id)
     {

@@ -51,7 +51,7 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
             $redirectLink = $this->get_return_url($order);
         }
 
-         $resultArray = [
+        $resultArray = [
             'result' => $result,
             'redirect' => $redirectLink,
         ];

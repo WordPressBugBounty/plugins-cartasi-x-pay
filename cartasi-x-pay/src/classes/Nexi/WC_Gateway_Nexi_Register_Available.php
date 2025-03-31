@@ -155,7 +155,7 @@ class WC_Gateway_Nexi_Register_Available
 
             $this->currency = get_woocommerce_currency();
 
-            if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'enabled', value: 'yes')) {
+            if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'enabled', 'yes')) {
                 if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
                     if (is_admin() || static::is_currency_valid_for_apm($this->currency, 'CARDS')) {
                         $this->paymentGateways[] = $mainGateway;

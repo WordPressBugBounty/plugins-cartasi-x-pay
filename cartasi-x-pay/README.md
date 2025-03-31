@@ -7,7 +7,7 @@ Requires at least: 4.6
 Tested up to: 6.7.2
 WC Requires at least: 2.7.0
 WC Tested up to: 9.7.1
-Stable tag: 7.6.0
+Stable tag: 7.6.1
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -289,3 +289,6 @@ This payment method doesn't support transaction refunds. In case of a refund, th
 = 7.6.0 =
  * Added - Compatibility with WooCommerce Block Checkout
  * Added - Compatibility with WooCommerce High-Performance Order Storage (HPOS)
+ 
+= 7.6.1 =
+ * Fixed - Minor issues

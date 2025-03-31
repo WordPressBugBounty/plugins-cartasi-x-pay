@@ -18,7 +18,7 @@ abstract class WC_Gateway_NPG_Blocks_Support extends WC_Gateway_Generic_Blocks_S
 
     public function __construct(
         $apm = '',
-        $isBuild = false,
+        $isBuild = false
     ) {
         if ($apm !== null && !empty($apm)) {
             parent::__construct('xpay_npg_' . strtolower($apm), 'npg', 'xpay_npg', $apm, $isBuild);

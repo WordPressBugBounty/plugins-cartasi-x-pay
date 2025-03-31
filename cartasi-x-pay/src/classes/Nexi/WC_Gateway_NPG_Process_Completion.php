@@ -272,7 +272,7 @@ class WC_Gateway_NPG_Process_Completion
                 break;
 
             case NPG_OR_PENDING: // if operationResult is pending, the final operation status isn't sure and the order is set in pending
-                Log::actionWarning(message: __FUNCTION__ . ': operation not in a final status');
+                Log::actionWarning(__FUNCTION__ . ': operation not in a final status');
 
                 if ($order->get_status() != 'pending') {
                     $order->update_status('pending');   // not using 'pd-pending-status' because in this status the order is considered as paid and completed
@@ -293,7 +293,7 @@ class WC_Gateway_NPG_Process_Completion
                     $order->update_status('failed');
                 }
 
-                Log::actionWarning(message: __FUNCTION__ . ': payment error');
+                Log::actionWarning(__FUNCTION__ . ': payment error');
 
                 $error = $operation['operationResult'];
 

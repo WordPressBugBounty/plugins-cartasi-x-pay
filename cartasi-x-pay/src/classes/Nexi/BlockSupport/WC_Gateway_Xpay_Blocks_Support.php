@@ -18,7 +18,7 @@ abstract class WC_Gateway_Xpay_Blocks_Support extends WC_Gateway_Generic_Blocks_
 
     public function __construct(
         $apm = '',
-        $isBuild = false,
+        $isBuild = false
     ) {
         if ($apm !== null && !empty($apm)) {
             parent::__construct('xpay_' . strtolower($apm), 'xpay', 'xpay', $apm, $isBuild);

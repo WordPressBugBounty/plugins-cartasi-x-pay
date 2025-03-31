@@ -22,7 +22,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
     public function __construct(
         $apmCode,
         $apmLabel,
-        $isBuild = false,
+        $isBuild = false
     ) {
         parent::__construct($apmCode, $isBuild);
         $this->apmCode = $apmCode;

@@ -166,7 +166,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                     GATEWAY_NPG => __('APIKey', 'woocommerce-gateway-nexi-xpay')
                 ),
                 'description' => '- ' . __('Select "Alias and MAC Key" option if you received the credentials of the production environment in the Welcome Mail received from Nexi during the activation of the service', 'woocommerce-gateway-nexi-xpay') . '<br />'
-                . '- ' . __('Select "APIKey" option if you use the API Key as the credential of the production environment generated from the Back Office XPay. Follow the directions in the developer portal for the correct generation process.', 'woocommerce-gateway-nexi-xpay'),
+                    . '- ' . __('Select "APIKey" option if you use the API Key as the credential of the production environment generated from the Back Office XPay. Follow the directions in the developer portal for the correct generation process.', 'woocommerce-gateway-nexi-xpay'),
                 'class' => 'gateway-input'
             )
         ));
@@ -452,12 +452,15 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                     </div>
 
                     <div>
-                        <button class="button" id="add-ranges-variation"><?php echo __('Add rule', 'woocommerce-gateway-nexi-xpay'); ?></button>
+                        <button class="button"
+                            id="add-ranges-variation"><?php echo __('Add rule', 'woocommerce-gateway-nexi-xpay'); ?></button>
                     </div>
-                    
-                    <input type="hidden" id="ranges-delete-label" value="<?php echo __('Delete', 'woocommerce-gateway-nexi-xpay'); ?>" />
 
-                    <input type="hidden" id="<?php echo esc_attr($key); ?>" name="<?php echo esc_attr($field); ?>" value="<?php echo esc_attr($value); ?>" />
+                    <input type="hidden" id="ranges-delete-label"
+                        value="<?php echo __('Delete', 'woocommerce-gateway-nexi-xpay'); ?>" />
+
+                    <input type="hidden" id="<?php echo esc_attr($key); ?>" name="<?php echo esc_attr($field); ?>"
+                        value="<?php echo esc_attr($value); ?>" />
                 </fieldset>
 
                 <style>
@@ -542,7 +545,8 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
             </th>
             <td class="forminp">
                 <fieldset>
-                    <label for="<?php echo esc_attr($field); ?>" class="<?php echo wp_kses_post($data['class']); ?>"><?php echo wp_kses_post($data['label']); ?></label>
+                    <label for="<?php echo esc_attr($field); ?>"
+                        class="<?php echo wp_kses_post($data['class']); ?>"><?php echo wp_kses_post($data['label']); ?></label>
 
                     <?php echo $this->get_description_html($data); ?>
                 </fieldset>
