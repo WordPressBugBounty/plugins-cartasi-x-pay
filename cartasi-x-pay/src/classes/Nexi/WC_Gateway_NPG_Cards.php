@@ -15,6 +15,7 @@ namespace Nexi;
 class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
 {
 
+
     public function __construct()
     {
         parent::__construct('xpay', true);
@@ -26,7 +27,17 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
         $this->title = $this->method_title;
 
         $this->description = $this->get_sorted_cards_images() . __("Pay securely by credit, debit and prepaid card. Powered by Nexi.", 'woocommerce-gateway-nexi-xpay');
+
+        add_filter( 'woocommerce_saved_payment_methods_list', [ $this, 'filter_saved_payment_methods_list' ], 10, 2 );
     }
+
+    public function filter_saved_payment_methods_list( $list, $customer_id ) {
+        $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_settings') ?? [];
+        if (empty($gatewaySettings) || ($gatewaySettings['nexi_xpay_oneclick_enabled'] ?? '') !== 'yes' || \Nexi\WC_Nexi_Helper::cart_contains_subscription()) {
+            return [];
+        }
+		return $list;
+	}
 
     public function process_payment($order_id)
     {
@@ -40,17 +51,23 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
 
             if (isset($_REQUEST["wc-" . $this->id . "-payment-token"])) {
                 $selectedToken = $_REQUEST["wc-" . $this->id . "-payment-token"];
+            } else if (isset($_POST["wc-" . $this->id . "-payment-token"])) {
+                $selectedToken = $_POST["wc-" . $this->id . "-payment-token"];
             }
 
             $saveCard = false;
             if (isset($_REQUEST["save-card-npg"])) {
                 $saveCard = $_REQUEST["save-card-npg"] == "1";
+            } else if (isset($_POST['wc-' . $this->id . '-new-payment-method'])) {
+                $saveCard = $_POST['wc-' . $this->id . '-new-payment-method'] == "1";
             }
 
             $installmentsNumber = 0;
 
             if (isset($_REQUEST["nexi-xpay-installments-number"])) {
                 $installmentsNumber = $_REQUEST["nexi-xpay-installments-number"];
+            } else if (isset($_POST['nexi_xpay_number_of_installments'])) {
+                $installmentsNumber = $_POST['nexi_xpay_number_of_installments'];
             }
 
             $redirectLink = WC_Gateway_NPG_API::getInstance()->new_payment_link($order, $recurringPayment, WC()->cart, $selectedToken, $saveCard, 'CARDS', $installmentsNumber);
@@ -62,10 +79,12 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
             $redirectLink = $this->get_return_url($order);
         }
 
-        return array(
+        $resultArray = [
             'result' => $result,
             'redirect' => $redirectLink,
-        );
+        ];
+
+        return $resultArray;
     }
 
     function init_form_fields()
@@ -119,7 +138,7 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
 
         $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 
-        if (!$isRecurring) {
+        if (!$isRecurring && $this->settings["nexi_xpay_oneclick_enabled"] == "yes") {
             $this->saved_payment_methods();
         }
 
@@ -133,12 +152,13 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
             <?php
         } else if ($this->settings["nexi_xpay_oneclick_enabled"] == "yes") {
             ?>
-            <fieldset id="wc-<?php echo esc_attr($this->id) ?>-cc-form">
-                <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
-                    <input id="save-card-npg" name="save-card-npg" type="checkbox" value="1" style="width:auto;" />
-                    <label for="save-card-npg" style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
-                </p>
-            </fieldset>
+                <fieldset id="wc-<?php echo esc_attr($this->id) ?>-cc-form">
+                    <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
+                        <input id="save-card-npg" name="save-card-npg" type="checkbox" value="1" style="width:auto;" />
+                        <label for="save-card-npg"
+                            style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
+                    </p>
+                </fieldset>
             <?php
         }
     }
@@ -154,7 +174,7 @@ class WC_Gateway_NPG_Cards extends WC_Gateway_NPG_Generic_Method
         }
     }
 
-    private function get_installments_info()
+    public function get_installments_info()
     {
         $installmentsEnabled = $this->settings["nexi_xpay_installments_enabled"] === "yes";
 

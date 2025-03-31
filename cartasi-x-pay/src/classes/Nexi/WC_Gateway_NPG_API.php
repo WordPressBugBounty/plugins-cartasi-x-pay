@@ -159,7 +159,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                     "installmentQty" => $installmentsNumber,
                 );
 
-                update_post_meta($order->get_id(), "_npg_" . "installmentsNumber", $installmentsNumber);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "installmentsNumber", $installmentsNumber);
             }
 
             if ($recurringPayment) {
@@ -170,7 +170,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
                 $payload = $this->get_recurring_params($payload, $customerId, $cart);
 
-                update_post_meta($order->get_id(), "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
             } else if (is_user_logged_in() && $this->nexi_xpay_oneclick_enabled) {
                 $payload = $this->get_one_click_params($payload, $customerId, $selectedToken, $saveCard);
             }
@@ -185,11 +185,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 throw new \Exception('Error while initializing the payment - ' . json_encode($response));
             }
 
-            update_post_meta($order->get_id(), "_npg_" . "securityToken", $response['response']['securityToken']);
-            update_post_meta($order->get_id(), "_npg_" . "orderId", $orderId);
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "securityToken", $response['response']['securityToken']);
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "orderId", $orderId);
 
             if ($payload['paymentSession']['recurrence']['action'] == NPG_CONTRACT_CREATION) {
-                update_post_meta($order->get_id(), "_npg_" . "contractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "contractId", $payload['paymentSession']['recurrence']['contractId']);
             }
 
             return $response['response']["hostedPage"];
@@ -347,7 +347,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
     public function get_order_info($order_id)
     {
         try {
-            $npgOrderId = get_post_meta($order_id, "_npg_" . "orderId", true);
+            $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "orderId", true);
 
             if (!$npgOrderId) {
                 throw new \Exception(__('NPG orderId not found for order: ', 'woocommerce-gateway-nexi-xpay') . $order_id);
@@ -503,7 +503,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             if ($response['status_code'] !== 200) {
                 throw new \Exception('Unablee to performe capture - ' . json_encode(['payload' => $payload, 'response' => $response]));
             }
-            
+
             return true;
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
@@ -638,17 +638,19 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
             $response = $this->exec_post("orders/build", $payload);
 
+            \Nexi\Log::actionDebug("DEBUG: " . json_encode($response));
+
             if ($response['status_code'] !== 200) {
                 throw new \Exception('Error while initializing the payment - ' . json_encode($response));
             }
 
-            update_post_meta($orderId, "_npg_" . "is_build", true);
-            update_post_meta($orderId, "_npg_" . "orderId", $orderId);
-            update_post_meta($orderId, "_npg_" . "securityToken", $response['response']['securityToken']);
-            update_post_meta($orderId, "_npg_" . "sessionId", $response['response']['sessionId']);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "is_build", true);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "orderId", $orderId);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "securityToken", $response['response']['securityToken']);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "sessionId", $response['response']['sessionId']);
 
             if ($recurringPayment) {
-                update_post_meta($orderId, "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
             }
 
             return array_merge(['orderId' => $orderId], $response['response']);
@@ -707,7 +709,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
     }
 
     /**
-     * executes curl request and returns an array with the response and the status code 
+     * executes curl request and returns an array with the response and the status code
      *
      * @param string $method
      * @param string $url
@@ -748,11 +750,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         ];
 
         Log::actionInfo(__FUNCTION__ . ' - Request : ' . json_encode([
-                'method' => $method,
-                'requestUrl' => $requestUrl,
-                'httpHeader' => array_splice($httpHeader, 1),
-                'payload' => $payload,
-                'extraHeaders' => $extraHeaders
+            'method' => $method,
+            'requestUrl' => $requestUrl,
+            'httpHeader' => array_splice($httpHeader, 1),
+            'payload' => $payload,
+            'extraHeaders' => $extraHeaders
         ]));
 
         curl_setopt_array($connection, $options);

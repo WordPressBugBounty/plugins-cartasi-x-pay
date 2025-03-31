@@ -55,7 +55,7 @@ class WC_3DS20_Data_Provider
                 }
 
                 $params['chAccAgeIndicator'] = static::get3ds20AccountDateIndicator($user->get_date_created() ? $user->get_date_created() : false);
-                $params['nbPurchaseAccount'] = static::get3ds20OrderInLastSixMonth();
+                $params['nbPurchaseAccount'] = \Nexi\OrderHelper::get3ds20OrderInLastSixMonth();
                 $params['destinationAddressUsageDate'] = static::get3ds20LastUsagedestinationAddress($order->get_id(), $order->get_shipping_city(), $order->get_shipping_country(), $order->get_shipping_address_1(), $order->get_shipping_address_2(), $order->get_shipping_postcode(), $order->get_shipping_state());
                 $params['destinationAddressUsageIndicator'] = static::get3ds20FirstUsagedestinationAddress($order->get_id(), $order->get_shipping_city(), $order->get_shipping_country(), $order->get_shipping_address_1(), $order->get_shipping_address_2(), $order->get_shipping_postcode(), $order->get_shipping_state());
                 $params['destinationNameIndicator'] = static::get3ds20CheckName($user, $order->get_shipping_first_name(), $order->get_shipping_last_name());
@@ -136,8 +136,7 @@ class WC_3DS20_Data_Provider
 
     private static function get3ds20FirstUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
     {
-        $customer_orders = wc_get_orders(array(
-            'numberposts' => 1,
+        $args = [
             'orderby' => 'date',
             'order' => 'ASC',
             'exclude' => array($order_id),
@@ -178,8 +177,16 @@ class WC_3DS20_Data_Provider
                     'value' => $state,
                     'compare' => '=',
                 ),
-            ),
-        ));
+            )
+        ];
+
+        if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            $args['limit'] = 1;
+        } else {
+            $args['numberposts'] = 1;
+        }
+
+        $customer_orders = wc_get_orders($args);
 
         if (count($customer_orders) == 0) {
             //Account Created in this transaction
@@ -203,8 +210,7 @@ class WC_3DS20_Data_Provider
 
     private static function get3ds20LastUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
     {
-        $customer_orders = wc_get_orders(array(
-            'numberposts' => 1,
+        $args = [
             'orderby' => 'date',
             'order' => 'DESC',
             'exclude' => array($order_id),
@@ -246,7 +252,15 @@ class WC_3DS20_Data_Provider
                     'compare' => '=',
                 ),
             ),
-        ));
+        ];
+
+        if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            $args['limit'] = 1;
+        } else {
+            $args['numberposts'] = 1;
+        }
+
+        $customer_orders = wc_get_orders($args);
 
         if (count($customer_orders) == 0) {
             //Account Created in this transaction
@@ -254,24 +268,6 @@ class WC_3DS20_Data_Provider
         }
 
         return $customer_orders[0]->get_date_created()->date("Y-m-d");
-    }
-
-    public static function get3ds20OrderInLastSixMonth()
-    {
-        $args = array(
-            'numberposts' => -1,
-            'meta_key' => '_customer_user',
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'meta_value' => get_current_user_id(),
-            'post_type' => wc_get_order_types(),
-            'post_status' => array_keys(wc_get_order_statuses()),
-            'date_query' => array(
-                'after' => date('Y-m-d', strtotime('- 6 month'))
-            )
-        );
-        $orders = get_posts($args);
-        return count($orders);
     }
 
     private static function get3ds20AccountDateIndicator($date)
@@ -341,7 +337,7 @@ class WC_3DS20_Data_Provider
 
         $userParams['chAccAgeIndicator'] = static::get3ds20AccountDateIndicator($wc->customer->get_date_created() ? $wc->customer->get_date_created() : false);
 
-        $userParams['nbPurchaseAccount'] = static::get3ds20OrderInLastSixMonth();
+        $userParams['nbPurchaseAccount'] = \Nexi\OrderHelper::get3ds20OrderInLastSixMonth();
         $userParams['destinationAddressUsageDate'] = static::get3ds20LastUsagedestinationAddress(null, $wc->customer->get_shipping_city(), $wc->customer->get_shipping_country(), $wc->customer->get_shipping_address_1(), $wc->customer->get_shipping_address_2(), $wc->customer->get_shipping_postcode(), $wc->customer->get_shipping_state());
         $userParams['destinationAddressUsageIndicator'] = static::get3ds20FirstUsagedestinationAddress(null, $wc->customer->get_shipping_city(), $wc->customer->get_shipping_country(), $wc->customer->get_shipping_address_1(), $wc->customer->get_shipping_address_2(), $wc->customer->get_shipping_postcode(), $wc->customer->get_shipping_state());
         $userParams['destinationNameIndicator'] = static::get3ds20CheckName($wc->customer, $wc->customer->get_shipping_first_name(), $wc->customer->get_shipping_last_name());

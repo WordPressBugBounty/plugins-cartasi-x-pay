@@ -40,7 +40,7 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
         try {
             $recurringPayment = WC_Nexi_Helper::order_or_cart_contains_subscription($order);
 
-            update_post_meta($order_id, "_npg_" . "is_build", false);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_" . "is_build", false);
 
             $redirectLink = WC_Gateway_NPG_API::getInstance()->new_payment_link($order, $recurringPayment, WC()->cart, false, false, $this->selectedCard, 0);
 
@@ -51,10 +51,12 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
             $redirectLink = $this->get_return_url($order);
         }
 
-        return array(
+         $resultArray = [
             'result' => $result,
             'redirect' => $redirectLink,
-        );
+        ];
+
+        return $resultArray;
     }
 
     function init_form_fields()

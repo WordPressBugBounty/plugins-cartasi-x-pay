@@ -42,7 +42,7 @@ class WC_Pagodil_Widget
 
     /**
      * Calculate the installments amount
-     * 
+     *
      * @param int $installments
      */
     public static function calc_installments($installments = null)
@@ -73,7 +73,7 @@ class WC_Pagodil_Widget
         $xpaySettings = self::getXPaySettings();
 
         if ($xpaySettings['pd_field_name_cf']) {
-            update_post_meta($order_id, $xpaySettings['pd_field_name_cf'], esc_attr($_POST[$xpaySettings['pd_field_name_cf']]));
+            \Nexi\OrderHelper::updateOrderMeta($order_id, $xpaySettings['pd_field_name_cf'], esc_attr($_POST[$xpaySettings['pd_field_name_cf']]));
         }
     }
 
@@ -264,7 +264,7 @@ class WC_Pagodil_Widget
 
     /**
      * Calculate installments amount
-     * 
+     *
      * @return float
      */
     public static function calcInstallmentsAmount($total, $installments)
@@ -276,7 +276,7 @@ class WC_Pagodil_Widget
 
     /**
      * Return PagoDIL configuration
-     * 
+     *
      * @return array
      */
     public static function getPagodilConfig()
@@ -301,12 +301,13 @@ class WC_Pagodil_Widget
 
     /**
      * Check if single product is payable in installments
-     * 
+     *
      * @return boolean
      */
     public static function isProductInstallable($installableCategories, $xpaySettings, $pagodilConfig, $product)
     {
         if ($xpaySettings['enabled'] != "yes" || !self::isPagodilEnabled() || $pagodilConfig === null) {
+
             return false;
         }
 
@@ -321,7 +322,7 @@ class WC_Pagodil_Widget
 
     /**
      * Check if quote is payable in installments
-     * 
+     *
      * @return boolean
      */
     public static function isQuoteInstallable($xpaySettings, $pagodilConfig, $cart)
@@ -333,7 +334,7 @@ class WC_Pagodil_Widget
 
     /**
      * Check if total amount is not big enough
-     * 
+     *
      * @return boolean
      */
     public static function totalNotBigEnough($pagodilConfig, $amount)
@@ -347,7 +348,7 @@ class WC_Pagodil_Widget
 
     /**
      * Check if total amount is too big
-     * 
+     *
      * @return boolean
      */
     public static function totalTooBig($pagodilConfig, $amount)
@@ -361,7 +362,7 @@ class WC_Pagodil_Widget
 
     /**
      * Check if number of products in the cart is smaller than configuration value
-     * 
+     *
      * @return boolean
      */
     public static function checkNumberOfProducts($xpaySettings, $cart)
@@ -380,7 +381,7 @@ class WC_Pagodil_Widget
 
     /**
      * Check if products in the cart are payable in installments
-     * 
+     *
      * @return boolean
      */
     public static function checkCategories($xpaySettings, $pagodilConfig, $cart)
@@ -406,7 +407,7 @@ class WC_Pagodil_Widget
 
     /**
      * Return total amount from cart
-     * 
+     *
      * @return float
      */
     public static function getCartTotal($cart)
@@ -416,7 +417,7 @@ class WC_Pagodil_Widget
 
     /**
      * Categories saved as payable in installments
-     * 
+     *
      * @param array $xpaySettings
      * @return array
      */
@@ -437,7 +438,7 @@ class WC_Pagodil_Widget
 
     /**
      * Return minimum price limit based on XPay configuration
-     * 
+     *
      * @param array $pagodilConfig
      * @return int
      */
@@ -452,7 +453,7 @@ class WC_Pagodil_Widget
 
     /**
      * Return maximum price limit based on XPay configuration
-     * 
+     *
      * @param array $pagodilConfig
      * @return int
      */
@@ -466,7 +467,7 @@ class WC_Pagodil_Widget
     }
 
     /**
-     * 
+     *
      * @return array
      */
     public static function getXPaySettings()
@@ -492,7 +493,7 @@ class WC_Pagodil_Widget
 
     /**
      * List of available installments number based on XPay configuration, shown in configuration
-     * 
+     *
      * @return array
      */
     public static function getAvailableInstallmentsNumber()
@@ -510,7 +511,7 @@ class WC_Pagodil_Widget
 
     /**
      * List of installment values based on XPay configuration
-     * 
+     *
      * @return array
      */
     private static function getArrayOfInstallmentValues()
@@ -553,7 +554,7 @@ class WC_Pagodil_Widget
     }
 
     /**
-     * 
+     *
      * @return bool
      */
     private static function isTypeSingleInstallment($type)
@@ -562,7 +563,7 @@ class WC_Pagodil_Widget
     }
 
     /**
-     * 
+     *
      * @return bool
      */
     private static function isTypeRangeInstallment($type)
@@ -571,7 +572,7 @@ class WC_Pagodil_Widget
     }
 
     /**
-     * 
+     *
      * @return bool
      */
     private static function isTypeMultipleInstallments($type)
