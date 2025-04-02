@@ -52,17 +52,13 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         $order = new \WC_Order($order_id);
 
         if (!empty($_REQUEST['installments'])) {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "installments", sanitize_text_field($_REQUEST['installments']));
-        } else if (isset($_POST['nexi_xpay_number_of_installments'])) {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "installments", sanitize_text_field($_POST['nexi_xpay_number_of_installments']));
+            update_post_meta($order_id, "installments", sanitize_text_field($_REQUEST['installments']));
         }
 
-        $resultArray = [
+        return array(
             'result' => 'success',
             'redirect' => $order->get_checkout_payment_url(true),
-        ];
-
-        return $resultArray;
+        );
     }
 
     public function payment_fields()
@@ -107,7 +103,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
     /**
      * on subscription renewal a new order is crated and post meta from the original one are copied and saved with new order's id as post_id
      * Con una nuova versione del plugin sembra che non vengano copiati i dati quindi prendiamo il campo _subscription_renewal per recuperare le info sul contratto
-     *
+     * 
      * @param type $amount_to_charge
      * @param type $order
      */
@@ -137,7 +133,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
     /**
      * order state is changed to "Refunded" automatically when total amount is refunded
-     *
+     * 
      * @param type $order_id
      * @param type $amount
      * @param type $reaseon
@@ -168,7 +164,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
     public function init_form_fields()
     {
-
+        
     }
 
     /**
@@ -207,7 +203,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
      */
     public function add_payment_method()
     {
-
+        
     }
 
     /**

@@ -19,7 +19,7 @@ class WC_Save_Order_Meta
     public static function saveSuccessXPay($order_id, $alias, $num_contratto, $codTrans, $scadenza_pan)
     {
         $metaPrefix = "_xpay_";
-        \Nexi\OrderHelper::deleteOrderMeta($order_id, $metaPrefix . "last_error");
+        delete_post_meta($order_id, $metaPrefix . "last_error");
 
         if (
             function_exists("wcs_is_subscription") && wcs_is_subscription($order_id) ||
@@ -33,27 +33,25 @@ class WC_Save_Order_Meta
                 foreach ($subscriptions as $subscription) {
                     $subscription_id = $subscription->get_id();
 
-                    \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . "alias", $alias);
-                    \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . "num_contratto", $num_contratto);
-                    \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . "codTrans", $codTrans);
-                    \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . "scadenza_pan", $scadenza_pan);
-
+                    update_post_meta($subscription_id, $metaPrefix . "alias", $alias);
+                    update_post_meta($subscription_id, $metaPrefix . "num_contratto", $num_contratto);
+                    update_post_meta($subscription_id, $metaPrefix . "codTrans", $codTrans);
+                    update_post_meta($subscription_id, $metaPrefix . "scadenza_pan", $scadenza_pan);
                 }
             }
         }
 
-        \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . "alias", $alias);
-        \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . "num_contratto", $num_contratto);
-        \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . "codTrans", $codTrans);
-        \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . "scadenza_pan", $scadenza_pan);
-
+        update_post_meta($order_id, $metaPrefix . "alias", $alias);
+        update_post_meta($order_id, $metaPrefix . "num_contratto", $num_contratto);
+        update_post_meta($order_id, $metaPrefix . "codTrans", $codTrans);
+        update_post_meta($order_id, $metaPrefix . "scadenza_pan", $scadenza_pan);
     }
 
 
     public static function saveSuccessNpg($order_id, $authorization)
     {
         $metaPrefix = "_npg_";
-        \Nexi\OrderHelper::deleteOrderMeta($order_id, $metaPrefix . "last_error");
+        delete_post_meta($order_id, $metaPrefix . "last_error");
 
         // if it is a subscription, in addition to the order a subscription order is created, in which we need to save some information about the original order
         // doing so, when a new recurring payment is made for the same order, this data is copied automatically to the new order and can be used in the payment process
@@ -67,21 +65,39 @@ class WC_Save_Order_Meta
                 foreach ($subscriptions as $subscription) {
                     $subscription_id = $subscription->get_id();
 
-                    foreach (["orderId", "paymentMethod", "paymentCircuit", "operationCurrency", "customerInfo"] as $var_name) {
+                    foreach ([
+                        "orderId",
+                        "paymentMethod",
+                        "paymentCircuit",
+                        "operationCurrency",
+                        "customerInfo"
+                    ] as $var_name) {
                         if (\Nexi\WC_Nexi_Helper::nexi_array_key_exists($authorization, $var_name)) {
-                            \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . $var_name, $authorization[$var_name]);
+                            update_post_meta($subscription_id, $metaPrefix . $var_name, $authorization[$var_name]);
                         }
                     }
 
-                    \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . "recurringContractId", \Nexi\OrderHelper::getOrderMeta($order_id, $metaPrefix . 'recurringContractId', true));
-
+                    update_post_meta($subscription_id, $metaPrefix . "recurringContractId", get_post_meta($order_id,  $metaPrefix . 'recurringContractId', true));
                 }
             }
         }
 
-        foreach (["orderId", "operationId", "operationType", "operationResult", "operationTime", "paymentMethod", "paymentCircuit", "paymentInstrumentInfo", "paymentEndToEndId", "cancelledOperationId", "operationAmount", "operationCurrency", "customerInfo"] as $var_name) {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . $var_name, $authorization[$var_name]);
+        foreach ([
+            "orderId",
+            "operationId",
+            "operationType",
+            "operationResult",
+            "operationTime",
+            "paymentMethod",
+            "paymentCircuit",
+            "paymentInstrumentInfo",
+            "paymentEndToEndId",
+            "cancelledOperationId",
+            "operationAmount",
+            "operationCurrency",
+            "customerInfo"
+        ] as $var_name) {
+            update_post_meta($order_id, $metaPrefix . $var_name, $authorization[$var_name]);
         }
-
     }
 }

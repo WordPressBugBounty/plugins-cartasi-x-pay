@@ -23,12 +23,6 @@ class Log
         );
     }
 
-    public static function actionDebug($message)
-    {
-        $logger = wc_get_logger();
-        $logger->log("debug", $message, self::getContext());
-    }
-
     public static function actionInfo($message)
     {
         $logger = wc_get_logger();

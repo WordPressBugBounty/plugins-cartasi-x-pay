@@ -113,7 +113,7 @@ class WC_Admin_Page
             return;
         }
 
-        $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "orderId", true);
+        $npgOrderId = get_post_meta($order_id, "_npg_" . "orderId", true);
 
         if ($npgOrderId != "") {
             if ($order->get_payment_method() === 'xpay' || substr($order->get_payment_method(), 0, 9) == 'xpay_npg_' || substr($order->get_payment_method(), 0, 10) == 'xpay_build') {
@@ -122,7 +122,7 @@ class WC_Admin_Page
                 }
             }
         } else {
-            $transactionCodTrans = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'codTrans', true);
+            $transactionCodTrans = get_post_meta($order_id, '_xpay_' . 'codTrans', true);
             if ($transactionCodTrans == "") {
                 return;
             }
@@ -284,7 +284,7 @@ class WC_Admin_Page
 
             $accountUrl = get_rest_url(null, "woocommerce-gateway-nexi-xpay/process_account/npg/" . $order->get_id());
 
-            $installmentsNumber = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "installmentsNumber", true);
+            $installmentsNumber = get_post_meta($order_id, "_npg_" . "installmentsNumber", true);
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 

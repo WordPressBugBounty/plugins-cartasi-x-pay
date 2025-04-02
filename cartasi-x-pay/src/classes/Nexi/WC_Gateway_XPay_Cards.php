@@ -58,14 +58,7 @@ class WC_Gateway_XPay_Cards extends WC_Gateway_XPay_Generic_Method
 
         add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
 
-        add_filter('woocommerce_saved_payment_methods_list', [$this, 'filter_saved_payment_methods_list'], 10, 2);
-
         $this->selectedCard = "CC";
-    }
-
-    public function filter_saved_payment_methods_list($list, $customer_id)
-    {
-        return [];
     }
 
     function init_form_fields()

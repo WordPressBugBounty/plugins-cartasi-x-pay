@@ -18,49 +18,49 @@ class WC_Gateway_Nexi_Register_Available
 
     private static $xpayAllowedMethodsByCurrency = array(
         'EUR' => array(
-            'PAYPAL', //
-            'SOFORT', //
-            'AMAZONPAY', //
-            'GOOGLEPAY', //
-            'APPLEPAY', //
-            'ALIPAY', //
-            'WECHATPAY', //
-            'GIROPAY', //
-            'IDEAL', //
-            'BCMC', //
-            'EPS', //
-            'P24', //
-            'BANCOMATPAY', //
-            'SCT', //
+            'PAYPAL',
+            'SOFORT',
+            'AMAZONPAY',
+            'GOOGLEPAY',
+            'APPLEPAY',
+            'ALIPAY',
+            'WECHATPAY',
+            'GIROPAY',
+            'IDEAL',
+            'BCMC',
+            'EPS',
+            'P24',
+            'BANCOMATPAY',
+            'SCT',
             // 'MASTERPASS',
-            'SKRILL', //
-            'SKRILL1TAP', //
-            'MULTIBANCO', //
-            'MY_BANK', //
-            'PAGODIL', //
-            'KLARNA', //
+            'SKRILL',
+            'SKRILL1TAP',
+            'MULTIBANCO',
+            'MY_BANK',
+            'PAGODIL',
+            'KLARNA',
             'PAGOLIGHT',
             'PAYPAL_BNPL',
             'FASTCHECKOUT',
         ),
         'CZK' => array(
-            'PAYU' //
+            'PAYU'
         ),
         'PLN' => array(
-            'PAYU', //
-            'BLIK', //
+            'PAYU',
+            'BLIK',
         ),
         'NZD' => array(
-            'POLI', //
+            'POLI',
         ),
         'AUD' => array(
-            'POLI', //
+            'POLI',
         ),
         'GBP' => array(
-            'KLARNA', //
+            'KLARNA',
         ),
         'DKK' => array(
-            'KLARNA', //
+            'KLARNA',
         ),
     );
     private static $xpayMinAmounts = array(
@@ -87,16 +87,7 @@ class WC_Gateway_Nexi_Register_Available
         return array_merge($paymentGateways, $nexiGatewaysHelper->get_all_nexi_gateways());
     }
 
-    public static function registerBlocks()
-    {
-        $nexiGatewaysHelper = new static();
-        return $nexiGatewaysHelper->paymentGatewaysBlocks;
-    }
-
     private $paymentGateways;
-
-    private $paymentGatewaysBlocks;
-
     private $currency;
 
     private function get_all_nexi_gateways()
@@ -117,34 +108,26 @@ class WC_Gateway_Nexi_Register_Available
         global $pagenow;
 
         $this->paymentGateways = array();
-        $this->paymentGatewaysBlocks = [];
 
         if (is_admin() && $pagenow == 'admin.php' && isset($_GET['page']) && $_GET['page'] == 'wc-settings' && isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
             $this->paymentGateways[] = new \Nexi\WC_Gateway_Admin();
         } else {
             $currentConfig = WC_Nexi_Helper::get_nexi_settings();
 
-            $isBuild = false;
-
             switch (WC_GATEWAY_NEXI_PLUGIN_VARIANT) {
                 case 'xpay':
                     if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
                         $mainGateway = new \Nexi\WC_Gateway_NPG_Cards();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_NPG_Cards_Blocks_Support();
                     } else {
                         $mainGateway = new \Nexi\WC_Gateway_XPay_Cards();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_XPay_Cards_Blocks_Support();
                     }
                     break;
 
                 case 'xpay_build':
-                    $isBuild = true;
                     if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
                         $mainGateway = new \Nexi\WC_Gateway_NPG_Cards_Build();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_NPG_Build_Blocks_Support();
                     } else {
                         $mainGateway = new \Nexi\WC_Gateway_XPay_Cards_Build();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_XPay_Build_Blocks_Support();
                     }
                     break;
 
@@ -159,7 +142,6 @@ class WC_Gateway_Nexi_Register_Available
                 if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
                     if (is_admin() || static::is_currency_valid_for_apm($this->currency, 'CARDS')) {
                         $this->paymentGateways[] = $mainGateway;
-                        $this->paymentGatewaysBlocks[] = $mainGatewayBlocks;
                     }
 
                     $jsonAvailableMethodsNpg = \WC_Admin_Settings::get_option('xpay_npg_available_methods');
@@ -171,12 +153,11 @@ class WC_Gateway_Nexi_Register_Available
                     }
 
                     foreach ($availableMethodsNpg as $am) {
-                        $this->evaluate_one_apm_npg((array) $am, $isBuild);
+                        $this->evaluate_one_apm_npg((array) $am);
                     }
                 } else {
                     if (is_admin() || $this->currency == 'EUR') {
                         $this->paymentGateways[] = $mainGateway;
-                        $this->paymentGatewaysBlocks[] = $mainGatewayBlocks;
                     }
 
                     $jsonAvailableMethodsXpay = \WC_Admin_Settings::get_option('xpay_available_methods');
@@ -188,14 +169,14 @@ class WC_Gateway_Nexi_Register_Available
                     }
 
                     foreach ($availableMethodsXpay as $am) {
-                        $this->evaluate_one_apm_xpay($am, $isBuild);
+                        $this->evaluate_one_apm_xpay($am);
                     }
                 }
             }
         }
     }
 
-    private function evaluate_one_apm_xpay($am, $isBuild)
+    private function evaluate_one_apm_xpay($am)
     {
         // The method is an APM with selectedcard support
         if ($am['type'] != 'APM' || $am['selectedcard'] == '') {
@@ -228,17 +209,13 @@ class WC_Gateway_Nexi_Register_Available
             }
 
             // Test for PagoDIL configuration. Cart must be payable in installable to pay with PagoDIL
-            if ($am['selectedcard'] == 'PAGODIL') {
-                $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_APM_Blocks_Support($am['code'], $am['description'], $isBuild);
+            if ($am['selectedcard'] == 'PAGODIL' && isset(WC()->cart)) {
+                $xpaySettings = \Nexi\WC_Pagodil_Widget::getXPaySettings();
 
-                if (isset(WC()->cart)) {
-                    $xpaySettings = \Nexi\WC_Pagodil_Widget::getXPaySettings();
+                $pagodilConfig = \Nexi\WC_Pagodil_Widget::getPagodilConfig();
 
-                    $pagodilConfig = \Nexi\WC_Pagodil_Widget::getPagodilConfig();
-
-                    if (!\Nexi\WC_Pagodil_Widget::isQuoteInstallable($xpaySettings, $pagodilConfig, WC()->cart)) {
-                        return;
-                    }
+                if (!\Nexi\WC_Pagodil_Widget::isQuoteInstallable($xpaySettings, $pagodilConfig, WC()->cart)) {
+                    return;
                 }
             }
         }
@@ -253,12 +230,9 @@ class WC_Gateway_Nexi_Register_Available
 
         // If all tests are ok then add the APM to the array of gateways
         $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_APM($am['code'], $am['description'], $am['selectedcard'], $am['image']);
-        if ($am['selectedcard'] != 'PAGODIL' || ($am['selectedcard'] == 'PAGODIL' && is_admin())) {
-            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_APM_Blocks_Support($am['code'], $am['description'], $isBuild);
-        }
     }
 
-    private function evaluate_one_apm_npg($am, $isBuild)
+    private function evaluate_one_apm_npg($am)
     {
         if ($am['paymentMethodType'] != 'APM') {
             return;
@@ -302,12 +276,6 @@ class WC_Gateway_Nexi_Register_Available
             $apmInfo['description'],
             $am['circuit'],
             $am['imageLink']
-        );
-        $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_APM_Blocks_Support(
-            $am['circuit'],
-            $apmInfo['title'],
-            $apmInfo['description'],
-            $isBuild
         );
     }
 

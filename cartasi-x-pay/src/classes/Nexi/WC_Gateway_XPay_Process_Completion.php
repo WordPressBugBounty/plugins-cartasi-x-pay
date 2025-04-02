@@ -125,7 +125,7 @@ class WC_Gateway_XPay_Process_Completion
                         $order->update_status('failed');
                     }
 
-                    \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'last_error', $_POST["messaggio"]);
+                    update_post_meta($order_id, '_xpay_' . 'last_error', $_POST["messaggio"]);
 
                     $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_POST["messaggio"]);
 
@@ -137,8 +137,7 @@ class WC_Gateway_XPay_Process_Completion
                 }
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'post_notification_timestamp', time());
-
+            update_post_meta($order_id, '_xpay_' . 'post_notification_timestamp', time());
         } catch (\Exception $exc) {
             Log::actionInfo(__FUNCTION__ . ": " . $exc->getTraceAsString());
         }
@@ -154,9 +153,9 @@ class WC_Gateway_XPay_Process_Completion
 
         $order = new \WC_Order($order_id);
 
-        $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'post_notification_timestamp', true);
+        $post_notification_timestamp = get_post_meta($order_id, '_xpay_' . 'post_notification_timestamp', true);
 
-        //s2s not recived, so we need to update the order based the data recived in params
+        //s2s not recived, so we need to update the order based the data recived in params 
         if ($post_notification_timestamp == "") {
             Log::actionInfo(__FUNCTION__ . ": s2s notification for order id " . $order_id . " not recived, changing oreder status from request params");
 
@@ -182,26 +181,15 @@ class WC_Gateway_XPay_Process_Completion
                     $order->update_status('failed');
                 }
 
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'last_error', $params["messaggio"]);
+                update_post_meta($order_id, '_xpay_' . 'last_error', $params["messaggio"]);
 
                 $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $params["messaggio"]);
-
             }
         }
 
         Log::actionInfo(__FUNCTION__ . ": user redirect for order id " . $order_id . ' - ' . (array_key_exists('esito', $params) ? $params['esito'] : ''));
 
         if ($order->needs_payment() || $order->get_status() == 'cancelled') {
-
-            $lastErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'last_error', true);
-            if ($lastErrorXpay != "") {
-                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
-            }
-            $paymentErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'payment_error', true);
-            if ($paymentErrorXpay != "") {
-                wc_add_notice(htmlentities($paymentErrorXpay), 'error');
-            }
-
             return new \WP_REST_Response(
                 "redirecting failed...",
                 "303",
@@ -225,12 +213,12 @@ class WC_Gateway_XPay_Process_Completion
         if (($params['esito'] ?? '') === "ERRORE" && $params['warning']) {
 
             if (stripos($params['warning'], 'deliveryMethod') !== false) {
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('It was not possible to process the payment, check that the shipping address set is correct.', 'woocommerce-gateway-nexi-xpay'));
+                update_post_meta($order_id, '_xpay_' . 'payment_error', __('It was not possible to process the payment, check that the shipping address set is correct.', 'woocommerce-gateway-nexi-xpay'));
             } else {
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('Payment canceled: ', 'woocommerce-gateway-nexi-xpay') . $params['warning']);
+                update_post_meta($order_id, '_xpay_' . 'payment_error', __('Payment canceled: ', 'woocommerce-gateway-nexi-xpay') . $params['warning']);
             }
         } else {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
+            update_post_meta($order_id, '_xpay_' . 'payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
         }
 
         $order = new \WC_Order($order_id);

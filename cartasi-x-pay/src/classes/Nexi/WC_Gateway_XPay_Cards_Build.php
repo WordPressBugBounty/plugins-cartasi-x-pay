@@ -50,8 +50,6 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
             $this->icon = \WC_Admin_Settings::get_option('xpay_logo_small');
         }
 
-        add_filter('woocommerce_saved_payment_methods_list', [$this, 'filter_saved_payment_methods_list'], 10, 2);
-
         add_action('woocommerce_receipt_' . $this->id, array($this, 'exec_payment'));
 
         // Admin page
@@ -69,16 +67,7 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
         parent::init_form_fields();
     }
 
-    public function filter_saved_payment_methods_list($list, $customer_id)
-    {
-        $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_build_settings') ?? [];
-        if (empty($gatewaySettings) || ($gatewaySettings['nexi_xpay_oneclick_enabled'] ?? '') !== 'yes' || \Nexi\WC_Nexi_Helper::cart_contains_subscription()) {
-            return [];
-        }
-        return $list;
-    }
-
-    public function getBuildStyle()
+    private function getBuildStyle()
     {
         $style = array();
 
@@ -120,11 +109,6 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
         return json_encode($style);
     }
 
-    public function get_payment_payload()
-    {
-        return \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(\WC_Payment_Gateway::get_order_total());
-    }
-
     public function payment_fields()
     {
         global $wp;
@@ -141,7 +125,8 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
         $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 
         $payment_payload = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(\WC_Payment_Gateway::get_order_total());
-        if (!$isRecurring && $this->settings["nexi_xpay_oneclick_enabled"] == "yes") {
+
+        if (!$isRecurring) {
             $this->saved_payment_methods();
         }
         ?>
@@ -151,29 +136,22 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
                 renderXpayBuild();
             </script>
 
-            <input type="hidden" id="xpay_msg_err"
-                value="<?php echo __("The transaction has been declined, please retry.", 'woocommerce-gateway-nexi-xpay') ?>">
+            <input type="hidden" id="xpay_msg_err" value="<?php echo __("The transaction has been declined, please retry.", 'woocommerce-gateway-nexi-xpay') ?>">
 
             <input type="hidden" id="xpay_new_payment_info" value="<?php echo htmlentities(json_encode($payment_payload)) ?>">
             <input type="hidden" name="divisa" value="<?php echo htmlentities($payment_payload["divisa"]) ?>">
-            <input type="hidden" name="transactionId" id="xpay_build_transactionId"
-                data-new-card-value="<?php echo htmlentities($payment_payload["transactionId"]) ?>">
+            <input type="hidden" name="transactionId" id="xpay_build_transactionId" data-new-card-value="<?php echo htmlentities($payment_payload["transactionId"]) ?>">
             <input type="hidden" id="xpay_build_style" value="<?php echo htmlentities($this->getBuildStyle()); ?>">
-            <input type="hidden" id="xpay_build_border_color_default"
-                value="<?php echo htmlentities($this->settings['border_color_ok']); ?>">
-            <input type="hidden" id="xpay_build_border_color_error"
-                value="<?php echo htmlentities($this->settings['border_color_ko']); ?>">
-            <input type="hidden" id="xpay_build_3ds"
-                value="<?php echo $this->settings['nexi_xpay_3ds20_enabled'] == 'yes' ? 1 : 0; ?>">
+            <input type="hidden" id="xpay_build_border_color_default" value="<?php echo htmlentities($this->settings['border_color_ok']); ?>">
+            <input type="hidden" id="xpay_build_border_color_error" value="<?php echo htmlentities($this->settings['border_color_ko']); ?>">
+            <input type="hidden" id="xpay_build_3ds" value="<?php echo $this->settings['nexi_xpay_3ds20_enabled'] == 'yes' ? 1 : 0; ?>">
 
             <?php
             do_action('woocommerce_credit_card_form_start', $this->id);
             ?>
 
             <!-- Contiene il form dei dati carta -->
-            <div id="xpay-card"
-                style="border: 1px solid  <?php echo $this->settings['border_color_ok']; ?> ; padding: 3px; max-width: 420px;">
-            </div>
+            <div id="xpay-card" style="border: 1px solid  <?php echo $this->settings['border_color_ok']; ?> ; padding: 3px; max-width: 420px;"></div>
 
             <!-- Contiene gli errori -->
             <div id="xpay-card-errors"></div>
@@ -195,11 +173,10 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
                 echo __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
             } else if ($this->settings["nexi_xpay_oneclick_enabled"] == "yes") {
                 ?>
-                    <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
-                        <input id="save-card" name="save-card" type="checkbox" value="1" style="width:auto;" />
-                        <label for="save-card"
-                            style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
-                    </p>
+                <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
+                    <input id="save-card" name="save-card" type="checkbox" value="1" style="width:auto;" />
+                    <label for="save-card" style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
+                </p>
             <?php }
             ?>
             <div class="clear"></div>
@@ -219,63 +196,21 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
 
             if (isset($_REQUEST["wc-" . $this->id . "-payment-token"])) {
                 $isNewCard = $_REQUEST["wc-" . $this->id . "-payment-token"] == "new";
-            } else if (isset($_POST["wc-" . $this->id . "-new-payment-token"])) {
-                $isNewCard = $_POST["wc-" . $this->id . "-new-payment-token"] == true;
             }
 
             $save_card = false;
             if (isset($_REQUEST["save-card"])) {
                 $save_card = $_REQUEST["save-card"] == "1";
-            } else if (isset($_POST['wc-' . $this->id . '-new-payment-method'])) {
-                $save_card = $_POST['wc-' . $this->id . '-new-payment-method'] == "1";
             }
 
-            $nonce = null;
-            if (isset($_REQUEST['xpayNonce'])) {
-                $nonce = $_REQUEST['xpayNonce'];
-            } else if (isset($_POST['xpay_nonce'])) {
-                \Nexi\Log::actionDebug("found xpay nonce");
-                $nonce = $_POST['xpay_nonce'];
-            }
-
-            $codTrans = null;
-            if (isset($_REQUEST['transactionId'])) {
-                $codTrans = $_REQUEST['transactionId'];
-            } else if (isset($_POST['transaction_id'])) {
-                $codTrans = $_POST['transaction_id'];
-            }
-
-            $divisa = null;
-            if (isset($_REQUEST['divisa'])) {
-                $divisa = $_REQUEST['divisa'];
-            } else if (isset($_POST['divisa'])) {
-                $divisa = $_POST['divisa'];
-            }
-
+            $nonce = $_REQUEST['xpayNonce'];
+            $codTrans = $_REQUEST["transactionId"];
+            $divisa = $_REQUEST["divisa"];
             $num_contratto = "";
             $amount = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
 
-            $scadenzaCarta = null;
-            if (isset($_REQUEST['dettaglioCarta'])) {
-                $scadenzaCarta = $_REQUEST['dettaglioCarta']['scadenza'];
-            } else if (isset($_POST['scadenza_carta'])) {
-                $scadenzaCarta = $_POST['scadenza_carta'];
-            }
-
-            \Nexi\Log::actionDebug("nonce: " . $nonce . ", divisa: " . $divisa . ", codTrans: " . $codTrans . ", divisa: " . $divisa . ", scadenza: " . $scadenzaCarta);
-
             if ($save_card || $isRecurring) {
                 $user_id = get_current_user_id();
-
-                $brandCarta = null;
-                $panCarta = null;
-                if (isset($_REQUEST['dettaglioCarta'])) {
-                    $brandCarta = $_REQUEST['dettaglioCarta']['brand'];
-                    $panCarta = $_REQUEST['dettaglioCarta']['pan'];
-                } else if (isset($_POST['brand_carta']) && isset($_POST['pan_carta'])) {
-                    $brandCarta = $_POST['brand_carta'];
-                    $panCarta = $_POST['pan_carta'];
-                }
 
                 if ($user_id !== null) {
                     $md5_hash_num_contratto = md5($codTrans . "@" . $user_id . "@" . get_option('nexi_unique'));
@@ -283,7 +218,7 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
                 }
 
                 \Nexi\WC_Gateway_XPay_API::getInstance()->pagaNonceCreazioneContratto($codTrans, $amount, $nonce, $divisa, $num_contratto, $order);
-                WC_Build_Token::save_token($brandCarta, $panCarta, $scadenzaCarta, $num_contratto);
+                WC_Build_Token::save_token($_REQUEST['dettaglioCarta']['brand'], $_REQUEST['dettaglioCarta']['pan'], $_REQUEST['dettaglioCarta']['scadenza'], $num_contratto);
 
                 $order->add_order_note(__("Nexi XPay payment and card tokenization successful", 'woocommerce-gateway-nexi-xpay'));
             } else if (!$isNewCard) {
@@ -305,14 +240,14 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
                 \Nexi\WC_Gateway_XPay_API::getInstance()->get_build_alias(),
                 $num_contratto,
                 $codTrans,
-                $scadenzaCarta
+                $_REQUEST['dettaglioCarta']['scadenza']
             );
 
             $result = 'success';
         } catch (\Throwable $th) {
             Log::actionWarning(__FUNCTION__ . ": error: " . $th->getMessage());
 
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'last_error', $th->getMessage());
+            update_post_meta($order_id, '_xpay_' . 'last_error', $th->getMessage());
 
             $order->update_status('failed');
 
@@ -323,15 +258,12 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
             } else {
                 wc_add_notice(__("Thank you for shopping with us. However, the transaction has been declined.", 'woocommerce-gateway-nexi-xpay') . " - " . ($th->getMessage()), "error");
             }
-
         }
 
-        $resultArray = [
+        return array(
             'result' => $result,
             'redirect' => $this->get_return_url($order),
-        ];
-
-        return $resultArray;
+        );
     }
 
     public function get_saved_payment_method_option_html($token)
@@ -343,7 +275,7 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
             </li>',
             esc_attr($this->id),
             esc_attr($token->get_id()),
-            $this->get_token_display_name($token) /* esc_html( $token->get_display_name()) */ ,
+            $this->get_token_display_name($token) /* esc_html( $token->get_display_name()) */,
             checked($token->is_default(), true, false)
         );
 
@@ -381,50 +313,6 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Generic_Method
                 style="border: 1px solid ' . $this->settings['border_color_ok'] . '; max-width: 50px;"
             ></div>
             ';
-    }
-
-    public static function get_xpay_build_block_checkout_token_data()
-    {
-        global $woocommerce;
-
-        $token_id = $_REQUEST['token_id'];
-
-        $token = \WC_Payment_Tokens::get($token_id);
-
-
-        $codTransCvv = substr("BR-" . date('ysdim') . "-" . time(), 0, 30);
-        $timestampCvv = time() * 1000;
-        $importoCvv = WC_Nexi_Helper::mul_bcmul(floatval(preg_replace('#[^\d.]#', '', $woocommerce->cart->total)), 100, 0);
-
-        $macCvv = WC_Gateway_XPay_API::getInstance()->calculate_mac_for_build_oneclick($codTransCvv, get_woocommerce_currency(), $importoCvv);
-
-        \Nexi\Log::actionDebug("mac info: " . $macCvv);
-
-        $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_build_settings') ?? [];
-
-        wp_send_json(
-            [
-                'name' => $token->get_token(),
-                'id' => $token->get_id(),
-                'cod_trans_cvv' => $codTransCvv,
-                'timestamp_cvv' => $timestampCvv,
-                'mac_cvv' => $macCvv,
-                'style' => [
-                    'border' => '1px solid ' . $gatewaySettings['border_color_ok'] ?? '',
-                    'max-width' => '50px'
-                ],
-            ]
-        );
-
-        wp_die();
-    }
-
-    protected function getRecurringInfo()
-    {
-        return [
-            'enabled' => \Nexi\WC_Nexi_Helper::cart_contains_subscription(),
-            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay')
-        ];
     }
 
 }

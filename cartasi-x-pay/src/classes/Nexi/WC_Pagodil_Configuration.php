@@ -146,7 +146,7 @@ class WC_Pagodil_Configuration
 
     /**
      * List of checkout fields to choose fiscal code field, shown in configuration
-     *
+     * 
      * @return array
      */
     private static function getCheckoutFields()
@@ -184,7 +184,7 @@ class WC_Pagodil_Configuration
 
     /**
      * List of categories to be made payable in installments, shown in configuration
-     *
+     * 
      * @return array
      */
     private static function getOptionsConfigCategoriesTree()
@@ -246,7 +246,7 @@ class WC_Pagodil_Configuration
 
     /**
      * List of logo types available in the widget, shown in configuration
-     *
+     * 
      * @return array
      */
     private static function getLogoType()
