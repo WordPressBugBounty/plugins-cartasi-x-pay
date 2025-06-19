@@ -75,7 +75,7 @@ class WC_Gateway_NPG_Cards_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
         $installmentsInfo = $gw->get_installments_info();
 
         return [
-            'enabled' => $installmentsInfo['installments_enabled'],
+            'enabled' => !\Nexi\WC_Nexi_Helper::cart_contains_subscription() && $installmentsInfo['installments_enabled'],
             'options' => $installmentsInfo['max_installments'],
             'title_text' => __('Installments', 'woocommerce-gateway-nexi-xpay'),
             'one_solution_text' => __('One time solution', 'woocommerce-gateway-nexi-xpay'),

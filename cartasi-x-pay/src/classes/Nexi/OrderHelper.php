@@ -15,17 +15,43 @@ namespace Nexi;
 
 class OrderHelper
 {
+
     public static function getOrderMeta($orderId, $metaKey, $single = false)
     {
         try {
             if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
-                $order = new \WC_Order($orderId);
-                $meta = $order->get_meta($metaKey, $single);
-                return $meta;
+                if (function_exists("wcs_get_subscription")) {
+                    try {
+                        $subscription = wcs_get_subscription($orderId);
+
+                        if ($subscription != null) {
+                            $meta = $subscription->get_meta($metaKey, $single);
+
+                            if (!$meta) {
+                                if (strpos($metaKey, 'num_contratto') !== false || strpos($metaKey, 'scadenza_pan') !== false || strpos($metaKey, 'recurringContractId') !== false) {
+                                    return get_post_meta($orderId, $metaKey, $single);
+                                }
+                            }
+
+                            return $meta;
+                        }
+                    } catch (\Exception $e) {
+                        \Nexi\Log::actionDebug("exception: " . json_encode($e));
+                    }
+                }
+
+                try {
+                    $order = new \WC_Order($orderId);
+                    $meta = $order->get_meta($metaKey, $single);
+                    return $meta;
+                } catch (\Exception $e) {
+                    \Nexi\Log::actionDebug("exception: " . json_encode($e));
+                }
             }
         } catch (\Exception $e) {
             \Nexi\Log::actionDebug("exception: " . json_encode($e));
         }
+
         return get_post_meta($orderId, $metaKey, $single);
     }
 
@@ -33,13 +59,30 @@ class OrderHelper
     {
         try {
             if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
-                $order = new \WC_Order($orderId);
-                $order->update_meta_data($metaKey, $value);
-                $order->save_meta_data();
+                if (function_exists("wcs_get_subscription")) {
+                    try {
+                        $subscription = wcs_get_subscription($orderId);
+                        if ($subscription != null) {
+                            $subscription->update_meta_data($metaKey, $value);
+                            $subscription->save();
+                        }
+                    } catch (\Exception $e) {
+                        \Nexi\Log::actionDebug("subscription exception: " . json_encode($e));
+                    }
+                }
+
+                try {
+                    $order = new \WC_Order($orderId);
+                    $order->update_meta_data($metaKey, $value);
+                    $order->save_meta_data();
+                } catch (\Exception $e) {
+                    \Nexi\Log::actionDebug("order exception: " . json_encode($e));
+                }
             }
         } catch (\Exception $e) {
             \Nexi\Log::actionDebug("exception: " . json_encode($e));
         }
+
         update_post_meta($orderId, $metaKey, $value);
     }
 

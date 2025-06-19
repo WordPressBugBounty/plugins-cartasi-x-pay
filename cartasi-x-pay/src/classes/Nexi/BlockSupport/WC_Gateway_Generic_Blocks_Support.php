@@ -168,11 +168,13 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
     public function get_payment_method_data()
     {
         $recurring = $this->getRecurringInfo();
+
         $recurringEnabled = $recurring['enabled'];
 
         $savedCardsSupport = !$recurringEnabled && $this->savedCardsSupport();
 
         $features = ['products'];
+
         if ($recurringEnabled) {
             $features[] = 'subscriptions';
         } else if ($savedCardsSupport) {
@@ -191,6 +193,8 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
             'can_make_payment' => $this->is_active(),
             'installments' => $this->getInstallmentsInfo(),
             'recurring' => $recurring,
+            'min_amount' => $this->get_min_amount(),
+            'max_amount' => $this->get_max_amount(),
         ];
     }
 
@@ -226,6 +230,16 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
     protected function is_active_method_specific()
     {
         return true;
+    }
+
+    protected function get_min_amount()
+    {
+        return null;
+    }
+
+    protected function get_max_amount()
+    {
+        return null;
     }
 
     abstract protected function getLabel();

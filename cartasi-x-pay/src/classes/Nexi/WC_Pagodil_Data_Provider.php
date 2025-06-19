@@ -48,7 +48,7 @@ class WC_Pagodil_Data_Provider
 
             $params['shipIndicator'] = self::getShipIndicator($order);
 
-            $params['numberOfInstalment'] = get_post_meta($order->get_id(), "installments", true);
+            $params['numberOfInstalment'] = \Nexi\OrderHelper::getOrderMeta($order->get_id(), "installments", true);
 
             $xpaySettings = \Nexi\WC_Pagodil_Widget::getXPaySettings();
 
@@ -87,7 +87,7 @@ class WC_Pagodil_Data_Provider
             $params['Bill_state'] = CapToStateCode::getStateCode($order->get_billing_postcode());
 
             if ($xpaySettings['pd_field_name_cf']) {
-                $fiscalCode = get_post_meta($order->get_id(), $xpaySettings['pd_field_name_cf'], true);
+                $fiscalCode = \Nexi\OrderHelper::getOrderMeta($order->get_id(), $xpaySettings['pd_field_name_cf'], true);
 
                 if ($fiscalCode != "") {
                     $params['OPTION_CF'] = $fiscalCode;
@@ -103,7 +103,7 @@ class WC_Pagodil_Data_Provider
                     $params['chAccDate'] = $user->get_date_created()->format("Y-m-d");
                 }
 
-                $params['nbPurchaseAccount'] = WC_3DS20_Data_Provider::get3ds20OrderInLastSixMonth();
+                $params['nbPurchaseAccount'] = \Nexi\OrderHelper::get3ds20OrderInLastSixMonth();
                 $params['destinationNameIndicator'] = WC_3DS20_Data_Provider::get3ds20CheckName($user, $order->get_shipping_first_name(), $order->get_shipping_last_name());
             }
         } catch (Exception $exc) {

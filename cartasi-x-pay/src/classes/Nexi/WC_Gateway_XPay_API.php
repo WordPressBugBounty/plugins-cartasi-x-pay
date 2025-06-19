@@ -243,7 +243,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             $params = array_merge($params, WC_Klarna_Data_Provider::calculate_params($order));
         }
 
-        update_post_meta($order->get_id(), "_xpay_" . "codTrans", $params['codTrans']);
+        \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_xpay_" . "codTrans", $params['codTrans']);
 
         return array(
             "target_url" => $this->base_url . "ecomm/ecomm/DispatcherServlet",
@@ -251,7 +251,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         );
     }
 
-    public function get_payment_build_payload($total)
+    public function get_payment_build_payload($total, $token_id = null)
     {
         $importo = WC_Nexi_Helper::mul_bcmul($total, 100, 0);
 
@@ -263,7 +263,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'PLN' => '985',
             'AUD' => '036',
             'NZD' => '554'
-            )[get_woocommerce_currency()];
+        )[get_woocommerce_currency()];
 
         $buildData = array(
             "amount" => $importo,
@@ -278,6 +278,26 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             "build_border_color_default" => "white",
             "build_border_color_error" => "OK",
         );
+
+        if ($token_id !== null) {
+            $token = \WC_Payment_Tokens::get($token_id);
+
+            $codTransCvv = substr("BR-" . date('ysdim') . "-" . time(), 0, 30);
+            $timestampCvv = time() * 1000;
+            $importoCvv = WC_Nexi_Helper::mul_bcmul(floatval(preg_replace('#[^\d.]#', '', $total)), 100, 0);
+
+            $macCvv = WC_Gateway_XPay_API::getInstance()->calculate_mac_for_build_oneclick($codTransCvv, get_woocommerce_currency(), $importoCvv);
+
+            \Nexi\Log::actionDebug("mac info: " . $macCvv);
+
+            $buildData['token_data'] = [
+                'name' => $token->get_token(),
+                'id' => $token->get_id(),
+                'cod_trans_cvv' => $codTransCvv,
+                'timestamp_cvv' => $timestampCvv,
+                'mac_cvv' => $macCvv,
+            ];
+        }
 
         if ($this->nexi_xpay_3ds20_enabled) {
             $buildData = array_merge($buildData, WC_3DS20_Data_Provider::getParamsFromWC(WC()));
@@ -345,7 +365,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'PLN' => '985',
             'AUD' => '036',
             'NZD' => '554'
-            )[$currency];
+        )[$currency];
         $timeStamp = (time()) * 1000;
 
         // MAC calculation
@@ -403,7 +423,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'PLN' => '985',
             'AUD' => '036',
             'NZD' => '554'
-            )[$currency];
+        )[$currency];
         $timeStamp = (time()) * 1000;
 
         //  MAC calculation
@@ -481,7 +501,11 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             throw new \Exception(__($operation_info['errore']['messaggio'], 'woocommerce-gateway-nexi-xpay'));
         }
 
-        return $operation_info["report"][0];
+        if (is_array($operation_info["report"]) && count($operation_info["report"]) > 0) {
+            return $operation_info["report"][count($operation_info["report"]) - 1];
+        }
+
+        return [];
     }
 
     public function account($cod_trans, $amount, $currency)
@@ -500,7 +524,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'PLN' => '985',
             'AUD' => '036',
             'NZD' => '554'
-            )[$currency];
+        )[$currency];
 
         $timeStamp = (time()) * 1000;
 
@@ -650,6 +674,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             . 'divisa=' . $divisa
             . 'xpayNonce=' . $nonce
             . 'timeStamp=' . $timeStamp . $this->nexi_xpay_mac;
+
         $mac = sha1($macString);
 
         $pay_load = array(
@@ -671,14 +696,21 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             )
         );
 
+        \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode($pay_load));
+
         $uri = null;
+
         if ($standalonePayment) {
             $uri = "ecomm/api/hostedPayments/pagaNonce";
         } else {
             $uri = "ecomm/api/recurring/pagamentoRicorrente3DS";
         }
 
+        \Nexi\Log::actionDebug("DEBUG - uri: " . json_encode($uri));
+
         $operation_info = $this->exec_curl_post_json($uri, $pay_load);
+
+        \Nexi\Log::actionDebug("DEBUG - response: " . json_encode($operation_info));
 
         // Calcolo MAC di risposta
         $MACrisposta = sha1('esito=' . $operation_info['esito']
@@ -708,7 +740,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'PLN' => '985',
             'AUD' => '036',
             'NZD' => '554'
-            )[$divisa];
+        )[$divisa];
 
         return sha1('codTrans=' . $codTransCvv
             . 'divisa=' . $divisa

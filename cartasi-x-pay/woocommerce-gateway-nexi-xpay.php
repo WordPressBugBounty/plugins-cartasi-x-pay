@@ -1,10 +1,12 @@
 <?php
 
+use Nexi\Log;
+
 /**
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 7.5.0
+ * Version: 7.6.1
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
@@ -26,7 +28,7 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "7.5.0");
+        define("WC_GATEWAY_XPAY_VERSION", "7.6.1");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
@@ -50,6 +52,11 @@ function nexi_xpay_plugins_loaded()
         define('NPG_OR_REFUNDED', 'REFUNDED');
         define('NPG_OR_FAILED', 'FAILED');
         define('NPG_OR_EXPIRED', 'EXPIRED');
+
+        define('WC_GATEWAY_XPAY_PLUGIN_BASE_PATH', plugin_dir_path(__FILE__));
+        define('WC_GATEWAY_XPAY_PLUGIN_URL', untrailingslashit(plugins_url(basename(plugin_dir_path(__FILE__)), basename(__FILE__))));
+
+        define('WC_LANG_KEY', 'woocommerce-gateway-nexi-xpay');
 
         define('NPG_PAYMENT_SUCCESSFUL', [
             NPG_OR_AUTHORIZED,
@@ -77,7 +84,7 @@ function nexi_xpay_plugins_loaded()
         define('NPG_CONTRACT_CREATION', 'CONTRACT_CREATION');
         define('NPG_CARD_SUBSTITUTION', 'CARD_SUBSTITUTION');
 
-        define('NPG_RT_MIT_SCHEDULED', 'MIT_SCHEDULED');
+        define('NPG_RT_MIT_UNSCHEDULED', 'MIT_UNSCHEDULED');
 
         load_plugin_textdomain('woocommerce-gateway-nexi-xpay', false, dirname(plugin_basename(__FILE__)) . '/lang');
 
@@ -94,6 +101,9 @@ function nexi_xpay_plugins_loaded()
         add_action('wp_ajax_get_build_fields', '\Nexi\WC_Gateway_NPG_Cards_Build::get_build_fields');
         add_action('wp_ajax_nopriv_get_build_fields', '\Nexi\WC_Gateway_NPG_Cards_Build::get_build_fields');
 
+        add_action('wp_ajax_build_payment_payload', '\Nexi\WC_Gateway_XPay_Cards_Build::build_payment_payload');
+        add_action('wp_ajax_nopriv_build_payment_payload', '\Nexi\WC_Gateway_XPay_Cards_Build::build_payment_payload');
+
         define('WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE', __FILE__);
 
         function xpay_gw_wp_enqueue_scripts()
@@ -101,7 +111,7 @@ function nexi_xpay_plugins_loaded()
             wp_enqueue_script('xpay-checkout', plugins_url('assets/js/xpay.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
             wp_enqueue_style('xpay-checkout', plugins_url('assets/css/xpay.css', __FILE__), [], WC_GATEWAY_XPAY_VERSION);
 
-            if (WC_GATEWAY_NEXI_PLUGIN_VARIANT == 'xpay_build') {
+            if (!wooommerce_has_block_checkout() && WC_GATEWAY_NEXI_PLUGIN_VARIANT == 'xpay_build') {
                 if (\Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
                     wp_enqueue_script('xpay-build-npg-checkout', plugins_url('assets/js/xpay-build-npg.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
                 } else {
@@ -157,7 +167,7 @@ function nexi_xpay_plugins_loaded()
                 switch ($authorizationRecord['operationResult']) {
                     case NPG_OR_AUTHORIZED:
                     case NPG_OR_EXECUTED:
-                        $completed = $orderObj->payment_complete(get_post_meta($order->get_id(), "_npg_" . "orderId", true));
+                        $completed = $orderObj->payment_complete(\Nexi\OrderHelper::getOrderMeta($order->get_id(), "_npg_" . "orderId", true));
 
                         if ($completed) {
                             \Nexi\WC_Save_Order_Meta::saveSuccessNpg(
@@ -315,35 +325,38 @@ function nexi_xpay_plugins_loaded()
     }
 }
 
-function add_message_to_cart_nexi()
+add_action(
+    'before_woocommerce_init',
+    function () {
+        if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+        }
+    }
+);
+
+add_action('woocommerce_blocks_loaded', 'woocommerce_gateway_nexi_xpay_woocommerce_block_support');
+
+function woocommerce_gateway_nexi_xpay_woocommerce_block_support()
 {
-    if (key_exists("order_id", $_GET)) {
-        $orderId = $_GET["order_id"];
-
-        $lastErrorXpay = get_post_meta($orderId, '_xpay_' . 'last_error', true);
-
-        if ($lastErrorXpay != "") {
-            wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
-        }
-
-        $paymentErrorXpay = get_post_meta($orderId, '_xpay_' . 'payment_error', true);
-
-        if ($paymentErrorXpay != "") {
-            wc_add_notice(htmlentities($paymentErrorXpay), 'error');
-        }
-
-        $lastErrorNpg = get_post_meta($orderId, '_npg_' . 'last_error', true);
-
-        if ($lastErrorNpg != "") {
-            wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorNpg) . ")", 'error');
-        }
-
-        $paymentErrorNpg = get_post_meta($orderId, '_npg_' . 'payment_error', true);
-
-        if ($paymentErrorNpg != "") {
-            wc_add_notice(htmlentities($paymentErrorNpg), 'error');
-        }
+    if (class_exists('\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function (\Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
+                foreach (\Nexi\WC_Gateway_Nexi_Register_Available::registerBlocks() as $paymentMethod) {
+                    $payment_method_registry->register($paymentMethod);
+                }
+            }
+        );
     }
 }
 
-add_action('woocommerce_before_cart', 'add_message_to_cart_nexi');
+
+function wooommerce_has_block_checkout()
+{
+    if (class_exists('\WC_Blocks_Utils')) {
+        return \WC_Blocks_Utils::has_block_in_page(wc_get_page_id('checkout'), 'woocommerce/checkout');
+    } else {
+        return false;
+    }
+}

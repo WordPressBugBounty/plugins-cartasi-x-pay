@@ -148,6 +148,7 @@ class WC_Gateway_Xpay_Build_Blocks_Support extends AbstractPaymentMethodType
         $savedCardsSupport = !$recurringEnabled && $this->savedCardsSupport();
 
         $features = ['products'];
+
         if ($recurringEnabled) {
             $features[] = 'subscriptions';
         } else if ($savedCardsSupport) {
@@ -238,6 +239,7 @@ class WC_Gateway_Xpay_Build_Blocks_Support extends AbstractPaymentMethodType
 
         return $contentIcons;
     }
+
     protected function getRecurringInfo()
     {
         return [
@@ -245,7 +247,5 @@ class WC_Gateway_Xpay_Build_Blocks_Support extends AbstractPaymentMethodType
             'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', WC_LANG_KEY),
         ];
     }
-
-
 
 }

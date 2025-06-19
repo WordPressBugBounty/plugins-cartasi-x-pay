@@ -25,6 +25,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
         $isBuild = false
     ) {
         parent::__construct($apmCode, $isBuild);
+
         $this->apmCode = $apmCode;
         $this->label = $apmLabel;
     }
@@ -34,6 +35,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
         if ($this->apmCode === 'PAGODIL') {
             return __("Pay in installments without interest", WC_LANG_KEY);
         }
+
         return $this->label;
     }
 
@@ -42,6 +44,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
         if ($this->apmCode === 'PAGODIL') {
             return __('With PagoDIL by Cofidis, the merchant allows you to defer the payment in convenient installments without costs or interest.', WC_LANG_KEY);
         }
+
         return $this->label . __(' via Nexi XPay', WC_LANG_KEY);
     }
 
@@ -107,6 +110,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
                 'pago_dil_admin_url' => admin_url(),
             ];
         }
+
         return [
             'enabled' => false,
             'options' => [],
@@ -130,8 +134,26 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
                 return false;
             }
         }
+
         return true;
     }
 
+    protected function get_min_amount()
+    {
+        return \Nexi\WC_Gateway_Nexi_Register_Available::get_xpay_min_amount($this->apmCode);
+    }
+
+    protected function get_max_amount()
+    {
+        return \Nexi\WC_Gateway_Nexi_Register_Available::get_xpay_max_amount($this->apmCode);
+    }
+
+    protected function getRecurringInfo()
+    {
+        return [
+            'enabled' => \Nexi\WC_Gateway_Nexi_Register_Available::is_xpay_recurring($this->apmCode) && \Nexi\WC_Nexi_Helper::cart_contains_subscription(),
+            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', WC_LANG_KEY),
+        ];
+    }
 
 }

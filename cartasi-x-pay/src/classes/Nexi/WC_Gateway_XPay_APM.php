@@ -20,7 +20,7 @@ class WC_Gateway_XPay_APM extends WC_Gateway_XPay_Generic_Method
 
     public function __construct($code, $description, $selectedCard, $img)
     {
-        parent::__construct('xpay_' . strtolower($code), false);
+        parent::__construct('xpay_' . strtolower($code), \Nexi\WC_Gateway_Nexi_Register_Available::is_xpay_recurring($code));
 
         $this->selectedCard = $selectedCard;
 

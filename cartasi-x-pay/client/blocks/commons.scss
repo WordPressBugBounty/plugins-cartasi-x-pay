@@ -1,18 +1,40 @@
 .wc-block-checkout__payment-method .wc-block-components-radio-control__label > span {
-	width:95%;
+    width: 95%;
 }
 .wc-block-checkout__payment-method .wc-block-components-radio-control__label > span > span {
-	float:right;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+    float: right;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .wc-gateway-nexi-xpay-block-checkout-row {
-	display: block;
+    display: block;
 }
 .wc-gateway-nexi-xpay-block-checkout-additional-info {
-	margin-top: 10px;
+    margin-top: 10px;
 }
 div.wc-block-components-payment-method-icons {
-	flex-wrap: nowrap;
+    flex-wrap: nowrap;
+}
+
+.xpay-card-container {
+    border-width: 1px;
+    border-style: solid;
+    padding: 8px 10px;
+    height: fit-content;
+    display: flex;
+    width: 100%;
+    max-width: 325px;
+}
+
+.xpay-card-container.xpay-card-cvv {
+    max-width: 60px;
+}
+
+.wc-credit-card-form.wc-payment-form.nexi-xpay-build {
+    padding: 25px;
+}
+
+.nexi-xpay-build .reccurring-info-xpay {
+    margin-top: 20px;
 }

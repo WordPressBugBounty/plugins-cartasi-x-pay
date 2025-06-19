@@ -33,10 +33,8 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
             'MC',
             'MAE',
             'VISA',
-            //V Pay
             'AMEX',
             'JCB',
-            //UPI
             'DINERS',
         ];
 
@@ -78,47 +76,49 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
 
     /**
      * on subscription renewal a new order is crated and post meta from the original one are copied and saved with new order's id as post_id
-     * 
+     *
      * @param float $amount_to_charge
      * @param \WC_Order $order
      */
     public function scheduled_subscription_payment($amount_to_charge, $order)
     {
-        try {
-            $subscriptionId = $order->get_meta('_subscription_renewal');
+        if ($order->get_status() == 'pending') {
+            try {
+                $subscriptionId = $order->get_meta('_subscription_renewal');
 
-            if ($subscriptionId) {
-                $idToUse = $subscriptionId;
-            } else {
-                $idToUse = $order->get_id();
+                if ($subscriptionId) {
+                    $idToUse = $subscriptionId;
+                } else {
+                    $idToUse = $order->get_id();
+                }
+
+                Log::actionInfo(__METHOD__ . "::" . __LINE__ . ' $idToUse ' . json_encode($idToUse));
+
+                $contractId = \Nexi\OrderHelper::getOrderMeta($idToUse, '_npg_' . 'recurringContractId', true);
+
+                if ($contractId === null || $contractId === '') {
+                    throw new \Exception('Invalid contract id');
+                }
+
+                $currency = $order->get_currency();
+
+                $newOrderId = \Nexi\WC_Gateway_NPG_API::getInstance()->recurring_payment($order, $contractId, \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit($amount_to_charge, $currency));
+
+                // must be updated otherwise refferrs to the the first payment
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), '_npg_' . "orderId", $newOrderId);
+
+                $order->payment_complete($newOrderId);
+            } catch (\Exception $exc) {
+                Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
+
+                $order->update_status('failed');
             }
-
-            Log::actionInfo(__METHOD__ . "::" . __LINE__ . ' $idToUse ' . json_encode($idToUse));
-
-            $contractId = get_post_meta($idToUse, '_npg_' . 'recurringContractId', true);
-
-            if ($contractId === null || $contractId === '') {
-                throw new \Exception('Invalid contract id');
-            }
-
-            $currency = $order->get_currency();
-
-            $newOrderId = \Nexi\WC_Gateway_NPG_API::getInstance()->recurring_payment($order, $contractId, \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit($amount_to_charge, $currency));
-
-            // must be updated otherwise refferrs to the the first payment
-            update_post_meta($order->get_id(), '_npg_' . "orderId", $newOrderId);
-
-            $order->payment_complete($newOrderId);
-        } catch (\Exception $exc) {
-            Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
-
-            $order->update_status('failed');
         }
     }
 
     /**
      * order state is changed to "Refunded" automatically when total amount is refunded
-     * 
+     *
      * @param type $order_id
      * @param type $amount
      * @param type $reaseon

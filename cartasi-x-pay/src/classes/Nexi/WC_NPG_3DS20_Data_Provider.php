@@ -61,8 +61,8 @@ class WC_NPG_3DS20_Data_Provider
 
                 $params['cardHolderAcctInfo'] = [
                     "chAccDate" => $user->get_date_created() ? $user->get_date_created()->format("Y-m-d") : null,
-                    "chAccAgeIndicator" =>  static::get3ds20AccountDateIndicator($user->get_date_created() ? $user->get_date_created() : false),
-                    "nbPurchaseAccount" => static::get3ds20OrderInLastSixMonth(),
+                    "chAccAgeIndicator" => static::get3ds20AccountDateIndicator($user->get_date_created() ? $user->get_date_created() : false),
+                    "nbPurchaseAccount" => \Nexi\OrderHelper::get3ds20OrderInLastSixMonth(),
                     "destinationAddressUsageDate" => static::get3ds20LastUsagedestinationAddress(
                         $order->get_id(),
                         $order->get_shipping_city(),
@@ -135,7 +135,7 @@ class WC_NPG_3DS20_Data_Provider
 
     private static function get3ds20FirstUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
     {
-        $customer_orders = wc_get_orders(array(
+        $args = [
             'numberposts' => 1,
             'orderby' => 'date',
             'order' => 'ASC',
@@ -178,7 +178,15 @@ class WC_NPG_3DS20_Data_Provider
                     'compare' => '=',
                 ),
             ),
-        ));
+        ];
+
+        if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            $args['limit'] = 1;
+        } else {
+            $args['numberposts'] = 1;
+        }
+
+        $customer_orders = wc_get_orders($args);
 
         if (count($customer_orders) == 0) {
             //Account Created in this transaction
@@ -202,7 +210,7 @@ class WC_NPG_3DS20_Data_Provider
 
     private static function get3ds20LastUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
     {
-        $customer_orders = wc_get_orders(array(
+        $args = [
             'numberposts' => 1,
             'orderby' => 'date',
             'order' => 'DESC',
@@ -244,8 +252,16 @@ class WC_NPG_3DS20_Data_Provider
                     'value' => $state,
                     'compare' => '=',
                 ),
-            ),
-        ));
+            )
+        ];
+
+        if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            $args['limit'] = 1;
+        } else {
+            $args['numberposts'] = 1;
+        }
+
+        $customer_orders = wc_get_orders($args);
 
         if (count($customer_orders) == 0) {
             //Account Created in this transaction
@@ -253,24 +269,6 @@ class WC_NPG_3DS20_Data_Provider
         }
 
         return $customer_orders[0]->get_date_created()->date("Y-m-d");
-    }
-
-    public static function get3ds20OrderInLastSixMonth()
-    {
-        $args = array(
-            'numberposts' => -1,
-            'meta_key' => '_customer_user',
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'meta_value' => get_current_user_id(),
-            'post_type' => wc_get_order_types(),
-            'post_status' => array_keys(wc_get_order_statuses()),
-            'date_query' => array(
-                'after' => date('Y-m-d', strtotime('- 6 month'))
-            )
-        );
-        $orders = get_posts($args);
-        return count($orders);
     }
 
     private static function get3ds20AccountDateIndicator($date)
@@ -339,22 +337,22 @@ class WC_NPG_3DS20_Data_Provider
         }
 
         if (!empty($wc->customer->get_date_created())) {
-            $params["cardHolderAcctInfo"]["chAccDate"] =  $wc->customer->get_date_created()->format("Y-m-d");
+            $params["cardHolderAcctInfo"]["chAccDate"] = $wc->customer->get_date_created()->format("Y-m-d");
 
-            $params["cardHolderAcctInfo"]["chAccAgeIndicator"] =  static::get3ds20AccountDateIndicator($wc->customer->get_date_created());
+            $params["cardHolderAcctInfo"]["chAccAgeIndicator"] = static::get3ds20AccountDateIndicator($wc->customer->get_date_created());
         }
 
-        $params["cardHolderAcctInfo"]["nbPurchaseAccount"] =  static::get3ds20OrderInLastSixMonth();
+        $params["cardHolderAcctInfo"]["nbPurchaseAccount"] = \Nexi\OrderHelper::get3ds20OrderInLastSixMonth();
 
         if (
             !empty($wc->customer->get_shipping_city()) &&
             !empty($wc->customer->get_shipping_country()) &&
-            !empty($wc->customer->get_shipping_address_1()) && 
-            !empty($wc->customer->get_shipping_address_2()) && 
-            !empty($wc->customer->get_shipping_postcode()) && 
+            !empty($wc->customer->get_shipping_address_1()) &&
+            !empty($wc->customer->get_shipping_address_2()) &&
+            !empty($wc->customer->get_shipping_postcode()) &&
             !empty($wc->customer->get_shipping_state())
         ) {
-            $params["cardHolderAcctInfo"]["destinationAddressUsageDate"] =  static::get3ds20LastUsagedestinationAddress(
+            $params["cardHolderAcctInfo"]["destinationAddressUsageDate"] = static::get3ds20LastUsagedestinationAddress(
                 null,
                 $wc->customer->get_shipping_city(),
                 $wc->customer->get_shipping_country(),
@@ -364,7 +362,7 @@ class WC_NPG_3DS20_Data_Provider
                 $wc->customer->get_shipping_state()
             );
 
-            $params["cardHolderAcctInfo"]["destinationAddressUsageIndicator"] =  static::get3ds20FirstUsagedestinationAddress(
+            $params["cardHolderAcctInfo"]["destinationAddressUsageIndicator"] = static::get3ds20FirstUsagedestinationAddress(
                 null,
                 $wc->customer->get_shipping_city(),
                 $wc->customer->get_shipping_country(),

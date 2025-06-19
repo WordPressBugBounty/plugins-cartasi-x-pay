@@ -1,15 +1,12 @@
-import './commons.scss';
-import './xpay-build.scss';
+import "./commons.scss";
+import "./xpay-build.scss";
 
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from "react";
 
-import $ from 'jquery';
+import $ from "jquery";
 
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { __ } from '@wordpress/i18n';
+import { registerPaymentMethod } from "@woocommerce/blocks-registry";
+import { __ } from "@wordpress/i18n";
 
 const PAYMENT_METHOD_NAME = 'xpay_build'
 
@@ -112,7 +109,7 @@ const CreditCardContent = ( { paymentMethodName, eventRegistration, components }
 
     const { PaymentMethodIcons } = components;
 
-    const { onPaymentSetup } = eventRegistration;
+    const { onPaymentSetup, onShippingRateSelectSuccess } = eventRegistration;
 
     const contentIcons = getContentIcons( paymentMethodName );
 
@@ -171,6 +168,7 @@ const CreditCardContent = ( { paymentMethodName, eventRegistration, components }
                         iframe.src = element.src;
                         iframe.className = "iframe-field";
 
+                        $( `#${element.id}` ).html("");
                         $( `#${element.id}` ).append( iframe );
                     }
 
@@ -293,6 +291,15 @@ const CreditCardContent = ( { paymentMethodName, eventRegistration, components }
             $
         ]
     );
+
+    React.useEffect(() => {
+        const unsubscribe = onShippingRateSelectSuccess(() => {
+            npgBuildFields();
+
+            return true;
+        });
+        return unsubscribe;
+    }, [onShippingRateSelectSuccess, npgBuildFields]);
 
     return <div>
         <span >{getContent( paymentMethodName )}</span>

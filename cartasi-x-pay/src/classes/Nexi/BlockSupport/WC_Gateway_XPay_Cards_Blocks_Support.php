@@ -15,8 +15,9 @@ namespace Nexi\BlockSupport;
 
 class WC_Gateway_XPay_Cards_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
 {
-    public function __construct(
-    ) {
+
+    public function __construct()
+    {
         parent::__construct();
     }
 

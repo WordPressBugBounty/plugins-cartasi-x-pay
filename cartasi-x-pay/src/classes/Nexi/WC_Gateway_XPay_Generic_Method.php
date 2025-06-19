@@ -31,8 +31,10 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         $this->init_form_fields();
         $this->init_settings();
 
-        if (function_exists("wcs_is_subscription") && array_key_exists("nexi_xpay_recurring_enabled", $this->settings)) {
-            if (($this->settings["nexi_xpay_recurring_enabled"] == "yes") && $this->recurring) {
+        $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+
+        if (function_exists("wcs_is_subscription") && array_key_exists("nexi_xpay_recurring_enabled", $currentConfig)) {
+            if (($currentConfig["nexi_xpay_recurring_enabled"] == "yes") && $this->recurring) {
                 array_push(
                     $this->supports,
                     'subscriptions',
@@ -52,13 +54,17 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         $order = new \WC_Order($order_id);
 
         if (!empty($_REQUEST['installments'])) {
-            update_post_meta($order_id, "installments", sanitize_text_field($_REQUEST['installments']));
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "installments", sanitize_text_field($_REQUEST['installments']));
+        } else if (isset($_POST['nexi_xpay_number_of_installments'])) {
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "installments", sanitize_text_field($_POST['nexi_xpay_number_of_installments']));
         }
 
-        return array(
+        $resultArray = [
             'result' => 'success',
             'redirect' => $order->get_checkout_payment_url(true),
-        );
+        ];
+
+        return $resultArray;
     }
 
     public function payment_fields()
@@ -83,6 +89,8 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
         $recurringPaymentRequired = WC_Nexi_Helper::order_or_cart_contains_subscription($order);
 
+        \Nexi\Log::actionDebug("recurring payment: " . json_encode($recurringPaymentRequired));
+
         $order_form = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_form($order, $this->selectedCard, $recurringPaymentRequired);
 
         echo "<form ";
@@ -103,37 +111,39 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
     /**
      * on subscription renewal a new order is crated and post meta from the original one are copied and saved with new order's id as post_id
      * Con una nuova versione del plugin sembra che non vengano copiati i dati quindi prendiamo il campo _subscription_renewal per recuperare le info sul contratto
-     * 
+     *
      * @param type $amount_to_charge
      * @param type $order
      */
     public function scheduled_subscription_payment($amount_to_charge, $order)
     {
-        $subscriptionId = $order->get_meta('_subscription_renewal');
+        if ($order->get_status() == 'pending') {
+            $subscriptionId = $order->get_meta('_subscription_renewal');
 
-        if ($subscriptionId) {
-            $idToUse = $subscriptionId;
-        } else {
-            $idToUse = $order->get_id();
+            if ($subscriptionId) {
+                $idToUse = $subscriptionId;
+            } else {
+                $idToUse = $order->get_id();
+            }
+
+            Log::actionInfo(__METHOD__ . "::" . __LINE__ . ' $idToUse ' . json_encode($idToUse));
+
+            $num_contratto = WC_Nexi_Helper::get_xpay_post_meta($idToUse, 'num_contratto');
+            $scadenza_pan = WC_Nexi_Helper::get_xpay_post_meta($idToUse, 'scadenza_pan');
+            $currency = $order->get_currency();
+
+            list($alias, $newCodTrans) = \Nexi\WC_Gateway_XPay_API::getInstance()->recurring_payment($num_contratto, $scadenza_pan, $amount_to_charge, $currency, $order);
+
+            //must be uptaed otherwise refferrs to the the first payment
+            WC_Save_Order_Meta::saveSuccessXPay($order->get_id(), $alias, $num_contratto, $newCodTrans, $scadenza_pan);
+
+            $order->payment_complete($newCodTrans);
         }
-
-        Log::actionInfo(__METHOD__ . "::" . __LINE__ . ' $idToUse ' . json_encode($idToUse));
-
-        $num_contratto = WC_Nexi_Helper::get_xpay_post_meta($idToUse, 'num_contratto');
-        $scadenza_pan = WC_Nexi_Helper::get_xpay_post_meta($idToUse, 'scadenza_pan');
-        $currency = $order->get_currency();
-
-        list($alias, $newCodTrans) = \Nexi\WC_Gateway_XPay_API::getInstance()->recurring_payment($num_contratto, $scadenza_pan, $amount_to_charge, $currency, $order);
-
-        //must be uptaed otherwise refferrs to the the first payment
-        WC_Save_Order_Meta::saveSuccessXPay($order->get_id(), $alias, $num_contratto, $newCodTrans, $scadenza_pan);
-
-        $order->payment_complete($newCodTrans);
     }
 
     /**
      * order state is changed to "Refunded" automatically when total amount is refunded
-     * 
+     *
      * @param type $order_id
      * @param type $amount
      * @param type $reaseon
@@ -164,7 +174,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
     public function init_form_fields()
     {
-        
+
     }
 
     /**
@@ -203,7 +213,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
      */
     public function add_payment_method()
     {
-        
+
     }
 
     /**

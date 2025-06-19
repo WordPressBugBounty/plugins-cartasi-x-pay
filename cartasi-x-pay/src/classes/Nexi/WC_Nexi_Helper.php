@@ -36,21 +36,21 @@ class WC_Nexi_Helper
      */
     public static function get_xpay_post_meta($order_id, $key)
     {
-        $ret = get_post_meta($order_id, '_xpay_' . $key, true);
+        $ret = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . $key, true);
 
         if ($ret != "") {
             return $ret;
         }
 
-        $xpay_details_order = get_post_meta($order_id, "xpay_details_order", true);
+        $xpay_details_order = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_details_order", true);
 
         if ($xpay_details_order != "") {
             $details_order = json_decode($xpay_details_order);
 
-            update_post_meta($order_id, "_xpay_" . "alias", $details_order->alias);
-            update_post_meta($order_id, "_xpay_" . "scadenza_pan", $details_order->scadenza_pan);
-            update_post_meta($order_id, "_xpay_" . "num_contratto", $details_order->num_contratto);
-            update_post_meta($order_id, "_xpay_" . "codTrans", $details_order->codTrans);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "alias", $details_order->alias);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "scadenza_pan", $details_order->scadenza_pan);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "num_contratto", $details_order->num_contratto);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "codTrans", $details_order->codTrans);
 
             return $details_order->{$key};
         }

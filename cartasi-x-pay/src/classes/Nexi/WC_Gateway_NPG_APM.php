@@ -20,7 +20,7 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
 
     public function __construct($code, $title, $description, $selectedCard, $img)
     {
-        parent::__construct('xpay_npg_' . strtolower($code), false);
+        parent::__construct('xpay_npg_' . strtolower($code), \Nexi\WC_Gateway_Nexi_Register_Available::is_npg_recurring($code));
 
         $this->selectedCard = $selectedCard;
 
@@ -40,9 +40,11 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
         try {
             $recurringPayment = WC_Nexi_Helper::order_or_cart_contains_subscription($order);
 
-            update_post_meta($order_id, "_npg_" . "is_build", false);
+            \Nexi\Log::actionDebug("recurring payment: " . json_encode($recurringPayment));
 
-            $redirectLink = WC_Gateway_NPG_API::getInstance()->new_payment_link($order, $recurringPayment, WC()->cart, false, false, $this->selectedCard, 0);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_" . "is_build", false);
+
+            $redirectLink = WC_Gateway_NPG_API::getInstance()->new_payment_link($order, $recurringPayment, false, false, $this->selectedCard, 0);
 
             $result = 'success';
         } catch (\Throwable $th) {
@@ -51,10 +53,12 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
             $redirectLink = $this->get_return_url($order);
         }
 
-        return array(
+        $resultArray = [
             'result' => $result,
             'redirect' => $redirectLink,
-        );
+        ];
+
+        return $resultArray;
     }
 
     function init_form_fields()

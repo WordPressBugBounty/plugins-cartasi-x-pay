@@ -43,8 +43,10 @@ class WC_Build_Token extends \WC_Payment_Token_CC
         $tokens = \WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), static::$gateway_id);
 
         foreach ($tokens as $token) {
-            if ($token->get_card_type() == $brand && $token->get_last4() == $last4 &&
-                    $token->get_expiry_month() == $exp_month && $token->get_expiry_year() == $exp_year) {
+            if (
+                $token->get_card_type() == $brand && $token->get_last4() == $last4 &&
+                $token->get_expiry_month() == $exp_month && $token->get_expiry_year() == $exp_year
+            ) {
                 return true;
             }
         }

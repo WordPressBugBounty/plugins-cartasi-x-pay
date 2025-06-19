@@ -70,4 +70,22 @@ class WC_Gateway_NPG_APM_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
         return [];
     }
 
+    protected function get_min_amount()
+    {
+        return \Nexi\WC_Gateway_Nexi_Register_Available::get_npg_min_amount($this->apmCode);
+    }
+
+    protected function get_max_amount()
+    {
+        return \Nexi\WC_Gateway_Nexi_Register_Available::get_npg_max_amount($this->apmCode);
+    }
+
+    protected function getRecurringInfo()
+    {
+        return [
+            'enabled' => \Nexi\WC_Gateway_Nexi_Register_Available::is_npg_recurring($this->apmCode) && \Nexi\WC_Nexi_Helper::cart_contains_subscription(),
+            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', WC_LANG_KEY),
+        ];
+    }
+
 }
