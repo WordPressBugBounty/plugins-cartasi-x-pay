@@ -7,7 +7,7 @@ Requires at least: 4.6
 Tested up to: 6.8.1
 WC Requires at least: 2.7.0
 WC Tested up to: 9.9.4
-Stable tag: 7.6.1
+Stable tag: 7.6.2
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -291,4 +291,7 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Added - Compatibility with WooCommerce High-Performance Order Storage (HPOS)
 
 = 7.6.1 =
+ * Fixed - Minor issues
+
+= 7.6.2 =
  * Fixed - Minor issues

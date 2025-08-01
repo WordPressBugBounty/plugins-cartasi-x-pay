@@ -195,11 +195,15 @@ class WC_Gateway_XPay_Process_Completion
 
             $lastErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'last_error', true);
             if ($lastErrorXpay != "") {
-                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
+                if (isset(WC()->session)) {
+                    wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
+                }                
             }
             $paymentErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'payment_error', true);
             if ($paymentErrorXpay != "") {
-                wc_add_notice(htmlentities($paymentErrorXpay), 'error');
+                if (isset(WC()->session)) {
+                    wc_add_notice(htmlentities($paymentErrorXpay), 'error');
+                }
             }
 
             return new \WP_REST_Response(

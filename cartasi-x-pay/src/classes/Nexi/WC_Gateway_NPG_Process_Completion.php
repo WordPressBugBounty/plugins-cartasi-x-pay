@@ -25,7 +25,7 @@ class WC_Gateway_NPG_Process_Completion
                 'methods' => 'POST',
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::s2s',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => '__return_true',
             )
@@ -38,7 +38,7 @@ class WC_Gateway_NPG_Process_Completion
                 'methods' => array('GET', 'POST'),
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::redirect',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => '__return_true',
             )
@@ -51,7 +51,7 @@ class WC_Gateway_NPG_Process_Completion
                 'methods' => 'GET',
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::cancel',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => '__return_true',
             )
@@ -59,12 +59,12 @@ class WC_Gateway_NPG_Process_Completion
 
         register_rest_route(
             'woocommerce-gateway-nexi-xpay',
-            '/process_account/npg' . '/(?P<id>\d+)',
+            '/process_account/npg/(?P<id>\d+)',
             array(
                 'methods' => array('POST'),
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::process_account',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => function () {
                     return current_user_can('manage_woocommerce');
@@ -82,8 +82,8 @@ class WC_Gateway_NPG_Process_Completion
      */
     private static function check_if_build_and_get_wc_order_id($order_id)
     {
-        if ((bool) \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "is_build", true) && \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "wc_order_id", true)) {
-            return \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "wc_order_id", true);
+        if ((bool) \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_is_build", true) && \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_wc_order_id", true)) {
+            return \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_wc_order_id", true);
         }
 
         return $order_id;
@@ -108,6 +108,14 @@ class WC_Gateway_NPG_Process_Completion
             return new \WP_REST_Response($payload, $status, []);
         }
 
+        $securityToken = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_securityToken", true);
+
+        if ($params['securityToken'] != $securityToken) {
+            Log::actionWarning(__FUNCTION__ . ': Invalid securityToken for order: ' . $order_id . ' - Request: ' . json_encode($params));
+
+            return new \WP_REST_Response($payload, $status, []);
+        }
+
         if (!WC_Gateway_NPG_Lock_Handler::check_and_take_lock($order_id, __FUNCTION__)) {
             Log::actionWarning(__FUNCTION__ . ': Couldn\'t get execution lock');
 
@@ -115,16 +123,6 @@ class WC_Gateway_NPG_Process_Completion
         }
 
         Log::actionInfo(__FUNCTION__ . ': got lock - ' . date('d-m-Y H:i:s'));
-
-        $securityToken = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "securityToken", true);
-
-        if ($params['securityToken'] != $securityToken) {
-            Log::actionWarning(__FUNCTION__ . ': Invalid securityToken for order: ' . $order_id . ' - Request: ' . json_encode($params));
-
-            WC_Gateway_NPG_Lock_Handler::release_lock($order_id);
-
-            return new \WP_REST_Response($payload, $status, []);
-        }
 
         static::change_order_status_by_operation($order_id, $params['operation']);
 
@@ -134,15 +132,17 @@ class WC_Gateway_NPG_Process_Completion
             "order_id" => $order_id,
         ];
 
-        // $order_id, '_npg_' . 'post_notification_timestamp_' . \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'orderId', true) -> to be sure to reffer to the last pyment initialization,
+        // $order_id, '_npg_post_notification_timestamp_' . \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_orderId', true) -> to be sure to reffer to the last pyment initialization,
         // more then one payment for the same order can be made if the first ìs declined, the second can reffer to the same order but have a different orderId
-        \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_' . 'post_notification_timestamp_' . \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'orderId', true), time());
+        \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_post_notification_timestamp_' . \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_orderId', true), time());
 
         $order = new \WC_Order($order_id);
 
         if (in_array($order->get_status(), ['completed', 'processing'])) {
             self::save_card_token($order_id, $params['operation']);
         }
+
+        Log::actionInfo(__METHOD__ . '::' . __LINE__ . ': release lock - ' . $order_id . ' - ' . date('d-m-Y H:i:s'));
 
         WC_Gateway_NPG_Lock_Handler::release_lock($order_id);
 
@@ -159,7 +159,7 @@ class WC_Gateway_NPG_Process_Completion
 
         Log::actionInfo(__FUNCTION__ . ": return to shop for order id " . $order_id);
 
-        $npg_order_id = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'orderId', true);
+        $npg_order_id = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_orderId', true);
 
         if (!WC_Gateway_NPG_Lock_Handler::check_and_take_lock($order_id, __FUNCTION__)) {
             Log::actionWarning(__FUNCTION__ . ': Couldn\'t get execution lock');
@@ -180,7 +180,7 @@ class WC_Gateway_NPG_Process_Completion
         do {
             sleep(1);
 
-            $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'post_notification_timestamp_' . $npg_order_id, true);
+            $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_post_notification_timestamp_' . $npg_order_id, true);
 
             if ($post_notification_timestamp !== "") {
                 break;
@@ -188,12 +188,12 @@ class WC_Gateway_NPG_Process_Completion
 
             $c++;
 
-            $authorizationRecord = WC_Gateway_NPG_API::getInstance()->get_order_status($order_id);
-
             if ($c == 20) {
                 Log::actionWarning(__FUNCTION__ . ": reached max number of GET for order: " . $order_id);
                 break;
             }
+
+            $authorizationRecord = WC_Gateway_NPG_API::getInstance()->get_order_status($order_id);
 
             if ($authorizationRecord === null) {
                 Log::actionWarning(__FUNCTION__ . ": authorization operation not found for order: " . $order_id);
@@ -205,42 +205,42 @@ class WC_Gateway_NPG_Process_Completion
             static::change_order_status_by_operation($order_id, $authorizationRecord);
         } while ($authorizationRecord === null || $authorizationRecord['operationResult'] == 'PENDING');
 
-
-
         Log::actionInfo(__FUNCTION__ . ": user redirect for order id " . $order_id);
+
+        Log::actionInfo(__METHOD__ . '::' . __LINE__ . ': release lock - ' . $order_id . ' - ' . date('d-m-Y H:i:s'));
+
+        WC_Gateway_NPG_Lock_Handler::release_lock($order_id);
 
         $order = new \WC_Order($order_id);
 
         if ($order->needs_payment() || $order->get_status() == 'cancelled') {
+            $lastErrorNpg = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_last_error', true);
 
-            $lastErrorNpg = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'last_error', true);
             if ($lastErrorNpg != "") {
-                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorNpg) . ")", 'error');
-            }
-            $paymentErrorNpg = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_' . 'payment_error', true);
-            if ($paymentErrorNpg != "") {
-                wc_add_notice(htmlentities($paymentErrorNpg), 'error');
+                if (isset(WC()->session)) {
+                    wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorNpg) . ")", 'error');
+                }
             }
 
-            WC_Gateway_NPG_Lock_Handler::release_lock($order_id);
+            $paymentErrorNpg = \Nexi\OrderHelper::getOrderMeta($order_id, '_npg_payment_error', true);
+
+            if ($paymentErrorNpg != "") {
+                if (isset(WC()->session)) {
+                    wc_add_notice(htmlentities($paymentErrorNpg), 'error');
+                }
+            }
 
             return new \WP_REST_Response(
                 "redirecting failed...",
                 "303",
-                array("Location" => $order->get_cancel_order_url_raw())
+                ["Location" => $order->get_cancel_order_url_raw()]
             );
         }
-
-        if (isset($authorizationRecord) && $authorizationRecord !== null) {
-            self::save_card_token($order_id, $authorizationRecord);
-        }
-
-        WC_Gateway_NPG_Lock_Handler::release_lock($order_id);
 
         return new \WP_REST_Response(
             "redirecting success...",
             "303",
-            array("Location" => $order->get_checkout_order_received_url())
+            ["Location" => $order->get_checkout_order_received_url()]
         );
     }
 
@@ -256,7 +256,7 @@ class WC_Gateway_NPG_Process_Completion
             case NPG_OR_AUTHORIZED:
             case NPG_OR_EXECUTED:
                 if (!in_array($order->get_status(), ['completed', 'processing'])) {
-                    $completed = $order->payment_complete(\Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "orderId", true));
+                    $completed = $order->payment_complete(\Nexi\OrderHelper::getOrderMeta($order_id, "_npg_orderId", true));
 
                     if ($completed) {
                         Log::actionInfo(__FUNCTION__ . ": order completed: " . $order_id);
@@ -297,7 +297,7 @@ class WC_Gateway_NPG_Process_Completion
 
                 $error = $operation['operationResult'];
 
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_' . 'last_error', $error);
+                \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_last_error', $error);
 
                 $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $error);
                 break;
@@ -316,7 +316,7 @@ class WC_Gateway_NPG_Process_Completion
 
         try {
             if ($operation && $operation['paymentMethod'] == 'CARD' && $operation['paymentInstrumentInfo'] != '') {
-                $token = \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_' . 'contractId', true);
+                $token = \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_contractId', true);
 
                 if ($token != null && $token != "") {
                     $contracts = \Nexi\WC_Gateway_NPG_API::getInstance()->get_customer_one_click_contracts($order->get_customer_id());
@@ -356,7 +356,7 @@ class WC_Gateway_NPG_Process_Completion
 
         $order_id = static::check_if_build_and_get_wc_order_id($params["id"]);
 
-        \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_' . 'payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
+        \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
 
         $order = new \WC_Order($order_id);
 
