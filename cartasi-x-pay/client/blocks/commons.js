@@ -1,5 +1,3 @@
-import "./commons.scss";
-
 import { useEffect, useState } from "react";
 
 import $ from "jquery";
@@ -55,6 +53,18 @@ const getCreditCardIcons = (paymentMethodName) => {
 const getContentIcons = (paymentMethodName) => {
     return Object.entries(
         getPaymentMethodConfiguration(paymentMethodName)?.content_icons ?? [],
+    ).map(([id, { src, alt }]) => {
+        return {
+            id,
+            src,
+            alt,
+        };
+    });
+};
+
+const getAllCardIcons = (paymentMethodName) => {
+    return Object.entries(
+        getPaymentMethodConfiguration(paymentMethodName)?.all_card_icons ?? [],
     ).map(([id, { src, alt }]) => {
         return {
             id,
@@ -148,11 +158,10 @@ const CreditCardLabel = ({ label, icons, components }) => {
     );
 };
 
-const CreditCardContent = ({ paymentMethodName, eventRegistration, components }) => {
-    const { PaymentMethodIcons } = components;
+const CreditCardContent = ({ paymentMethodName, eventRegistration }) => {
     const { onPaymentSetup } = eventRegistration;
 
-    const contentIcons = getContentIcons(paymentMethodName);
+    const allCardIcons = getAllCardIcons(paymentMethodName);
 
     const installmentsEnabled = getInstallmentsEnabled(paymentMethodName);
     const installmentsOptions = getInstallmentsOptions(paymentMethodName);
@@ -214,9 +223,17 @@ const CreditCardContent = ({ paymentMethodName, eventRegistration, components })
     return (
         <>
             <span>{getContent(paymentMethodName)}</span>
-            {PaymentMethodIcons && contentIcons.length > 0 && (
-                <PaymentMethodIcons contentIcons={contentIcons} align="right" />
-            )}
+
+            <div class="nexixpay-loghi-container flex">
+                <div class="internal-container">
+                    {allCardIcons.map((cardIcon) => (
+                        <div class="img-container" key={cardIcon.id}>
+                            <img src={cardIcon.src} alt={cardIcon.alt} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {installmentsEnabled && installmentsOptions.length > 0 && (
                 <div className="wc-gateway-nexi-xpay-block-checkout-additional-info">
                     <div>
@@ -224,6 +241,7 @@ const CreditCardContent = ({ paymentMethodName, eventRegistration, components })
                             {getInstallmentsTitleText(paymentMethodName)}
                         </label>
                     </div>
+
                     <select
                         defaultValue=""
                         onChange={(e) => setNumberOfInstallments(e.target.value)}
@@ -237,6 +255,7 @@ const CreditCardContent = ({ paymentMethodName, eventRegistration, components })
                             return <option value={opt}>{opt}</option>;
                         })}
                     </select>
+
                     {isPagoDil && (
                         <div className="wc-gateway-nexi-xpay-block-checkout-row">
                             <span>{installmentAmountLabel}</span>
@@ -244,6 +263,7 @@ const CreditCardContent = ({ paymentMethodName, eventRegistration, components })
                     )}
                 </div>
             )}
+
             {isRecurring && (
                 <div>
                     <span>{getRecurringDisclaimertext(paymentMethodName)}</span>

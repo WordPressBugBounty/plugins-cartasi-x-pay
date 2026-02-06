@@ -37,12 +37,12 @@ class WC_Gateway_Nexi_Register_Available
             'MULTIBANCO',
             'SATISPAY',
             'PAGOINCONTO',
+            'PAYBYBANK',
             'MY_BANK',
             'PAGODIL',
             'KLARNA',
             'PAGOLIGHT',
             'PAYPAL_BNPL',
-            'FASTCHECKOUT',
         ],
         'CZK' => [
             'PAYU',
@@ -64,64 +64,23 @@ class WC_Gateway_Nexi_Register_Available
             'KLARNA',
         ],
     ];
-    private static $xpayMinAmounts = [
-        'SOFORT' => 10,
-        'GIROPAY' => 10,
-        'IDEAL' => 10,
-        'EPS' => 100,
-        'PAYU' => 300,
-        'BLIK' => 100,
-        'POLI' => 100,
-        'KLARNA' => 3500,
-        'PAGOLIGHT' => 6000,
-        'PAYPAL_BNPL' => 3000,
-    ];
-    private static $xpayMaxAmounts = [
-        'KLARNA' => 150000,
-        'PAGOLIGHT' => 500000,
-        'PAYPAL_BNPL' => 200000,
-    ];
-    private static $xpayRecurringEnabled = [];
-
-    public static function get_xpay_min_amount($apmCode)
-    {
-        if (array_key_exists($apmCode, self::$xpayMinAmounts)) {
-            return self::$xpayMinAmounts[$apmCode];
-        } else {
-            return null;
-        }
-    }
-
-    public static function get_xpay_max_amount($apmCode)
-    {
-        if (array_key_exists($apmCode, self::$xpayMaxAmounts)) {
-            return self::$xpayMaxAmounts[$apmCode];
-        } else {
-            return null;
-        }
-    }
-
-    public static function is_xpay_recurring($apmCode)
-    {
-        return in_array($apmCode, self::$xpayRecurringEnabled);
-    }
 
     public static function register($paymentGateways)
     {
         $nexiGatewaysHelper = new static();
+
         return array_merge($paymentGateways, $nexiGatewaysHelper->get_all_nexi_gateways());
     }
 
     public static function registerBlocks()
     {
         $nexiGatewaysHelper = new static();
+
         return $nexiGatewaysHelper->paymentGatewaysBlocks;
     }
 
     private $paymentGateways;
-
     private $paymentGatewaysBlocks;
-
     private $currency;
 
     private function get_all_nexi_gateways()
@@ -138,397 +97,595 @@ class WC_Gateway_Nexi_Register_Available
         $this->evaluate_all();
     }
 
-    private function evaluate_all()
+    public static function filter_available_payment_gateways($paymentGateways)
     {
-        global $pagenow;
+        $currentCurrency = get_woocommerce_currency();
 
-        $this->paymentGateways = [];
-        $this->paymentGatewaysBlocks = [];
+        $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
-        if (is_admin() && $pagenow == 'admin.php' && isset($_GET['page']) && $_GET['page'] == 'wc-settings' && isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
-            $this->paymentGateways[] = new \Nexi\WC_Gateway_Admin();
-        } else {
-            $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+        $isXPayEnabled = \Nexi\WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'enabled', 'yes');
 
-            $isBuild = false;
+        $isNpg = \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG($currentConfig);
 
-            switch (WC_GATEWAY_NEXI_PLUGIN_VARIANT) {
-                case 'xpay':
-                    if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
-                        $mainGateway = new \Nexi\WC_Gateway_NPG_Cards();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_NPG_Cards_Blocks_Support();
+        foreach ($paymentGateways as $code => $paymentGateway) {
+            if ($code === "xpay") {
+                if ($isXPayEnabled) {
+                    if ($isNpg) {
+                        if (is_admin() || self::is_currency_valid_for_npg_apm($currentCurrency, 'CARDS')) {
+                            continue;
+                        }
                     } else {
-                        $mainGateway = new \Nexi\WC_Gateway_XPay_Cards();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_XPay_Cards_Blocks_Support();
-                    }
-                    break;
-
-                case 'xpay_build':
-                    $isBuild = true;
-                    if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
-                        $mainGateway = new \Nexi\WC_Gateway_NPG_Cards_Build();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_NPG_Build_Blocks_Support();
-                    } else {
-                        $mainGateway = new \Nexi\WC_Gateway_XPay_Cards_Build();
-                        $mainGatewayBlocks = new \Nexi\BlockSupport\WC_Gateway_XPay_Build_Blocks_Support();
-                    }
-                    break;
-
-                default:
-                    Log::actionWarning(__('Invalid plugin variant value', 'woocommerce-gateway-nexi-xpay'));
-                    throw new \Exception(__('Invalid plugin variant value', 'woocommerce-gateway-nexi-xpay'));
-            }
-
-            $this->currency = get_woocommerce_currency();
-
-            if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'enabled', 'yes')) {
-                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
-                    if (is_admin() || static::is_currency_valid_for_apm($this->currency, 'CARDS')) {
-                        $this->paymentGateways[] = $mainGateway;
-                        $this->paymentGatewaysBlocks[] = $mainGatewayBlocks;
-                    }
-
-                    $jsonAvailableMethodsNpg = \WC_Admin_Settings::get_option('xpay_npg_available_methods');
-
-                    $availableMethodsNpg = json_decode($jsonAvailableMethodsNpg, true);
-
-                    if (!is_array($availableMethodsNpg)) {
-                        $availableMethodsNpg = [];
-                    }
-
-                    foreach ($availableMethodsNpg as $am) {
-                        $this->evaluate_one_apm_npg((array) $am, $isBuild);
-                    }
-                } else {
-                    if (is_admin() || $this->currency == 'EUR') {
-                        $this->paymentGateways[] = $mainGateway;
-                        $this->paymentGatewaysBlocks[] = $mainGatewayBlocks;
-                    }
-
-                    $jsonAvailableMethodsXpay = \WC_Admin_Settings::get_option('xpay_available_methods');
-
-                    $availableMethodsXpay = json_decode($jsonAvailableMethodsXpay, true);
-
-                    if (!is_array($availableMethodsXpay)) {
-                        $availableMethodsXpay = [];
-                    }
-
-                    foreach ($availableMethodsXpay as $am) {
-                        $this->evaluate_one_apm_xpay($am, $isBuild);
+                        if (is_admin() || $currentCurrency == 'EUR') {
+                            continue;
+                        }
                     }
                 }
+
+                unset($paymentGateways[$code]);
+            } else if (strpos($code, "xpay") !== false) {
+                if ($isXPayEnabled) {
+                    $config = get_option('woocommerce_' . $code . '_settings');
+
+                    if (\Nexi\WC_Nexi_Helper::nexi_array_key_exists_and_equals($config, 'enabled', 'yes')) {
+                        if ($isNpg) {
+                            if (self::isValidNpgApm($paymentGateway, $currentCurrency)) {
+                                continue;
+                            }
+                        } else {
+                            if (self::isValidXPayApm($paymentGateway, $currentCurrency)) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                unset($paymentGateways[$code]);
             }
         }
+
+        return $paymentGateways;
     }
 
-    private function evaluate_one_apm_xpay($am, $isBuild)
+    private static function isValidXPayApm($paymentGateway, $currentCurrency)
     {
-        // The method is an APM with selectedcard support
-        if ($am['type'] != 'APM' || $am['selectedcard'] == '') {
-            return;
+        // Test current currency
+        if (!WC_Nexi_Helper::nexi_array_key_exists_and_in_array(self::$xpayAllowedMethodsByCurrency, $currentCurrency, $paymentGateway->selectedCard)) {
+            return false;
         }
 
-        // If not an admin execute checks
-        if (!is_admin()) {
-            // The method supports the currency or is in the admin page
-            if (!WC_Nexi_Helper::nexi_array_key_exists_and_in_array(self::$xpayAllowedMethodsByCurrency, $this->currency, $am['selectedcard'])) {
-                return;
-            }
+        if (!wooommerce_has_block_checkout()) {
+            if (isset(WC()->cart)) {
+                $apmInfo = self::get_xpay_apm_info($paymentGateway->selectedCard);
 
-            if (!wooommerce_has_block_checkout()) {
+                if ($apmInfo === null) {
+                    return false;
+                }
+
                 // Test for minimum amount. Each APM can have a minimum amount for payment processing
-                if (WC_Nexi_Helper::nexi_array_key_exists(self::$xpayMinAmounts, $am['selectedcard']) && isset(WC()->cart)) {
-                    $currentCartAmount = WC_Nexi_Helper::mul_bcmul(WC()->cart->total, 100, 0);
+                if (isset($apmInfo['min_amount'])) {
+                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $currentCurrency);
 
-                    if ($currentCartAmount < self::$xpayMinAmounts[$am['selectedcard']]) {
-                        return;
+                    if ($currentCartAmount < $apmInfo['min_amount']) {
+                        return false;
                     }
                 }
 
                 // Test for maximum amount. Each APM can have a maximum amount for payment processing
-                if (WC_Nexi_Helper::nexi_array_key_exists(self::$xpayMaxAmounts, $am['selectedcard']) && isset(WC()->cart)) {
-                    $currentCartAmount = WC_Nexi_Helper::mul_bcmul(WC()->cart->total, 100, 0);
+                if (isset($apmInfo['max_amount'])) {
+                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $currentCurrency);
 
-                    if ($currentCartAmount > self::$xpayMaxAmounts[$am['selectedcard']]) {
-                        return;
+                    if ($currentCartAmount > $apmInfo['max_amount']) {
+                        return false;
                     }
                 }
-            }
 
-            // Test for PagoDIL configuration. Cart must be payable in installable to pay with PagoDIL
-            if ($am['selectedcard'] == 'PAGODIL') {
-                $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_APM_Blocks_Support($am['code'], $am['description'], $isBuild);
-
-                if (isset(WC()->cart)) {
+                // Test for Pagodil configuration
+                if ($paymentGateway->selectedCard == 'PAGODIL') {
                     $xpaySettings = \Nexi\WC_Pagodil_Widget::getXPaySettings();
 
                     $pagodilConfig = \Nexi\WC_Pagodil_Widget::getPagodilConfig();
 
                     if (!\Nexi\WC_Pagodil_Widget::isQuoteInstallable($xpaySettings, $pagodilConfig, WC()->cart)) {
-                        return;
+                        return false;
                     }
                 }
             }
         }
 
-        if ($am['selectedcard'] === 'PAGOLIGHT') {
-            $am['description'] = 'HeyLight';
+        return true;
+    }
+
+    private static function isValidNpgApm($paymentGateway, $currentCurrency)
+    {
+        if (!self::is_currency_valid_for_npg_apm($currentCurrency, $paymentGateway->selectedCard)) {
+            return false;
         }
 
-        if ($am['selectedcard'] === 'MY_BANK') {
-            $am['description'] = 'MyBank';
+        if (!wooommerce_has_block_checkout()) {
+            if (isset(WC()->cart)) {
+                $apmInfo = self::get_npg_apm_info($paymentGateway->selectedCard);
+
+                if ($apmInfo === null) {
+                    return false;
+                }
+
+                // Test for minimum amount. Each APM can have a minimum amount for payment processing
+                if (isset($apmInfo['min_amount'])) {
+                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $currentCurrency);
+
+                    if ($currentCartAmount < $apmInfo['min_amount']) {
+                        return false;
+                    }
+                }
+
+                // Test for maximum amount. Each APM can have a maximum amount for payment processing
+                if (isset($apmInfo['max_amount'])) {
+                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $currentCurrency);
+
+                    if ($currentCartAmount > $apmInfo['max_amount']) {
+                        return false;
+                    }
+                }
+            }
         }
 
-        // If all tests are ok then add the APM to the array of gateways
-        $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_APM($am['code'], $am['description'], $am['selectedcard'], $am['image']);
+        return true;
+    }
 
-        if ($am['selectedcard'] != 'PAGODIL' || ($am['selectedcard'] == 'PAGODIL' && is_admin())) {
-            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_APM_Blocks_Support($am['code'], $am['description'], $isBuild);
+    private function evaluate_all()
+    {
+        $this->paymentGateways = [];
+        $this->paymentGatewaysBlocks = [];
+
+        $page = isset($_GET['page']) ? wc_clean(wp_unslash($_GET['page'])) : '';
+        $tab = isset($_GET['tab']) ? wc_clean(wp_unslash($_GET['tab'])) : '';
+        $section = isset($_GET['section']) ? wc_clean(wp_unslash($_GET['section'])) : '';
+
+        $onPaymentDetailsPage = is_admin() && $page == 'wc-settings' && $tab == 'checkout' && strpos($section, "xpay") !== false;
+
+        if ($onPaymentDetailsPage) {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_Admin();
+        } else {
+            $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
+
+            $isBuild = WC_Nexi_Helper::nexi_is_build($currentConfig);
+
+            if (WC_Nexi_Helper::nexi_is_gateway_NPG($currentConfig)) {
+                if ($isBuild) {
+                    $this->paymentGateways[] = new \Nexi\WC_Gateway_NPG_Cards_Build();
+                    $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_Cards_Build_Blocks_Support();
+                } else {
+                    $this->paymentGateways[] = new \Nexi\WC_Gateway_NPG_Cards_Redirect();
+                    $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_Cards_Blocks_Support();
+                }
+
+                foreach (WC_Nexi_Helper::get_npg_available_methods() as $am) {
+                    $this->evaluate_one_apm_npg($currentConfig, $am);
+                }
+            } else {
+                if ($isBuild) {
+                    $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_Cards_Build();
+                    $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_Cards_Build_Blocks_Support();
+                } else {
+                    $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_Cards_Redirect();
+                    $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_Cards_Blocks_Support();
+                }
+
+                foreach (WC_Nexi_Helper::get_xpay_available_methods() as $am) {
+                    $this->evaluate_one_apm_xpay($currentConfig, $am);
+                }
+            }
         }
     }
 
-    private function evaluate_one_apm_npg($am, $isBuild)
+    private function evaluate_one_apm_xpay($currentConfig, $am)
+    {
+        if ($am['type'] != 'APM' || $am['selectedcard'] == '') {
+            return;
+        }
+
+        $apmInfo = self::get_xpay_apm_info($am['selectedcard']);
+
+        if ($apmInfo === null) {
+            return;
+        }
+
+        if ($am['selectedcard'] == 'GOOGLEPAY' && WC_Nexi_Helper::is_google_button_enabled($currentConfig)) {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_Google_Pay_Button(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['pngImage']
+            );
+
+            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_Google_Pay_Button_Blocks_Support(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['pngImage']
+            );
+        } else if ($am['selectedcard'] == 'APPLEPAY' && WC_Nexi_Helper::is_apple_button_enabled($currentConfig)) {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_Apple_Pay_Button(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['pngImage']
+            );
+
+            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_Apple_Pay_Button_Blocks_Support(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['pngImage']
+            );
+        } else {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_XPay_APM(
+                $am['selectedcard'],
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['selectedcard'],
+                $am['pngImage']
+            );
+
+            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_XPay_APM_Blocks_Support(
+                $am['selectedcard'],
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['pngImage']
+            );
+        }
+    }
+
+    private function evaluate_one_apm_npg($currentConfig, $am)
     {
         if ($am['paymentMethodType'] != 'APM') {
             return;
         }
 
-        if (!in_array($am['circuit'], static::get_npg_allowed_apm())) {
+        $apmInfo = self::get_npg_apm_info($am['circuit']);
+
+        if ($apmInfo === null) {
             return;
         }
 
-        if (!static::is_currency_valid_for_apm($this->currency, $am['circuit'])) {
-            return;
+        if ($am['circuit'] == 'GOOGLEPAY' && WC_Nexi_Helper::is_google_button_enabled($currentConfig)) {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_NPG_Google_Pay_Button(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['imageLink']
+            );
+
+            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_Google_Pay_Button_Blocks_Support(
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['imageLink']
+            );
+        } else {
+            $this->paymentGateways[] = new \Nexi\WC_Gateway_NPG_APM(
+                $am['circuit'],
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['circuit'],
+                $am['imageLink']
+            );
+
+            $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_APM_Blocks_Support(
+                $am['circuit'],
+                $apmInfo['title'],
+                $apmInfo['description'],
+                $am['imageLink']
+            );
         }
-
-        $apmInfo = static::get_npg_apm_info($am['circuit']);
-
-        if (!wooommerce_has_block_checkout()) {
-            // Test for minimum amount. Each APM can have a minimum amount for payment processing
-            if (isset($apmInfo['min_amount'])) {
-                if (isset(WC()->cart)) {
-                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $this->currency);
-
-                    if ($currentCartAmount < $apmInfo['min_amount']) {
-                        return;
-                    }
-                }
-            }
-
-            // Test for maximum amount. Each APM can have a maximum amount for payment processing
-            if (isset($apmInfo['max_amount'])) {
-                if (isset(WC()->cart)) {
-                    $currentCartAmount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit(WC()->cart->total, $this->currency);
-
-                    if ($currentCartAmount > $apmInfo['max_amount']) {
-                        return;
-                    }
-                }
-            }
-        }
-
-        $this->paymentGateways[] = new \Nexi\WC_Gateway_NPG_APM(
-            $am['circuit'],
-            $apmInfo['title'],
-            $apmInfo['description'],
-            $am['circuit'],
-            $am['imageLink']
-        );
-        $this->paymentGatewaysBlocks[] = new \Nexi\BlockSupport\WC_Gateway_NPG_APM_Blocks_Support(
-            $am['circuit'],
-            $apmInfo['title'],
-            $apmInfo['description'],
-            $isBuild
-        );
     }
 
-    public static function get_all_npg_available_apm_info()
+    public static function get_all_available_apm_info()
     {
         return [
-            'PAGOINCONTO' => [
+            [
                 'title' => 'PagoinConto',
                 'description' => __('Simply pay by bank transfer directly from your home banking with PagoinConto', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAGOINCONTO',
+                'selected_card_npg' => 'PAGOINCONTO',
             ],
-            'GOOGLEPAY' => [
+            [
+                'title' => 'PayByBank',
+                'description' => __('Simply pay by bank transfer directly from your home banking with PayByBank', 'woocommerce-gateway-nexi-xpay'),
+                'min_amount' => null,
+                'max_amount' => null,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAYBYBANK',
+                'selected_card_npg' => 'PAYBYBANK',
+            ],
+            [
                 'title' => 'Google Pay',
                 'description' => __('Easily pay with your Google Pay wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'GOOGLEPAY',
+                'selected_card_npg' => 'GOOGLEPAY',
             ],
-            'APPLEPAY' => [
+            [
                 'title' => 'Apple Pay',
                 'description' => __('Easily pay with your Apple Pay wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'APPLEPAY',
+                'selected_card_npg' => 'APPLEPAY',
             ],
-            'BANCOMATPAY' => [
+            [
                 'title' => 'Bancomat Pay',
                 'description' => __('Pay via BANCOMAT Pay just by entering your phone number', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'BANCOMAT',
+                'selected_card_npg' => 'BANCOMATPAY',
             ],
-            'MYBANK' => [
+            [
                 'title' => 'MyBank',
                 'description' => __('Pay securely by bank transfer with MyBank', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'MY_BANK',
+                'selected_card_npg' => 'MYBANK',
             ],
-            'ALIPAY' => [
+            [
                 'title' => 'Alipay',
                 'description' => __('Pay quickly and easily with your AliPay wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'ALIPAY',
+                'selected_card_npg' => 'ALIPAY',
             ],
-            'WECHATPAY' => [
+            [
                 'title' => 'WeChat Pay',
                 'description' => __('Pay quickly and easily with your WeChat Pay wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'WECHATPAY',
+                'selected_card_npg' => 'WECHATPAY',
             ],
-            'GIROPAY' => [
+            [
                 'title' => 'Giropay',
                 'description' => __('Pay directly from your bank account with Giropay', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 10,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'GIROPAY',
+                'selected_card_npg' => 'GIROPAY',
             ],
-            'IDEAL' => [
+            [
                 'title' => 'iDEAL',
                 'description' => __('Pay directly from your bank account with iDEAL', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 10,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'IDEAL',
+                'selected_card_npg' => 'IDEAL',
             ],
-            'BANCONTACT' => [
+            [
                 'title' => 'Bancontact',
                 'description' => __('Pay easily with Bancontact', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => true,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'BCMC',
+                'selected_card_npg' => 'BANCONTACT',
             ],
-            'EPS' => [
+            [
                 'title' => 'EPS',
                 'description' => __('Real time payment directly from your bank account with EPS', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 100,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'EPS',
+                'selected_card_npg' => 'EPS',
             ],
-            'PRZELEWY24' => [
+            [
                 'title' => 'Przelewy24',
                 'description' => __('Secure payment directly from your bank account with Przelewy24', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'P24',
+                'selected_card_npg' => 'PRZELEWY24',
             ],
-            'SKRILL' => [
+            [
                 'title' => 'Skrill',
                 'description' => __('Pay quickly and easily with your Skrill wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'SKRILL',
+                'selected_card_npg' => 'SKRILL',
             ],
-            'SKRILL1TAP' => [
+            [
                 'title' => 'Skrill 1tap',
                 'description' => __('Pay in one tap with your Skrill wallet', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'SKRILLONETAP',
+                'selected_card_npg' => 'SKRILL1TAP',
             ],
-            'PAYU' => [
+            [
                 'title' => 'PayU',
                 'description' => __('Secure payment directly from your bank account with PayU', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 300,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAYU',
+                'selected_card_npg' => 'PAYU',
             ],
-            'BLIK' => [
+            [
                 'title' => 'Blik',
                 'description' => __('Secure payment directly from your home banking with Blik', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 100,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'BLIK',
+                'selected_card_npg' => 'BLIK',
             ],
-            'MULTIBANCO' => [
+            [
                 'title' => 'Multibanco',
                 'description' => __('Secure payment directly from your home banking with Multibanco', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'MULTIBANCO',
+                'selected_card_npg' => 'MULTIBANCO',
             ],
-            'SATISPAY' => [
+            [
                 'title' => 'Satispay',
                 'description' => __('Pay easily with your Satispay account', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'SATISPAY',
+                'selected_card_npg' => 'SATISPAY',
             ],
-            'AMAZONPAY' => [
+            [
                 'title' => 'Amazon Pay',
                 'description' => __('Pay easily with your Amazon account', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'AMAZONPAY',
+                'selected_card_npg' => 'AMAZONPAY',
             ],
-            'PAYPAL' => [
+            [
                 'title' => 'PayPal',
                 'description' => __('Pay securely with your PayPal account', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAYPAL',
+                'selected_card_npg' => 'PAYPAL',
             ],
-            'ONEY' => [
+            [
                 'title' => 'Oney',
                 'description' => __('Pay in 3 or 4 installments by credit, debit or Postepay card with Oney', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => null,
+                'selected_card_npg' => 'ONEY',
             ],
-            'KLARNA' => [
+            [
                 'title' => 'Klarna',
                 'description' => __('Pay in 3 installments with Klarna interest-free', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 3500,
                 'max_amount' => 150000,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'SOFORT',
+                'selected_card_npg' => 'KLARNA',
             ],
-            'PAGODIL' => [
+            [
                 'title' => 'PagoDil',
                 'description' => __('Buy now and pay a little by little with PagoDIL', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => null,
                 'max_amount' => null,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAGODIL',
+                'selected_card_npg' => 'PAGODIL',
             ],
-            'HEYLIGHT' => [
+            [
                 'title' => 'HeyLight',
                 'description' => __('Pay in installments with HeyLight', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 6000,
                 'max_amount' => 500000,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAGOLIGHT',
+                'selected_card_npg' => 'HEYLIGHT',
             ],
-            'PAYPAL_BNPL' => [
+            [
                 'title' => 'PayPal BNPL',
                 'description' => __('Pay in 3 installments with PayPal', 'woocommerce-gateway-nexi-xpay'),
                 'min_amount' => 3000,
                 'max_amount' => 200000,
-                'recurring' => false,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'PAYPAL_BNPL',
+                'selected_card_npg' => 'PAYPAL_BNPL',
+            ],
+            [
+                'title' => 'POLi',
+                'description' => __('Pay securely with POLi', 'woocommerce-gateway-nexi-xpay'),
+                'min_amount' => null,
+                'max_amount' => null,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'POLI',
+                'selected_card_npg' => null,
+            ],
+            [
+                'title' => 'MyBank',
+                'description' => __('Pay securely by bank transfer with MyBank', 'woocommerce-gateway-nexi-xpay'),
+                'min_amount' => null,
+                'max_amount' => null,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'SCT',
+                'selected_card_npg' => null,
+            ],
+            [
+                'title' => 'Klarna',
+                'description' => __('Pay in 3 installments with Klarna interest-free', 'woocommerce-gateway-nexi-xpay'),
+                'min_amount' => null,
+                'max_amount' => null,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => 'KLARNA',
+                'selected_card_npg' => null,
+            ],
+            [
+                'title' => 'IRIS',
+                'description' => __('Pay securely with IRIS', 'woocommerce-gateway-nexi-xpay'),
+                'min_amount' => null,
+                'max_amount' => null,
+                'recurring_npg' => false,
+                'recurring_xpay' => false,
+                'selected_card_xpay' => null,
+                'selected_card_npg' => 'IRIS',
             ],
         ];
     }
 
     public static function is_npg_recurring($apmCode)
     {
-        $apmInfo = self::get_all_npg_available_apm_info();
+        $apmInfo = self::get_npg_apm_info($apmCode);
 
-        if (array_key_exists($apmCode, $apmInfo)) {
-            return $apmInfo[$apmCode]['recurring'];
+        if (isset($apmInfo)) {
+            return $apmInfo['recurring_npg'];
         } else {
             return false;
         }
@@ -536,10 +693,10 @@ class WC_Gateway_Nexi_Register_Available
 
     public static function get_npg_min_amount($apmCode)
     {
-        $apmInfo = self::get_all_npg_available_apm_info();
+        $apmInfo = self::get_npg_apm_info($apmCode);
 
-        if (array_key_exists($apmCode, $apmInfo)) {
-            return $apmInfo[$apmCode]['min_amount'];
+        if (isset($apmInfo)) {
+            return $apmInfo['min_amount'];
         } else {
             return null;
         }
@@ -547,26 +704,79 @@ class WC_Gateway_Nexi_Register_Available
 
     public static function get_npg_max_amount($apmCode)
     {
-        $apmInfo = self::get_all_npg_available_apm_info();
+        $apmInfo = self::get_npg_apm_info($apmCode);
 
-        if (array_key_exists($apmCode, $apmInfo)) {
-            return $apmInfo[$apmCode]['max_amount'];
+        if (isset($apmInfo)) {
+            return $apmInfo['max_amount'];
         } else {
             return null;
         }
     }
 
-    private static function get_npg_allowed_apm()
+    private static function get_npg_apm_info($apmCode)
     {
-        return array_keys(self::get_all_npg_available_apm_info());
+        if (isset($apmCode)) {
+            $allApms = self::get_all_available_apm_info();
+
+            foreach ($allApms as $apm) {
+                if (strtolower(trim($apm['selected_card_npg'] ?? "")) === strtolower(trim($apmCode ?? ""))) {
+                    return $apm;
+                }
+            }
+        }
+
+        return null;
     }
 
-    private static function get_npg_apm_info($circuit)
+    public static function is_xpay_recurring($apmCode)
     {
-        return self::get_all_npg_available_apm_info()[$circuit];
+        $apmInfo = self::get_xpay_apm_info($apmCode);
+
+        if (isset($apmInfo)) {
+            return $apmInfo['recurring_xpay'];
+        } else {
+            return false;
+        }
     }
 
-    private static function is_currency_valid_for_apm($currency, $apmCode)
+    public static function get_xpay_min_amount($apmCode)
+    {
+        $apmInfo = self::get_xpay_apm_info($apmCode);
+
+        if (isset($apmInfo)) {
+            return $apmInfo['min_amount'];
+        } else {
+            return null;
+        }
+    }
+
+    public static function get_xpay_max_amount($apmCode)
+    {
+        $apmInfo = self::get_xpay_apm_info($apmCode);
+
+        if (isset($apmInfo)) {
+            return $apmInfo['max_amount'];
+        } else {
+            return null;
+        }
+    }
+
+    private static function get_xpay_apm_info($apmCode)
+    {
+        if (isset($apmCode)) {
+            $allApms = self::get_all_available_apm_info();
+
+            foreach ($allApms as $apm) {
+                if (strtolower(trim($apm['selected_card_xpay'] ?? "")) === strtolower(trim($apmCode ?? ""))) {
+                    return $apm;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function is_currency_valid_for_npg_apm($currency, $apmCode)
     {
         $validApmCodes = array(
             "CARDS",

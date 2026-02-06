@@ -18,13 +18,12 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
 abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodType
 {
 
-    public function __construct($name, $gateway, $gatewaySettingsKey, $apm = '', $isBuild = false)
+    public function __construct($name, $gateway, $gatewaySettingsKey, $apm = '')
     {
         $this->name = $name;
         $this->gateway = $gateway;
         $this->gatewaySettingsKey = $gatewaySettingsKey;
         $this->apm = $apm;
-        $this->isBuild = $isBuild;
     }
 
     /**s
@@ -40,8 +39,6 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
     private $gatewaySettingsKey;
 
     protected $apm;
-
-    protected $isBuild;
 
     /**
      * Initializes the payment method.
@@ -70,19 +67,15 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
 
     private function is_active_internal()
     {
-        $gatewaySettings = null;
-
-        if ($this->isBuild) {
-            $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_build_settings') ?? [];
-        } else {
-            $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_settings') ?? [];
-        }
+        $gatewaySettings = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
         if (empty($gatewaySettings) || ($gatewaySettings['enabled'] ?? '') !== 'yes' || ($gatewaySettings['nexi_gateway'] ?? '') !== $this->gateway) {
             return false;
         }
+
         if ($this->apm !== null && !empty($this->apm)) {
             $apmSettings = \WC_Admin_Settings::get_option('woocommerce_' . $this->gatewaySettingsKey . '_' . $this->apm . '_settings') ?? [];
+
             if (empty($apmSettings) || $apmSettings['enabled' ?? ''] !== 'yes') {
                 return false;
             }
@@ -109,13 +102,15 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
         $baseFilename = 'index_' . $this->name;
         $baseName = str_replace('_', '-', $this->name);
 
-        $pluginScriptPath = WC_GATEWAY_XPAY_PLUGIN_URL . '/build/' . $baseFilename . '.js';
-        $pluginStylePath = WC_GATEWAY_XPAY_PLUGIN_URL . '/build/' . $baseFilename . '.css';
+        $pluginScriptUrl = WC_GATEWAY_XPAY_PLUGIN_URL . '/build/' . $baseFilename . '.js';
+        $pluginStyleUrl = WC_GATEWAY_XPAY_PLUGIN_URL . '/build/' . $baseFilename . '.css';
+        $pluginStylePath = WC_GATEWAY_XPAY_PLUGIN_BASE_PATH . '/build/' . $baseFilename . '.css';
         $asset_path = WC_GATEWAY_XPAY_PLUGIN_BASE_PATH . 'build/' . $baseFilename . '.asset.php';
 
         $version = "1.0.0";
 
         $dependencies = [];
+
         if (file_exists($asset_path)) {
             $asset = require $asset_path;
             $version = is_array($asset) && isset($asset['version'])
@@ -126,16 +121,18 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
                 : $dependencies;
         }
 
-        wp_enqueue_style(
-            'wc-gateway-' . $baseName . '-blocks-integration-style',
-            $pluginStylePath,
-            [],
-            $version
-        );
+        if (file_exists($pluginStylePath)) {
+            wp_enqueue_style(
+                'wc-gateway-' . $baseName . '-blocks-integration-style',
+                $pluginStyleUrl,
+                [],
+                $version
+            );
+        }
 
         wp_register_script(
             'wc-gateway-' . $baseName . '-blocks-integration',
-            $pluginScriptPath,
+            $pluginScriptUrl,
             $dependencies,
             $version,
             true
@@ -187,6 +184,7 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
             'content' => $this->getContent(),
             'icons' => $this->getIcons(),
             'content_icons' => $this->getContentIcons(),
+            'all_card_icons' => $this->getAllCardsIcons(),
             'features' => $features,
             'show_saved_cards' => $savedCardsSupport,
             'show_save_option' => $savedCardsSupport,
@@ -195,6 +193,7 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
             'recurring' => $recurring,
             'min_amount' => $this->get_min_amount(),
             'max_amount' => $this->get_max_amount(),
+            'admin_url' => admin_url(),
         ];
     }
 
@@ -249,5 +248,10 @@ abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodTy
     abstract protected function getIcons();
 
     abstract protected function getContentIcons();
+
+    protected function getAllCardsIcons()
+    {
+        return [];
+    }
 
 }

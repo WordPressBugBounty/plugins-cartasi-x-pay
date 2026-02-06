@@ -51,6 +51,7 @@ class WC_Pagodil_Configuration
                 'label' => WC_Nexi_Helper::div_bcdiv(\Nexi\WC_Pagodil_Widget::getPagodilMinAmount($pagodilConfig), 100, 2) . " €",
                 'description' => __('Minimum cart value (in Euro) for which it will be possible to proceed through installment payments with PagoDIL. This value corresponds to the amount set in the XPay back office.', 'woocommerce-gateway-nexi-xpay'),
                 'class' => 'xpay-only',
+                'desc_tip' => false,
             ),
             'pd_max_amount' => array(
                 'title' => __('Maximum cart value', 'woocommerce-gateway-nexi-xpay'),
@@ -58,6 +59,7 @@ class WC_Pagodil_Configuration
                 'label' => WC_Nexi_Helper::div_bcdiv(\Nexi\WC_Pagodil_Widget::getPagodilMaxAmount($pagodilConfig), 100, 2) . " €",
                 'description' => __('Maximum cart value (in Euro) for which it will be possible to proceed through installment payments with PagoDIL. This value corresponds to the amount set in the XPay back office.', 'woocommerce-gateway-nexi-xpay'),
                 'class' => 'xpay-only',
+                'desc_tip' => false,
             ),
             'pd_installments_number' => array(
                 'title' => __('Number of installments', 'woocommerce-gateway-nexi-xpay'),
@@ -65,6 +67,7 @@ class WC_Pagodil_Configuration
                 'label' => implode(", ", $installmentsNumber),
                 'description' => __('Number of installments made available for payment via PagoDIL. The rates displayed correspond to the values set in the XPay back office.', 'woocommerce-gateway-nexi-xpay'),
                 'class' => 'xpay-only',
+                'desc_tip' => false,
             ),
             'pd_check_mode_categories' => array(
                 'title' => __('Installment products', 'woocommerce-gateway-nexi-xpay'),

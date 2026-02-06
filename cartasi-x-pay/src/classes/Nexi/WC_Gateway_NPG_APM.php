@@ -16,7 +16,7 @@ namespace Nexi;
 class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
 {
 
-    protected $selectedCard;
+    public $selectedCard;
 
     public function __construct($code, $title, $description, $selectedCard, $img)
     {
@@ -42,7 +42,7 @@ class WC_Gateway_NPG_APM extends WC_Gateway_NPG_Generic_Method
 
             \Nexi\Log::actionDebug("recurring payment: " . json_encode($recurringPayment));
 
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_" . "is_build", false);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_is_build", false);
 
             $redirectLink = WC_Gateway_NPG_API::getInstance()->new_payment_link($order, $recurringPayment, false, false, $this->selectedCard, 0);
 

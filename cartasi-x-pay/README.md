@@ -4,10 +4,10 @@ Tags: nexi, nexi payments, xpay, payment gateway, e-commerce
 Author URI: https://ecommerce.nexi.it
 Author: Nexi Payments SpA
 Requires at least: 4.6
-Tested up to: 6.8.1
+Tested up to: 6.9
 WC Requires at least: 2.7.0
-WC Tested up to: 9.9.4
-Stable tag: 7.6.2
+WC Tested up to: 10.4.2
+Stable tag: 8.2.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -24,7 +24,7 @@ Nexi has a strong market position, managing 44 million payment cards and process
 
 XPay allows you to accept online payments and is compatible with all major payment circuits. It can handle all sales channels, including e-commerce and mobile.
 
-The XPay extension for Wordpress/WooCommerce enables you to integrate the XPay payment gateway into your website without additional implementations. It manages the customer's transition from your website to the secure Nexi environment and vice versa. The customer remains on your e-commerce site until the checkout process and is then redirected to the secure Nexi environment for payment. You don't need to handle any sensitive data.
+The XPay extension for Wordpress/WooCommerce allows you to integrate the XPay payment gateway into your website without additional implementations.
 
 The extension is regularly updated to incorporate the advancements and improvements of XPay.
 
@@ -33,6 +33,7 @@ The extension is regularly updated to incorporate the advancements and improveme
 == XPay Module Features ==
 
 -	**Simple Payment**: Redirects the customer to Nexi's secure payment gateway.
+-   **XPay Build**: Entry form for card data on your site without redirections on external cash pages.  
 -	**One-Click Payment**: Allows the end customer to store their credit card data and use it for future purchases with a single click.
 -	**Recurring Payment**: Enables the merchant to tokenize the customer's card data, allowing for recurring billing and subscriptions. To enable recurring payments, you need to install the WooCommerce Subscriptions extension.
 -	**Pay-By-Link**: Enables sending a payment link to the customer via email or social media.
@@ -294,4 +295,22 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Fixed - Minor issues
 
 = 7.6.2 =
+ * Fixed - Minor issues
+ 
+= 8.0.0 =
+ * XPay Build plugin features
+ * Server-to-server payment method with Apple Pay and Google Pay
+ 
+= 8.1.0 =
+ * Changed - Card logos
+ * Added - New payment method available for Greek merchants only: Iris.
+ * Fixed - Minor issues
+
+= 8.1.1 =
+ * Fixed - Minor issues
+
+= 8.2.0 =
+ * Added - Discount management for Klarna APM (only for alias and secret key credential types)
+ * Added - Translations for Croatian and Albanian languages
+ * Added - New invoiceId parameter (only for API key credential type)
  * Fixed - Minor issues

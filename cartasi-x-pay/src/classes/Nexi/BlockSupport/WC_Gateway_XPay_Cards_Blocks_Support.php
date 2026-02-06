@@ -13,7 +13,7 @@
 
 namespace Nexi\BlockSupport;
 
-class WC_Gateway_XPay_Cards_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
+class WC_Gateway_XPay_Cards_Blocks_Support extends WC_Gateway_XPay_Blocks_Support
 {
 
     public function __construct()
@@ -23,41 +23,48 @@ class WC_Gateway_XPay_Cards_Blocks_Support extends WC_Gateway_Xpay_Blocks_Suppor
 
     protected function getLabel()
     {
-        return __('Payment cards', WC_LANG_KEY);
+        return __('Payment cards', 'woocommerce-gateway-nexi-xpay');
     }
 
     protected function getContent()
     {
-        return __('Pay securely by credit, debit and prepaid card. Powered by Nexi.', WC_LANG_KEY);
+        return __('Pay securely by credit, debit and prepaid card. Powered by Nexi.', 'woocommerce-gateway-nexi-xpay');
+    }
+
+    protected function getAllCardsIcons()
+    {
+        $allCardsIcons = [];
+
+        foreach (\Nexi\WC_Nexi_Helper::get_xpay_cards() as $am) {
+            if ($am['pngImage']) {
+                $allCardsIcons[$am['selectedcard'] . '-nexipay'] = [
+                    'src' => $am['pngImage'],
+                    'alt' => $am['description'],
+                ];
+            }
+        }
+
+        return $allCardsIcons;
     }
 
     protected function getIcons()
     {
-        $available_methods_xpay = json_decode(\WC_Admin_Settings::get_option('xpay_available_methods'), true);
-
-        $contentIcons = [];
-
-        if (is_array($available_methods_xpay)) {
-            foreach ($available_methods_xpay as $am) {
-                if ($am['type'] != "CC") {
-                    continue;
-                }
-                $imageLink = $am['image'] ?? '';
-                if (!empty($imageLink)) {
-                    $contentIcons[$am['code'] . '-nexipay'] = [
-                        'src' => $imageLink,
-                        'alt' => __($am['description'] . " logo", WC_LANG_KEY)
-                    ];
-                }
-            }
-        }
-
-        return $contentIcons;
+        return [
+            'xpay-nexixpay' => [
+                'src' => WC_GATEWAY_XPAY_PLUGIN_URL . '/assets/images/card.png',
+                'alt' => 'Payment cards',
+            ]
+        ];
     }
 
     protected function getContentIcons()
     {
-        return [];
+        return [
+            'xpay-nexipay' => [
+                'src' => \WC_Admin_Settings::get_option('xpay_logo_small'),
+                'alt' => __("Nexi XPay logo", 'woocommerce-gateway-nexi-xpay')
+            ],
+        ];
     }
 
     protected function savedCardsSupport()

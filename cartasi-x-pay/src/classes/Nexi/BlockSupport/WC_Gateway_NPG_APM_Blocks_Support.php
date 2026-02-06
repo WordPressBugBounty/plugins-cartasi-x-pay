@@ -15,54 +15,40 @@ namespace Nexi\BlockSupport;
 
 class WC_Gateway_NPG_APM_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
 {
-    private $apmCode;
-    private $label;
-    private $description;
 
-    public function __construct(
-        $apmCode,
-        $apmLabel,
-        $apmDescription,
-        $isBuild = false
-    ) {
-        parent::__construct($apmCode, $isBuild);
+    private $apmCode;
+    private $title;
+    private $description;
+    private $image;
+
+    public function __construct($apmCode, $title, $description, $image)
+    {
+        parent::__construct($apmCode);
+
         $this->apmCode = $apmCode;
-        $this->label = $apmLabel;
-        $this->description = $apmDescription;
+        $this->title = $title;
+        $this->description = $description;
+        $this->image = $image;
     }
 
     protected function getLabel()
     {
-        return __($this->label, WC_LANG_KEY);
+        return $this->title;
     }
 
     protected function getContent()
     {
-        return __($this->description, WC_LANG_KEY);
+        return $this->description;
     }
 
     protected function getIcons()
     {
-        $available_methods_npg = json_decode(\WC_Admin_Settings::get_option('xpay_npg_available_methods'), true);
-
-        $icons = [];
-
-        if (is_array($available_methods_npg)) {
-            foreach ($available_methods_npg as $am) {
-                if ($am['circuit'] !== $this->apmCode) {
-                    continue;
-                }
-                $imageLink = $am['imageLink'] ?? '';
-                if (!empty($imageLink) && $imageLink !== 'no image') {
-                    $icons[$am['circuit'] . '-nexipay'] = [
-                        'src' => $am['imageLink'],
-                        'alt' => __($this->label . " logo", WC_LANG_KEY)
-                    ];
-                }
-            }
-        }
-
-        return $icons;
+        return [
+            "{$this->apmCode}-nexipay" => [
+                'src' => $this->image,
+                'alt' => "{$this->title} logo",
+            ]
+        ];
     }
 
     protected function getContentIcons()
@@ -84,7 +70,7 @@ class WC_Gateway_NPG_APM_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
     {
         return [
             'enabled' => \Nexi\WC_Gateway_Nexi_Register_Available::is_npg_recurring($this->apmCode) && \Nexi\WC_Nexi_Helper::cart_contains_subscription(),
-            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', WC_LANG_KEY),
+            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay'),
         ];
     }
 

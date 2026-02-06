@@ -20,7 +20,7 @@ class WC_Gateway_NPG_Lock_Handler
     {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'nexi_' . WC_GATEWAY_NEXI_PLUGIN_VARIANT . '_order_lock';
+        $table_name = $wpdb->prefix . 'nexi_xpay_order_lock';
 
         return $table_name;
     }

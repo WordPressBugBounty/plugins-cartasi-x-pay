@@ -18,7 +18,7 @@ class WC_Nexi_Db
 
     public static function run_updates()
     {
-        $oldVersion = get_option('nexi_xpay_' . WC_GATEWAY_NEXI_PLUGIN_VARIANT . '_db_version', '1.0');
+        $oldVersion = get_option('nexi_xpay_xpay_db_version', '1.0');
 
         $newVersion = '1.1';
 
@@ -28,7 +28,7 @@ class WC_Nexi_Db
 
         \Nexi\WC_Gateway_NPG_Lock_Handler::create_lock_table();
 
-        update_option('nexi_xpay_' . WC_GATEWAY_NEXI_PLUGIN_VARIANT . '_db_version', $newVersion);
+        update_option('nexi_xpay_xpay_db_version', $newVersion);
     }
 
 }

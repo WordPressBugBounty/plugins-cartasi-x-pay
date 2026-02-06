@@ -16,7 +16,7 @@ namespace Nexi;
 class WC_Build_Token extends \WC_Payment_Token_CC
 {
 
-    private static $gateway_id = 'xpay_build';
+    private static $gateway_id = 'xpay';
 
     public static function save_token(string $brand, string $pan, string $scadenza_pan, string $num_contratto)
     {

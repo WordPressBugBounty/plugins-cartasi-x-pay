@@ -35,13 +35,27 @@ function checkApplePay($) {
             checkApplePay($);
         }, 700);
 
-        $(document).on('change', '#pagodil-installments-number', function () {
-            window.localStorage.setItem('lastSelectedInstallments', parseInt($('#pagodil-installments-number').val()));
+        $(document).on("change", "#pagodil-installments-number", function () {
+            window.localStorage.setItem(
+                "lastSelectedInstallments",
+                parseInt($("#pagodil-installments-number").val()),
+            );
 
             installmentsCalc();
 
             if ($("#installments")) {
                 $("#installments").val($("#pagodil-installments-number").val());
+            }
+        });
+
+        jQuery("form.checkout").on("change", 'input[name="payment_method"]', function () {
+            if (
+                jQuery('input[name="payment_method"]:checked').val() === "xpay_googlepay_button" ||
+                jQuery('input[name="payment_method"]:checked').val() === "xpay_applepay_button"
+            ) {
+                jQuery("#place_order").hide();
+            } else {
+                jQuery("#place_order").show();
             }
         });
     });
@@ -51,15 +65,15 @@ function installmentsCalc() {
     var admin_url = jQuery("#xpay_admin_url").val();
 
     jQuery.ajax({
-        type: 'POST',
+        type: "POST",
         data: {
-            action: 'calc_installments',
-            installments: jQuery("#pagodil-installments-number").val()
+            action: "calc_installments",
+            installments: jQuery("#pagodil-installments-number").val(),
         },
         url: admin_url + "admin-ajax.php",
         success: function (response) {
             jQuery("#pagodil-installment-info").html(response.installmentsLabel);
         },
-        complete: function () { }
+        complete: function () {},
     });
 }

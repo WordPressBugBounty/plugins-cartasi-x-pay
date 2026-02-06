@@ -31,7 +31,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         $this->init_form_fields();
         $this->init_settings();
 
-        $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+        $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
         if (function_exists("wcs_is_subscription") && array_key_exists("nexi_xpay_recurring_enabled", $currentConfig)) {
             if (($currentConfig["nexi_xpay_recurring_enabled"] == "yes") && $this->recurring) {
@@ -47,6 +47,21 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
                 );
             }
         }
+    }
+
+    public function get_xpay_cards_icon()
+    {
+        $img_list = "";
+
+        foreach (\Nexi\WC_Nexi_Helper::get_xpay_cards() as $am) {
+            $img_list .= '<div class="img-container"><img src="' . $am['pngImage'] . '" alt="' . $am['description'] . '"></div>';
+        }
+
+        if ($img_list != "") {
+            return '<div class="nexixpay-loghi-container flex"><div class="internal-container">' . $img_list . '</div></div>';
+        }
+
+        return "";
     }
 
     public function process_payment($order_id)
@@ -77,9 +92,9 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         }
 
         if (WC_Nexi_Helper::cart_contains_subscription()) {
-            echo __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
+            echo "<p>" . __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay') . "</p>";
         } else {
-            echo $this->description;
+            echo "<p>" . $this->description . "</p>";
         }
     }
 
@@ -100,9 +115,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         echo " enctype=\"application/www-x-form-urlencoded\" ";
         echo " >";
         foreach ($order_form["fields"] as $name => $value) {
-            // echo "<label>" . htmlentities($name) . "</label>";
             echo "<input type=\"hidden\" name=\"" . htmlentities($name) . "\" value=\"" . htmlentities($value) . "\" />";
-            // echo "<br>";
         }
         echo "<input type=\"submit\" />";
         echo "</form>";
@@ -257,9 +270,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
             case 'de_DE':
                 $language_id = 'GER';
 
-                $currentConfig = WC_Nexi_Helper::get_nexi_settings();
-
-                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
+                if (WC_Nexi_Helper::nexi_is_gateway_NPG()) {
                     $language_id = 'DEU';
                 }
                 break;
@@ -267,9 +278,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
             case 'ja':
                 $language_id = 'GER';
 
-                $currentConfig = WC_Nexi_Helper::get_nexi_settings();
-
-                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
+                if (WC_Nexi_Helper::nexi_is_gateway_NPG()) {
                     $language_id = 'DEU';
                 }
                 break;
@@ -279,9 +288,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
                 break;
 
             case 'el':
-                $currentConfig = WC_Nexi_Helper::get_nexi_settings();
-
-                if (WC_Nexi_Helper::nexi_array_key_exists_and_equals($currentConfig, 'nexi_gateway', GATEWAY_NPG)) {
+                if (WC_Nexi_Helper::nexi_is_gateway_NPG()) {
                     $language_id = 'ELL';
                 }
                 break;

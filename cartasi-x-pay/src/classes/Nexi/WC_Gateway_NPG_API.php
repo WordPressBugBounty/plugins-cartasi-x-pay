@@ -31,7 +31,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         return self::$instance;
     }
 
-    public $id = WC_GATEWAY_NEXI_PLUGIN_VARIANT;
+    public $id = 'xpay';
     private $nexi_npg_api_key;
     private $base_url = null;
     private $nexi_xpay_accounting;
@@ -44,20 +44,25 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         $this->init_settings();
 
         if ($this->settings["nexi_xpay_test_mode"] == "no") {
-            $this->base_url = 'https://xpay.nexigroup.com/api/phoenix-0.0/psp/api/v1/';
+            $this->base_url = 'https://xpay.nexigroup.com';
         } else {
-            $this->base_url = 'https://stg-ta.nexigroup.com/api/phoenix-0.0/psp/api/v1/';
+            $this->base_url = 'https://stg-ta.nexigroup.com';
         }
 
         $this->nexi_npg_api_key = $this->settings["nexi_npg_api_key"];
 
         $this->nexi_xpay_accounting = $this->settings["nexi_xpay_accounting"];
 
-        $this->nexi_xpay_oneclick_enabled = ($this->settings["nexi_xpay_oneclick_enabled"] == "yes");
+        $this->nexi_xpay_oneclick_enabled = (($this->settings["nexi_xpay_oneclick_enabled"] ?? "no") == "yes");
 
-        $this->nexi_xpay_3ds20_enabled = ($this->settings['nexi_xpay_3ds20_enabled'] == 'yes');
+        $this->nexi_xpay_3ds20_enabled = (($this->settings['nexi_xpay_3ds20_enabled'] ?? "no") == 'yes');
 
-        $this->nexi_xpay_recurring_enabled = ($this->settings["nexi_xpay_recurring_enabled"] == "yes");
+        $this->nexi_xpay_recurring_enabled = (($this->settings["nexi_xpay_recurring_enabled"] ?? "no") == "yes");
+    }
+
+    public function getUrlNpgBuildJS()
+    {
+        return "{$this->base_url}/monetaweb/resources/hfsdk.js";
     }
 
     public function get_profile_info()
@@ -85,7 +90,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             self::enable_apms();
 
             return $payment_methods_data;
-        } catch (Exception $exc) {
+        } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
             throw new \Exception(__('Error while checking credentials.', 'woocommerce-gateway-nexi-xpay'));
@@ -94,27 +99,33 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
     public static function enable_apms()
     {
-        $jsonAvailableMethodsNpg = \WC_Admin_Settings::get_option('xpay_npg_available_methods');
+        \Nexi\WC_Nexi_Helper::enable_payment_method(WC_SETTINGS_KEY);
 
-        $availableMethodsNpg = json_decode($jsonAvailableMethodsNpg, true);
+        foreach (\Nexi\WC_Nexi_Helper::get_npg_available_methods() as $method) {
+            if ($method['paymentMethodType'] === 'APM') {
+                \Nexi\WC_Nexi_Helper::enable_payment_method("woocommerce_xpay_npg_" . $method['circuit'] . "_settings");
 
-        if ($jsonAvailableMethodsNpg != "" && is_array($availableMethodsNpg)) {
-            $time = time();
-
-            foreach ($availableMethodsNpg as $method) {
-                $option_name = 'xpay_npg_apm_seen_' . $method['circuit'];
-
-                $config_name = "woocommerce_xpay_npg_" . $method['circuit'] . "_settings";
-
-                $config = get_option($config_name, array());
-
-                $config['enabled'] = 'yes';
-
-                update_option($config_name, $config);
-
-                update_option($option_name, $time);
+                if (in_array(strtolower($method['circuit']), ['googlepay', 'applepay'])) {
+                    \Nexi\WC_Nexi_Helper::enable_payment_method("woocommerce_xpay_npg_" . $method['circuit'] . "_button_settings");
+                }
             }
         }
+    }
+
+    private function get_result_url($nexiOrderId)
+    {
+        return add_query_arg(
+            ['nexi_order_id' => $nexiOrderId],
+            wc_get_endpoint_url('woocommerce-gateway-nexi-npg-redirect', '', home_url('/'))
+        );
+    }
+
+    private function get_cancel_url($nexiOrderId)
+    {
+        return add_query_arg(
+            ['nexi_order_id' => $nexiOrderId],
+            wc_get_endpoint_url('woocommerce-gateway-nexi-npg-cancel', '', home_url('/'))
+        );
     }
 
     public function new_payment_link($order, $recurringPayment, $selectedToken, $saveCard, $selectedC, $installmentsNumber)
@@ -129,10 +140,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $payload = array(
                 "order" => array(
                     "orderId" => $orderId,
+                    "invoiceId" => substr("Order-" . $order->get_order_number(), 0, 30),
                     "amount" => $amount,
                     "currency" => $order->get_currency(),
                     "description" => "WC Order " . $order->get_id(),
-                    "customField" => "Woocommerce " . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . " - nexi" . WC_GATEWAY_NEXI_PLUGIN_VARIANT . " " . WC_GATEWAY_XPAY_VERSION,
+                    "customField" => "Woocommerce " . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . " - nexixpay " . WC_GATEWAY_XPAY_VERSION,
                 ),
                 "paymentSession" => array(
                     "actionType" => "PAY",
@@ -142,8 +154,8 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                     ),
                     "exemptions" => "NO_PREFERENCE",
                     "language" => WC_Gateway_XPay_Generic_Method::get_language_id(),
-                    "resultUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/redirect/npg/" . $order->get_id()),
-                    "cancelUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/cancel/npg/" . $order->get_id()),
+                    "resultUrl" => $this->get_result_url($order->get_id()),
+                    "cancelUrl" => $this->get_cancel_url($order->get_id()),
                     "notificationUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/s2s/npg/" . $order->get_id()),
                     "paymentService" => $selectedC
                 )
@@ -159,7 +171,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                     "installmentQty" => $installmentsNumber,
                 );
 
-                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "installmentsNumber", $installmentsNumber);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_installmentsNumber", $installmentsNumber);
             }
 
             if ($recurringPayment) {
@@ -170,7 +182,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
                 $payload = $this->get_recurring_params($payload, $customerId);
 
-                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
             } else if (is_user_logged_in() && $this->nexi_xpay_oneclick_enabled) {
                 $payload = $this->get_one_click_params($payload, $customerId, $selectedToken, $saveCard);
             }
@@ -185,11 +197,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 throw new \Exception('Error while initializing the payment - ' . json_encode($response));
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "securityToken", $response['response']['securityToken']);
-            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "orderId", $orderId);
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", $response['response']['securityToken']);
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_orderId", $orderId);
 
             if ($payload['paymentSession']['recurrence']['action'] == NPG_CONTRACT_CREATION) {
-                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_" . "contractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_contractId", $payload['paymentSession']['recurrence']['contractId']);
             }
 
             return $response['response']["hostedPage"];
@@ -326,7 +338,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
     public function get_order_info($order_id)
     {
         try {
-            $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "orderId", true);
+            $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_orderId", true);
 
             if (!$npgOrderId) {
                 throw new \Exception(__('NPG orderId not found for order: ', 'woocommerce-gateway-nexi-xpay') . $order_id);
@@ -500,6 +512,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         $payload = [
             "order" => [
                 "orderId" => $orderId,
+                "invoiceId" => substr("Order-" . $order->get_order_number(), 0, 30),
                 "amount" => $amount,
                 "currency" => $order->get_currency(),
                 "customField" => "WC Order " . $order->get_id(),
@@ -562,25 +575,30 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         return false;
     }
 
-    public function build_payment($total, $wc, $recurringPayment, $orderId = null)
+    public function build_payment($total, $wc, $recurringPayment)
     {
         try {
             $amount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit($total, get_woocommerce_currency());
 
+            $orderId = $wc->session->get('npg_build_order_id');
+
             if ($orderId === null) {
                 $orderId = $this->generate_npg_order_id(18);
+
+                $wc->session->set('npg_build_order_id', $orderId);
             }
 
             $customerId = $wc->customer->get_id();
 
             $payload = array(
-                "merchantUrl" => get_rest_url(null, ""),
+                "merchantUrl" => get_site_url(),
                 "order" => array(
                     "orderId" => $orderId,
+                    "invoiceId" => substr("Order-" . $orderId, 0, 30),
                     "amount" => $amount,
                     "currency" => get_woocommerce_currency(),
                     "description" => "WC Order ",
-                    "customField" => "Woocommerce " . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . " - nexi" . WC_GATEWAY_NEXI_PLUGIN_VARIANT . " " . WC_GATEWAY_XPAY_VERSION,
+                    "customField" => "Woocommerce " . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . " - nexixpay " . WC_GATEWAY_XPAY_VERSION,
                     "customerId" => $customerId,
                 ),
                 "paymentSession" => array(
@@ -590,12 +608,13 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                         "action" => NPG_NO_RECURRING
                     ),
                     "exemptions" => "NO_PREFERENCE",
-                    "language" => "ita",
-                    "resultUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/redirect/npg/" . $orderId),
-                    "cancelUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/cancel/npg/" . $orderId),
+                    "language" => WC_Gateway_XPay_Generic_Method::get_language_id(),
+                    "resultUrl" => $this->get_result_url($orderId),
+                    "cancelUrl" => $this->get_cancel_url($orderId),
                     "notificationUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/s2s/npg/" . $orderId),
                     "paymentService" => 'CARDS'
-                )
+                ),
+                "version" => 3,
             );
 
             if ($recurringPayment) {
@@ -623,16 +642,16 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 throw new \Exception('Error while initializing the payment - ' . json_encode($response));
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "is_build", true);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "orderId", $orderId);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "securityToken", $response['response']['securityToken']);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "sessionId", $response['response']['sessionId']);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_is_build", true);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_orderId", $orderId);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_securityToken", $response['response']['securityToken']);
+            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_sessionId", $response['response']['sessionId']);
 
             if ($recurringPayment) {
-                \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_" . "recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
             }
 
-            return array_merge(['orderId' => $orderId], $response['response']);
+            return $response['response'];
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
@@ -640,7 +659,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         }
     }
 
-    public function build_payment_finalize($sessionId)
+    public function build_payment_finalize($wc, $sessionId)
     {
         try {
             $payload = [
@@ -648,6 +667,8 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             ];
 
             $response = $this->exec_post("build/finalize_payment", $payload);
+
+            $wc->session->__unset('npg_build_order_id');
 
             if ($response['status_code'] !== 200) {
                 throw new \Exception('Error while finalizing the payment - ' . json_encode($response));
@@ -658,6 +679,85 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
             throw new \Exception(__('Unable to finalize the payment.', 'woocommerce-gateway-nexi-xpay'));
+        }
+    }
+
+    public function build_state($sessionId)
+    {
+        try {
+            $payload = [
+                'sessionId' => $sessionId
+            ];
+
+            $response = $this->exec_get("build/state", $payload);
+
+            if ($response['status_code'] !== 200) {
+                return null;
+            }
+
+            return $response['response'];
+        } catch (\Exception $exc) {
+            Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
+
+            return null;
+        }
+    }
+
+    public function google_pay_payment($order, $googlePayJson)
+    {
+        try {
+            $amount = \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit($order->get_total(), $order->get_currency());
+
+            $orderId = $this->generate_npg_order_id(18, $order->get_order_number());
+
+            $customerId = $order->get_customer_id();
+
+            $payload = array(
+                "order" => array(
+                    "orderId" => $orderId,
+                    "invoiceId" => substr("Order-" . $order->get_order_number(), 0, 30),
+                    "amount" => $amount,
+                    "currency" => $order->get_currency(),
+                    "description" => "WC Order " . $order->get_id(),
+                    "customField" => "Woocommerce " . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . " - nexixpay " . WC_GATEWAY_XPAY_VERSION,
+                ),
+                "paymentSession" => array(
+                    "actionType" => "PAY",
+                    "amount" => $amount,
+                    "recurrence" => array(
+                        "action" => NPG_NO_RECURRING
+                    ),
+                    "exemptions" => "NO_PREFERENCE",
+                    "language" => WC_Gateway_XPay_Generic_Method::get_language_id(),
+                    "resultUrl" => $this->get_result_url($order->get_id()),
+                    "cancelUrl" => $this->get_cancel_url($order->get_id()),
+                    "notificationUrl" => get_rest_url(null, "woocommerce-gateway-nexi-xpay/s2s/npg/" . $order->get_id()),
+                ),
+                "googlePayPaymentData" => json_decode($googlePayJson, true),
+            );
+
+            if (is_user_logged_in() && $customerId) {
+                $payload["order"]["customerId"] = $customerId;
+            }
+
+            if ($this->nexi_xpay_3ds20_enabled) {
+                $payload['order']['customerInfo'] = WC_NPG_3DS20_Data_Provider::calculate_params($order);
+            }
+
+            $response = $this->exec_post("orders/googlepay", $payload);
+
+            if ($response['status_code'] !== 200) {
+                throw new \Exception('Error while initializing the payment - ' . json_encode($response));
+            }
+
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", "noCheck");
+            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_orderId", $orderId);
+
+            return $response['response'];
+        } catch (\Exception $exc) {
+            Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
+
+            throw new \Exception(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay'));
         }
     }
 
@@ -704,10 +804,10 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             throw new \Exception('Curl connection error');
         }
 
-        $requestUrl = $this->base_url . $url;
+        $requestUrl = $this->base_url . '/api/phoenix-0.0/psp/api/v1/' . $url;
 
-        if ($method === "GET" && count($payload) > 0) {
-            $requestUrl = sprintf("%s?%s", $requestUrl, http_build_query($payload));
+        if ($method === "GET" && \count($payload) > 0) {
+            $requestUrl = \sprintf("%s?%s", $requestUrl, http_build_query($payload));
         } else if ($method === "POST") {
             curl_setopt($connection, CURLOPT_POST, 1);
 
@@ -716,7 +816,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
         $httpHeader = [
             'x-api-key: ' . $this->nexi_npg_api_key,
-            'x-plugin-name: Woocommerce ' . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . ' - nexi' . WC_GATEWAY_NEXI_PLUGIN_VARIANT . ' ' . WC_GATEWAY_XPAY_VERSION,
+            'x-plugin-name: Woocommerce ' . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . ' - nexixpay ' . WC_GATEWAY_XPAY_VERSION,
             'Correlation-Id: ' . self::generate_uuid(),
             'Content-Type: application/json'
         ];
@@ -729,11 +829,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         ];
 
         Log::actionInfo(__FUNCTION__ . ' - Request : ' . json_encode([
-                'method' => $method,
-                'requestUrl' => $requestUrl,
-                'httpHeader' => array_splice($httpHeader, 1),
-                'payload' => $payload,
-                'extraHeaders' => $extraHeaders
+            'method' => $method,
+            'requestUrl' => $requestUrl,
+            'httpHeader' => array_splice($httpHeader, 1),
+            'payload' => $payload,
+            'extraHeaders' => $extraHeaders
         ]));
 
         curl_setopt_array($connection, $options);
@@ -776,6 +876,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 throw new \Exception('JSON error');
             }
         }
+
+        Log::actionInfo(__FUNCTION__ . ' - Response : ' . json_encode([
+            'status_code' => $curlInfo['http_code'],
+            'response' => $json
+        ]));
 
         return [
             'status_code' => $curlInfo['http_code'],

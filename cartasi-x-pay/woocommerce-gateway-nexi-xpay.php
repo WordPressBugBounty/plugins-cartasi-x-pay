@@ -1,12 +1,10 @@
 <?php
 
-use Nexi\Log;
-
 /**
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 7.6.2
+ * Version: 8.2.0
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
@@ -28,15 +26,12 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "7.6.2");
+        define("WC_GATEWAY_XPAY_VERSION", "8.2.0");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
 
-        define('WC_GATEWAY_NEXI_PLUGIN_VARIANT', 'xpay');
-        define('WC_GATEWAY_XPAY_PLUGIN_COLL', false);
-
-        define('WC_SETTINGS_KEY', 'woocommerce_' . WC_GATEWAY_NEXI_PLUGIN_VARIANT . '_settings');
+        define('WC_SETTINGS_KEY', 'woocommerce_xpay_settings');
 
         define('NPG_OR_AUTHORIZED', 'AUTHORIZED');
         define('NPG_OR_EXECUTED', 'EXECUTED');
@@ -55,8 +50,6 @@ function nexi_xpay_plugins_loaded()
 
         define('WC_GATEWAY_XPAY_PLUGIN_BASE_PATH', plugin_dir_path(__FILE__));
         define('WC_GATEWAY_XPAY_PLUGIN_URL', untrailingslashit(plugins_url(basename(plugin_dir_path(__FILE__)), basename(__FILE__))));
-
-        define('WC_LANG_KEY', 'woocommerce-gateway-nexi-xpay');
 
         define('NPG_PAYMENT_SUCCESSFUL', [
             NPG_OR_AUTHORIZED,
@@ -92,17 +85,31 @@ function nexi_xpay_plugins_loaded()
 
         add_filter('woocommerce_payment_gateways', "\Nexi\WC_Gateway_Nexi_Register_Available::register");
 
+        add_filter('woocommerce_available_payment_gateways', "\Nexi\WC_Gateway_Nexi_Register_Available::filter_available_payment_gateways");
+
         // Register endpoint in the rest api for s2s notification API, for post payment redirect url and for cancel url
         add_action('rest_api_init', '\Nexi\WC_Gateway_XPay_Process_Completion::rest_api_init');
         add_action('rest_api_init', '\Nexi\WC_Gateway_NPG_Process_Completion::rest_api_init');
 
         \Nexi\WC_Pagodil_Widget::register();
 
+        add_action('wp_ajax_validate_checkout_form', '\Nexi\WC_XPay_Checkout::validate_checkout_form');
+        add_action('wp_ajax_nopriv_validate_checkout_form', '\Nexi\WC_XPay_Checkout::validate_checkout_form');
+
         add_action('wp_ajax_get_build_fields', '\Nexi\WC_Gateway_NPG_Cards_Build::get_build_fields');
         add_action('wp_ajax_nopriv_get_build_fields', '\Nexi\WC_Gateway_NPG_Cards_Build::get_build_fields');
 
         add_action('wp_ajax_build_payment_payload', '\Nexi\WC_Gateway_XPay_Cards_Build::build_payment_payload');
         add_action('wp_ajax_nopriv_build_payment_payload', '\Nexi\WC_Gateway_XPay_Cards_Build::build_payment_payload');
+
+        add_action('wp_ajax_google_pay_configuration', '\Nexi\WC_Gateway_Google_Pay::google_pay_configuration');
+        add_action('wp_ajax_nopriv_google_pay_configuration', '\Nexi\WC_Gateway_Google_Pay::google_pay_configuration');
+
+        add_action('wp_ajax_apple_pay_configuration', '\Nexi\WC_Gateway_Apple_Pay::apple_pay_configuration');
+        add_action('wp_ajax_nopriv_apple_pay_configuration', '\Nexi\WC_Gateway_Apple_Pay::apple_pay_configuration');
+
+        add_action('wp_ajax_apple_pay_validate_merchant', '\Nexi\WC_Gateway_Apple_Pay::apple_pay_validate_merchant');
+        add_action('wp_ajax_nopriv_apple_pay_validate_merchant', '\Nexi\WC_Gateway_Apple_Pay::apple_pay_validate_merchant');
 
         define('WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE', __FILE__);
 
@@ -111,16 +118,50 @@ function nexi_xpay_plugins_loaded()
             wp_enqueue_script('xpay-checkout', plugins_url('assets/js/xpay.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
             wp_enqueue_style('xpay-checkout', plugins_url('assets/css/xpay.css', __FILE__), [], WC_GATEWAY_XPAY_VERSION);
 
-            if (!wooommerce_has_block_checkout() && WC_GATEWAY_NEXI_PLUGIN_VARIANT == 'xpay_build') {
-                if (\Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
-                    wp_enqueue_script('xpay-build-npg-checkout', plugins_url('assets/js/xpay-build-npg.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
-                } else {
-                    wp_enqueue_script('xpay-build-checkout', plugins_url('assets/js/xpay-build.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
+            $isGoogleButtonEnabled = \Nexi\WC_Nexi_Helper::is_google_button_enabled();
+
+            if ($isGoogleButtonEnabled) {
+                wp_enqueue_script('google-pay-js', 'https://pay.google.com/gp/p/js/pay.js');
+            }
+
+            $isAppleButtonEnabled = \Nexi\WC_Nexi_Helper::is_apple_button_enabled();
+
+            if ($isAppleButtonEnabled) {
+                wp_enqueue_script('apple-pay-js', 'https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js');
+            }
+
+            if (!wooommerce_has_block_checkout()) {
+                $isBuild = \Nexi\WC_Nexi_Helper::nexi_is_build();
+                $isNpg = \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG();
+                $isXPay = \Nexi\WC_Nexi_Helper::nexi_is_gateway_XPay();
+
+                if ($isGoogleButtonEnabled) {
+                    if ($isNpg) {
+                        wp_enqueue_script('xpay-npg-google-pay-js', plugins_url('assets/js/xpay-googlepay-npg.js', __FILE__), [], WC_GATEWAY_XPAY_VERSION);
+                    } else {
+                        wp_enqueue_script('xpay-google-pay-js', plugins_url('assets/js/xpay-googlepay.js', __FILE__), [], WC_GATEWAY_XPAY_VERSION);
+                    }
+                }
+
+                if ($isAppleButtonEnabled) {
+                    if ($isXPay) {
+                        wp_enqueue_script('xpay-apple-pay-js', plugins_url('assets/js/xpay-applepay.js', __FILE__), [], WC_GATEWAY_XPAY_VERSION);
+                    }
+                }
+
+                if ($isBuild) {
+                    if ($isNpg) {
+                        wp_enqueue_script('xpay-build-npg-checkout', plugins_url('assets/js/xpay-build-npg.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
+                    } else {
+                        wp_enqueue_script('xpay-build-checkout', plugins_url('assets/js/xpay-build.js', __FILE__), array('jquery'), WC_GATEWAY_XPAY_VERSION);
+                    }
                 }
             }
         }
 
         add_action('admin_init', '\Nexi\WC_Admin_Page::init');
+
+        add_action('admin_init', '\Nexi\WC_Admin_Redirect::init');
 
         add_action('wp_enqueue_scripts', 'xpay_gw_wp_enqueue_scripts');
 
@@ -146,7 +187,7 @@ function nexi_xpay_plugins_loaded()
         function wp_nexi_polling_executor()
         {
             $args = array(
-                'payment_method' => WC_GATEWAY_NEXI_PLUGIN_VARIANT,
+                'payment_method' => 'xpay',
                 'status' => ['wc-pending'],
                 'orderby' => 'date',
                 'order' => 'ASC',
@@ -167,7 +208,7 @@ function nexi_xpay_plugins_loaded()
                 switch ($authorizationRecord['operationResult']) {
                     case NPG_OR_AUTHORIZED:
                     case NPG_OR_EXECUTED:
-                        $completed = $orderObj->payment_complete(\Nexi\OrderHelper::getOrderMeta($order->get_id(), "_npg_" . "orderId", true));
+                        $completed = $orderObj->payment_complete(\Nexi\OrderHelper::getOrderMeta($order->get_id(), "_npg_orderId", true));
 
                         if ($completed) {
                             \Nexi\WC_Save_Order_Meta::saveSuccessNpg(
@@ -244,12 +285,12 @@ function nexi_xpay_plugins_loaded()
         add_filter('cron_schedules', 'my_add_nexi_schedules_for_polling');
 
         //chcks if the task is not already scheduled
-        if (!wp_next_scheduled('wp_nexi_polling') && WC_GATEWAY_NEXI_PLUGIN_VARIANT == 'xpay' && \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
+        if (!wp_next_scheduled('wp_nexi_polling') && !\Nexi\WC_Nexi_Helper::nexi_is_build() && \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
             //schedules the task by giving the first execution time, the interval and the hook to call
             wp_schedule_event(time(), 'nexi_polling_schedule', 'wp_nexi_polling');
         }
 
-        if (!wp_next_scheduled('wp_nexi_update_npg_payment_methods') && WC_GATEWAY_NEXI_PLUGIN_VARIANT == 'xpay' && \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
+        if (!wp_next_scheduled('wp_nexi_update_npg_payment_methods') && !\Nexi\WC_Nexi_Helper::nexi_is_build() && \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
             //schedules the task by giving the first execution time, the interval and the hook to call
             wp_schedule_event(time(), 'nexi_polling_schedule_2h', 'wp_nexi_update_npg_payment_methods');
         }
@@ -285,7 +326,7 @@ function nexi_xpay_plugins_loaded()
         function xpay_plugin_action_links($links)
         {
             $plugin_links = array(
-                '<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=' . WC_GATEWAY_NEXI_PLUGIN_VARIANT)) . '">' . __('Settings') . '</a>',
+                '<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=xpay')) . '">' . __('Settings') . '</a>',
             );
 
             return array_merge($plugin_links, $links);
@@ -293,20 +334,48 @@ function nexi_xpay_plugins_loaded()
 
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'xpay_plugin_action_links');
 
-        function nexi_xpay_plugin_init()
-        {
+        add_action('init', function () {
             \Nexi\WC_Pending_Status::addNexiPendingPaymentOrderStatus();
 
             \Nexi\WC_Nexi_Db::run_updates();
-        }
 
-        add_action('init', 'nexi_xpay_plugin_init');
+            add_rewrite_endpoint('woocommerce-gateway-nexi-xpay-redirect', EP_ROOT | EP_PAGES);
+            add_rewrite_endpoint('woocommerce-gateway-nexi-xpay-cancel', EP_ROOT | EP_PAGES);
+            add_rewrite_endpoint('woocommerce-gateway-nexi-npg-redirect', EP_ROOT | EP_PAGES);
+            add_rewrite_endpoint('woocommerce-gateway-nexi-npg-cancel', EP_ROOT | EP_PAGES);
+            add_rewrite_endpoint('woocommerce-gateway-nexi-npg-googlepay-redirect', EP_ROOT | EP_PAGES);
+
+            $option_value = get_option("nexi_xpay_redirect_flush_rewrite_rule", false);
+
+            if ($option_value === false) {
+                flush_rewrite_rules();
+
+                update_option("nexi_xpay_redirect_flush_rewrite_rule", "1");
+            }
+        });
+
+        add_filter('query_vars', function ($query_vars) {
+            $query_vars[] = 'woocommerce-gateway-nexi-xpay-redirect';
+            $query_vars[] = 'woocommerce-gateway-nexi-xpay-cancel';
+            $query_vars[] = 'woocommerce-gateway-nexi-npg-redirect';
+            $query_vars[] = 'woocommerce-gateway-nexi-npg-cancel';
+            $query_vars[] = 'woocommerce-gateway-nexi-npg-googlepay-redirect';
+            $query_vars[] = 'nexi_order_id';
+
+            return $query_vars;
+        });
+
+        add_action('template_redirect', function () {
+            \Nexi\WC_Gateway_XPay_Process_Completion::action_template_redirect();
+
+            \Nexi\WC_Gateway_NPG_Process_Completion::action_template_redirect();
+        });
 
         add_filter('wc_order_statuses', '\Nexi\WC_Pending_Status::wcOrderStatusesFilter');
 
         add_filter('woocommerce_valid_order_statuses_for_payment_complete', '\Nexi\WC_Pending_Status::validOrderStatusesForPaymentCompleteFilter');
 
-        add_action('woocommerce_payment_token_deleted', '\Nexi\WC_Gateway_NPG_Cards::woocommerce_payment_token_deleted', 10, 2);
+        add_action('woocommerce_payment_token_deleted', '\Nexi\WC_Gateway_NPG_Cards_Redirect::woocommerce_payment_token_deleted', 10, 2);
 
         function nexixpay_admin_warning()
         {
@@ -350,7 +419,6 @@ function woocommerce_gateway_nexi_xpay_woocommerce_block_support()
         );
     }
 }
-
 
 function wooommerce_has_block_checkout()
 {

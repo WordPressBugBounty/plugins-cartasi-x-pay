@@ -13,63 +13,42 @@
 
 namespace Nexi\BlockSupport;
 
-class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
+class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_XPay_Blocks_Support
 {
+
     private $apmCode;
-    private $label;
+    private $title;
+    private $description;
+    private $image;
 
-
-    public function __construct(
-        $apmCode,
-        $apmLabel,
-        $isBuild = false
-    ) {
-        parent::__construct($apmCode, $isBuild);
+    public function __construct($apmCode, $title, $description, $image)
+    {
+        parent::__construct($apmCode);
 
         $this->apmCode = $apmCode;
-        $this->label = $apmLabel;
+        $this->title = $title;
+        $this->description = $description;
+        $this->image = $image;
     }
 
     protected function getLabel()
     {
-        if ($this->apmCode === 'PAGODIL') {
-            return __("Pay in installments without interest", WC_LANG_KEY);
-        }
-
-        return $this->label;
+        return $this->title;
     }
 
     protected function getContent()
     {
-        if ($this->apmCode === 'PAGODIL') {
-            return __('With PagoDIL by Cofidis, the merchant allows you to defer the payment in convenient installments without costs or interest.', WC_LANG_KEY);
-        }
-
-        return $this->label . __(' via Nexi XPay', WC_LANG_KEY);
+        return $this->description;
     }
 
     protected function getIcons()
     {
-        $available_methods_xpay = json_decode(\WC_Admin_Settings::get_option('xpay_available_methods'), true);
-
-        $icons = [];
-
-        if (is_array($available_methods_xpay)) {
-            foreach ($available_methods_xpay as $am) {
-                if ($am['code'] !== $this->apmCode) {
-                    continue;
-                }
-                $imageLink = $am['image'] ?? '';
-                if (!empty($imageLink)) {
-                    $icons[$am['code'] . '-nexipay'] = [
-                        'src' => $imageLink,
-                        'alt' => __($am['description'] . " logo", WC_LANG_KEY)
-                    ];
-                }
-            }
-        }
-
-        return $icons;
+        return [
+            "{$this->apmCode}-nexipay" => [
+                'src' => $this->image,
+                'alt' => "{$this->title} logo",
+            ]
+        ];
     }
 
     protected function getContentIcons()
@@ -94,7 +73,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
 
             $enabled = false;
 
-            if (!empty($installmentsNumber)) {
+            if (!empty($installmentsNumber) && WC() !== null && WC()->cart !== null) {
                 $firstInstallmentArray[] = $installmentsNumber[array_key_first($installmentsNumber)];
                 $enabled = true;
                 $firstInstallmentAmount = \Nexi\WC_Pagodil_Widget::calcInstallmentsAmount(\Nexi\WC_Nexi_Helper::mul_bcmul(WC()->cart->total, 100, 1), end($firstInstallmentArray));
@@ -103,10 +82,10 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
             return [
                 'enabled' => $enabled,
                 'options' => $installmentsNumberValues,
-                'title_text' => __('Choose the number of installments', WC_LANG_KEY),
+                'title_text' => __('Choose the number of installments', 'woocommerce-gateway-nexi-xpay'),
                 'default_option' => $firstInstallmentArray[0] ?? '',
                 'is_pago_dil' => true,
-                'pago_dil_installment_amount_label' => sprintf(__('Amount: %s installments of %s€', WC_LANG_KEY), end($firstInstallmentArray), $firstInstallmentAmount),
+                'pago_dil_installment_amount_label' => sprintf(__('Amount: %s installments of %s€', 'woocommerce-gateway-nexi-xpay'), end($firstInstallmentArray), $firstInstallmentAmount),
                 'pago_dil_admin_url' => admin_url(),
             ];
         }
@@ -152,7 +131,7 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_Xpay_Blocks_Support
     {
         return [
             'enabled' => \Nexi\WC_Gateway_Nexi_Register_Available::is_xpay_recurring($this->apmCode) && \Nexi\WC_Nexi_Helper::cart_contains_subscription(),
-            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', WC_LANG_KEY),
+            'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay'),
         ];
     }
 

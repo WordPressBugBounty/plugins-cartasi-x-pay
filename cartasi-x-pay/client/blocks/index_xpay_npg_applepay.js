@@ -1,7 +1,7 @@
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 
-import { getPaymentMethodOptions } from './commons';
+import { getPaymentMethodOptions } from "./commons";
 
-const PAYMENT_METHOD_NAME = 'xpay_npg_applepay';
+const PAYMENT_METHOD_NAME = "xpay_npg_applepay";
 
-registerPaymentMethod( getPaymentMethodOptions( PAYMENT_METHOD_NAME, () => window.ApplePaySession ) );
+registerPaymentMethod(getPaymentMethodOptions(PAYMENT_METHOD_NAME, () => window.ApplePaySession));

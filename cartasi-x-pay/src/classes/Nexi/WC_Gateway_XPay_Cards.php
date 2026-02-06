@@ -23,27 +23,11 @@ class WC_Gateway_XPay_Cards extends WC_Gateway_XPay_Generic_Method
         $this->supports = array_merge($this->supports, ['tokenization']);
 
         $this->method_title = __('Payment cards', 'woocommerce-gateway-nexi-xpay');
-        $this->method_description = __('Payment gateway.', 'woocommerce-gateway-nexi-xpay');
+        $this->method_description = __('Pay securely by credit, debit and prepaid card. Powered by Nexi.', 'woocommerce-gateway-nexi-xpay');
         $this->title = $this->method_title;
+        $this->description = $this->method_description;
 
-        $avaiable_methods_xpay = json_decode(\WC_Admin_Settings::get_option('xpay_available_methods'), true);
-        $img_list = "";
-
-        if (is_array($avaiable_methods_xpay)) {
-            foreach ($avaiable_methods_xpay as $am) {
-                if ($am['type'] != "CC") {
-                    continue;
-                }
-
-                $img_list .= '  <div class="img-container"><img src="' . $am['image'] . '"></div>';
-            }
-        }
-
-        if ($img_list != "") {
-            $img_list = '<div class="nexixpay-loghi-container">' . $img_list . '</div>';
-        }
-
-        $this->description = $img_list . __("Pay securely by credit, debit and prepaid card. Powered by Nexi.", 'woocommerce-gateway-nexi-xpay');
+        $this->selectedCard = "CC";
 
         if (\WC_Admin_Settings::get_option('xpay_logo_small') == "") {
             $this->icon = WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_DEFAULT_LOGO_URL;
@@ -59,18 +43,11 @@ class WC_Gateway_XPay_Cards extends WC_Gateway_XPay_Generic_Method
         add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
 
         add_filter('woocommerce_saved_payment_methods_list', [$this, 'filter_saved_payment_methods_list'], 10, 2);
-
-        $this->selectedCard = "CC";
     }
 
-    public function filter_saved_payment_methods_list($list, $customer_id)
+    public function get_icon()
     {
-        return [];
-    }
-
-    function init_form_fields()
-    {
-        parent::init_form_fields();
+        return '<div class="nexixpay-loghi-container"><div class="internal-container"><div class="img-container"><img class="nexi-card-image" src="' . WC_GATEWAY_XPAY_PLUGIN_URL . '/assets/images/card.png" alt="Payment cards" /></div></div></div>';
     }
 
 }

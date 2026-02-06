@@ -35,20 +35,21 @@ class WC_Admin_Page
 
     public static function migrate_data()
     {
-        $CURRENT_VERSION = "2";
+        $CURRENT_VERSION = "3";
 
         $nexi_xpay_data_version = get_option("nexi_xpay_data_version");
 
         switch ($nexi_xpay_data_version) {
             case "":
                 self::migrate_to_v1();
+
                 return true;
-                break;
 
             case "1":
-                self::migrate_to_v2();
+            case "2":
+                self::migrate_to_v3();
+
                 return true;
-                break;
 
             default:
                 if ($nexi_xpay_data_version == $CURRENT_VERSION || intval($nexi_xpay_data_version) > intval($CURRENT_VERSION)) {
@@ -56,7 +57,6 @@ class WC_Admin_Page
                 }
 
                 return false;
-                break;
         }
     }
 
@@ -64,7 +64,7 @@ class WC_Admin_Page
     {
         Log::actionInfo("updating settings to v1");
 
-        $currentConfig = WC_Nexi_Helper::get_nexi_settings();
+        $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
         $currentConfig["nexi_xpay_alias"] = $currentConfig["cartasi_alias"];
         $currentConfig["nexi_xpay_mac"] = $currentConfig["cartasi_mac"];
@@ -83,29 +83,34 @@ class WC_Admin_Page
         $currentConfig["nexi_xpay_3ds20_enabled"] = $currentConfig['enabled3ds'];
 
         update_option(WC_SETTINGS_KEY, $currentConfig);
+
         Log::actionInfo("updated settings to v1");
 
         update_option('nexi_xpay_data_version', "1");
     }
 
-    private static function migrate_to_v2()
+    private static function migrate_to_v3()
     {
-        Log::actionInfo("updating settings to v2");
+        Log::actionInfo("updating settings to v3");
 
-        $currentConfig = WC_Nexi_Helper::get_nexi_settings();
-
-        if (array_key_exists('nexi_gateway', $currentConfig) && $currentConfig['nexi_gateway'] == GATEWAY_NPG) {
+        if (\Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
             WC_Gateway_NPG_API::enable_apms();
+        } else {
+            WC_Gateway_XPay_API::enable_apms();
         }
 
-        Log::actionInfo("updated settings to v2");
+        Log::actionInfo("updated settings to v3");
 
-        update_option('nexi_xpay_data_version', "2");
+        update_option('nexi_xpay_data_version', "3");
     }
 
     public function add_meta_box_details_payment_nexixpay($post_type, $post)
     {
-        $order_id = $post->ID;
+        if ($post instanceof \WC_Order) {
+            $order_id = $post->get_id();
+        } else {
+            $order_id = $post->ID;
+        }
 
         $order = wc_get_order($order_id);
 
@@ -113,16 +118,16 @@ class WC_Admin_Page
             return;
         }
 
-        $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "orderId", true);
+        $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_orderId", true);
 
         if ($npgOrderId != "") {
-            if ($order->get_payment_method() === 'xpay' || substr($order->get_payment_method(), 0, 9) == 'xpay_npg_' || substr($order->get_payment_method(), 0, 10) == 'xpay_build') {
+            if ($order->get_payment_method() === 'xpay' || substr($order->get_payment_method(), 0, 9) == 'xpay_npg_') {
                 foreach (array('woocommerce_page_wc-orders', 'shop_order') as $type) {
                     add_meta_box('xpay-subscription-box', __('Nexi payment details', 'woocommerce-gateway-nexi-xpay'), array($this, 'details_payment_npg'), $type, 'normal', 'high');
                 }
             }
         } else {
-            $transactionCodTrans = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'codTrans', true);
+            $transactionCodTrans = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_codTrans', true);
             if ($transactionCodTrans == "") {
                 return;
             }
@@ -163,7 +168,11 @@ class WC_Admin_Page
 
     public function details_payment_xpay($post)
     {
-        $order_id = $post->ID;
+        if ($post instanceof \WC_Order) {
+            $order_id = $post->get_id();
+        } else {
+            $order_id = $post->ID;
+        }
 
         $transactionCodTrans = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
 
@@ -255,7 +264,11 @@ class WC_Admin_Page
 
     public function details_payment_npg($post)
     {
-        $order_id = $post->ID;
+        if ($post instanceof \WC_Order) {
+            $order_id = $post->get_id();
+        } else {
+            $order_id = $post->ID;
+        }
 
         try {
             $order = wc_get_order($order_id);
@@ -284,7 +297,7 @@ class WC_Admin_Page
 
             $accountUrl = get_rest_url(null, "woocommerce-gateway-nexi-xpay/process_account/npg/" . $order->get_id());
 
-            $installmentsNumber = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_" . "installmentsNumber", true);
+            $installmentsNumber = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_installmentsNumber", true);
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 

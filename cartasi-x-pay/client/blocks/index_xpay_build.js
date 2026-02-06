@@ -49,6 +49,18 @@ const getContentIcons = () => {
     );
 };
 
+const getAllCardIcons = () => {
+    return Object.entries(getPaymentMethodConfiguration()?.all_card_icons ?? []).map(
+        ([id, { src, alt }]) => {
+            return {
+                id,
+                src,
+                alt,
+            };
+        },
+    );
+};
+
 const getContent = () => {
     return getPaymentMethodConfiguration()?.content ?? "";
 };
@@ -115,14 +127,12 @@ const CreditCardLabel = ({ label, icons, components }) => {
     );
 };
 
-const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, emitResponse }) => {
-    const { PaymentMethodIcons } = components;
-
-    const { onPaymentProcessing, onCheckoutFail, onShippingRateSelectSuccess } = eventRegistration;
-
-    const contentIcons = getContentIcons();
+const CreditCardContent = ({ eventRegistration, shouldSavePayment, emitResponse }) => {
+    const { onPaymentSetup, onCheckoutFail, onShippingRateSelectSuccess } = eventRegistration;
 
     const isRecurring = getIsRecurring();
+
+    const allCardIcons = getAllCardIcons();
 
     const [paymentPayload, setPaymentPayload] = React.useState(getPaymentPayload());
 
@@ -156,6 +166,8 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
     }, [shouldSavePayment, isRecurring, xpayBuildFormReady]);
 
     const renderXPayBuild = React.useCallback(() => {
+        setXPayBuildFormReady(false);
+
         $.ajax({
             type: "POST",
             data: {
@@ -196,6 +208,7 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
 
             return true;
         });
+
         return unsubscribe;
     }, [onCheckoutFail, renderXPayBuild]);
 
@@ -264,7 +277,7 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
     }, []);
 
     useEffect(() => {
-        const unsubscribe = onPaymentProcessing(async () => {
+        const unsubscribe = onPaymentSetup(async () => {
             try {
                 const eventDetail = await createXPayNonce(cardXPayRef.current);
 
@@ -303,7 +316,7 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
     }, [
         emitResponse.responseTypes.ERROR,
         emitResponse.responseTypes.SUCCESS,
-        onPaymentProcessing,
+        onPaymentSetup,
         createXPayNonce,
         paymentPayload,
         cardXPayRef,
@@ -313,16 +326,53 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
         <>
             <span>{getContent()}</span>
 
-            {PaymentMethodIcons && contentIcons.length > 0 && (
-                <PaymentMethodIcons contentIcons={contentIcons} align="right" />
-            )}
+            <div class="nexixpay-loghi-container flex">
+                <div class="internal-container">
+                    {allCardIcons.map((cardIcon) => (
+                        <div class="img-container" key={cardIcon.id}>
+                            <img src={cardIcon.src} alt={cardIcon.alt} />
+                        </div>
+                    ))}
+                </div>
+            </div>
 
             <div class="wc-credit-card-form wc-payment-form nexi-xpay-build">
-                <div
-                    id="xpay-card"
-                    class="xpay-card-container"
-                    style={{ borderColor: xpayCardBorderColorStyle }}
-                ></div>
+                <div style={{ display: "table", marginBottom: "30px" }}>
+                    <div
+                        id="xpay-pan"
+                        class="xpay-card-container"
+                        style={{
+                            maxWidth: "300px",
+                            width: "100%",
+                            borderColor: xpayCardBorderColorStyle,
+                            marginBottom: "5px",
+                        }}
+                    ></div>
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div
+                            id="xpay-expiry"
+                            class="xpay-card-container"
+                            style={{
+                                maxWidth: "147.5px",
+                                width: "100%",
+                                borderColor: xpayCardBorderColorStyle,
+                                borderTopWidth: "1",
+                                borderRightWidth: "1",
+                                marginRight: "5px",
+                            }}
+                        ></div>
+                        <div
+                            id="xpay-cvv"
+                            class="xpay-card-container"
+                            style={{
+                                maxWidth: "147.5px",
+                                width: "100%",
+                                borderColor: xpayCardBorderColorStyle,
+                                borderTopWidth: "1",
+                            }}
+                        ></div>
+                    </div>
+                </div>
 
                 <div id="xpay-card-errors">{errorMessageXPay}</div>
 
@@ -337,7 +387,7 @@ const CreditCardContent = ({ components, eventRegistration, shouldSavePayment, e
 const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
     const [paymentPayload, setPaymentPayload] = React.useState(getPaymentPayload());
 
-    const { onPaymentProcessing, onCheckoutFail, onShippingRateSelectSuccess } = eventRegistration;
+    const { onPaymentSetup, onCheckoutFail, onShippingRateSelectSuccess } = eventRegistration;
 
     const [errorMessageXPay, setErrorMessageXPay] = useState("");
 
@@ -372,6 +422,16 @@ const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
     useEffect(() => {
         renderXPayTokenBuild();
     }, [renderXPayTokenBuild]);
+
+    useEffect(() => {
+        const unsubscribe = onShippingRateSelectSuccess(() => {
+            renderXPayTokenBuild();
+
+            return true;
+        });
+
+        return unsubscribe;
+    }, [onShippingRateSelectSuccess, renderXPayTokenBuild]);
 
     useEffect(() => {
         const unsubscribe = onCheckoutFail(() => {
@@ -446,7 +506,7 @@ const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = onPaymentProcessing(async () => {
+        const unsubscribe = onPaymentSetup(async () => {
             try {
                 const eventDetail = await createXPayNonce(cardXPayRef.current);
 
@@ -460,7 +520,7 @@ const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
                             brand_carta: eventDetail.dettaglioCarta?.brand ?? "",
                             pan_carta: eventDetail.dettaglioCarta?.pan ?? "",
                             scadenza_carta: eventDetail.dettaglioCarta?.scadenza ?? "",
-                            "wc-xpay_build-new-payment-token": false,
+                            "wc-xpay-new-payment-token": false,
                         },
                     },
                 };
@@ -486,7 +546,7 @@ const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
     }, [
         emitResponse.responseTypes.ERROR,
         emitResponse.responseTypes.SUCCESS,
-        onPaymentProcessing,
+        onPaymentSetup,
         createXPayNonce,
         paymentPayload,
         cardXPayRef,
@@ -512,7 +572,7 @@ const getPaymentMethodOptions = () => {
 
     const options = {
         savedTokenComponent: <SavedTokenComponent />,
-        name: "xpay_build",
+        name: "xpay",
         content: <CreditCardContent />,
         label: <CreditCardLabel label={label} icons={cardIcons} />,
         edit: <CreditCardContent content={getContent()} icons={contentIcons} />,

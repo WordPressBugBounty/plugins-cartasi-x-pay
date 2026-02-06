@@ -9,13 +9,13 @@
  * @license     GNU General Public License v3.0
  */
 
-var card = {};
+let card = {};
 
 function renderXpayBuild() {
-    if (jQuery("#payment_method_xpay_build").is(":checked")) {
+    if (jQuery("#payment_method_xpay").is(":checked")) {
         checkCanSavePaymentMethod();
 
-        jQuery(document).on("change", "input[name='wc-xpay_build-payment-token']", function () {
+        jQuery(document).on("change", "input[name='wc-xpay-payment-token']", function () {
             checkCanSavePaymentMethod();
         });
 
@@ -25,36 +25,52 @@ function renderXpayBuild() {
 
         XPay.init();
 
-        CreateXpayBuildForm();
+        CreateXpayBuildForm(false, "xpay-card");
 
         jQuery(".xpay-card-cvv").each(function () {
-            CreateXpayBuildForm(jQuery(this).attr("id"), true);
+            CreateXpayBuildForm(true, jQuery(this).attr("id"));
         });
     }
 }
 
 // Handler per la gestione degli errori di validazione carta
 window.addEventListener("XPay_Card_Error", function (event) {
-    var displayError = document.getElementById("xpay-card-errors");
+    let displayError = document.getElementById("xpay-card-errors");
 
     if (event.detail.errorMessage) {
         // Visualizzo il messaggio di errore
         displayError.innerHTML = event.detail.errorMessage;
 
-        if (jQuery("#xpay_build_border_color_error").val()) {
-            jQuery("#xpay-card").css(
+        if (jQuery("#xpay_border_color_error").val()) {
+            jQuery("#xpay-pan").css(
                 "border",
-                "1px solid " + jQuery("#xpay_build_border_color_error").val(),
+                "1px solid " + jQuery("#xpay_border_color_error").val(),
+            );
+            jQuery("#xpay-expiry").css(
+                "border",
+                "1px solid " + jQuery("#xpay_border_color_error").val(),
+            );
+            jQuery("#xpay-cvv").css(
+                "border",
+                "1px solid " + jQuery("#xpay_border_color_error").val(),
             );
         }
     } else {
         // Nessun errore nascondo eventuali messaggi rimasti
         displayError.textContent = "";
 
-        if (jQuery("#xpay_build_border_color_default").val()) {
-            jQuery("#xpay-card").css(
+        if (jQuery("#xpay_border_color_default").val()) {
+            jQuery("#xpay-pan").css(
                 "border",
-                "1px solid " + jQuery("#xpay_build_border_color_default").val(),
+                "1px solid " + jQuery("#xpay_border_color_default").val(),
+            );
+            jQuery("#xpay-expiry").css(
+                "border",
+                "1px solid " + jQuery("#xpay_border_color_default").val(),
+            );
+            jQuery("#xpay-cvv").css(
+                "border",
+                "1px solid " + jQuery("#xpay_border_color_default").val(),
             );
         }
     }
@@ -70,7 +86,7 @@ window.addEventListener("XPay_Nonce", function (event) {
         document.getElementById("xpayEsito").setAttribute("value", response.esito);
         document.getElementById("xpayMac").setAttribute("value", response.mac);
 
-        form = document.getElementById("wc-xpay_build-cc-form");
+        form = document.getElementById("wc-xpay-cc-form");
 
         for (var prop in response.dettaglioCarta) {
             var x = document.createElement("INPUT");
@@ -102,35 +118,33 @@ window.addEventListener("XPay_Nonce", function (event) {
 });
 
 function xPayNonce() {
-    if (jQuery("#payment_method_xpay_build").is(":checked")) {
+    if (jQuery("#payment_method_xpay").is(":checked")) {
         if (jQuery("#xpayNonce").val().length === 0) {
             if (
-                typeof jQuery('input[name="wc-xpay_build-payment-token"]:checked').val() ===
+                typeof jQuery('input[name="wc-xpay-payment-token"]:checked').val() ===
                     "undefined" ||
-                "new" === jQuery('input[name="wc-xpay_build-payment-token"]:checked').val()
+                "new" === jQuery('input[name="wc-xpay-payment-token"]:checked').val()
             ) {
-                jQuery("#xpay_build_transactionId").val(
-                    jQuery("#xpay_build_transactionId").attr("data-new-card-value"),
+                jQuery("#xpay_transactionId").val(
+                    jQuery("#xpay_transactionId").attr("data-new-card-value"),
                 );
 
-                jQuery("#xpay_build_num_contratto").val(
-                    jQuery("#xpay_build_num_contratto").attr("data-new-card-value"),
+                jQuery("#xpay_num_contratto").val(
+                    jQuery("#xpay_num_contratto").attr("data-new-card-value"),
                 );
 
                 XPay.createNonce("wc-xpay-cc-form", card["xpay-card"]);
             } else {
-                selectedSavedCard = jQuery(
-                    'input[name="wc-xpay_build-payment-token"]:checked',
-                ).val();
+                selectedSavedCard = jQuery('input[name="wc-xpay-payment-token"]:checked').val();
 
                 tokenObject = jQuery("div[data-wc-id='" + selectedSavedCard + "']");
 
                 tokenValue = tokenObject.attr("data-token");
                 instanceId = "xpay-card-cvv-" + tokenValue;
 
-                jQuery("#xpay_build_transactionId").val(tokenObject.attr("data-codTransCvv"));
+                jQuery("#xpay_transactionId").val(tokenObject.attr("data-codTransCvv"));
 
-                jQuery("#xpay_build_num_contratto").val("");
+                jQuery("#xpay_num_contratto").val("");
 
                 XPay.createNonce("wc-xpay-cc-form", card[instanceId]);
             }
@@ -144,11 +158,10 @@ function xPayNonce() {
 
 function checkCanSavePaymentMethod() {
     if (
-        parseInt(
-            jQuery(".payment_method_xpay_build ul.woocommerce-SavedPaymentMethods").data("count"),
-        ) > 0 &&
-        jQuery("#wc-xpay_build-payment-token-new").length &&
-        !jQuery("#wc-xpay_build-payment-token-new").is(":checked")
+        parseInt(jQuery(".payment_method_xpay ul.woocommerce-SavedPaymentMethods").data("count")) >
+            0 &&
+        jQuery("#wc-xpay-payment-token-new").length &&
+        !jQuery("#wc-xpay-payment-token-new").is(":checked")
     ) {
         jQuery("#save-card").removeAttr("checked");
 
@@ -161,7 +174,7 @@ function checkCanSavePaymentMethod() {
 jQuery(document).ready(function () {
     var checkout_form = jQuery("form.checkout");
 
-    checkout_form.on("checkout_place_order_xpay_build", function () {
+    checkout_form.on("checkout_place_order_xpay", function () {
         // Return true to continue the submission or false to prevent it return true;
         return xPayNonce();
     });
@@ -181,19 +194,20 @@ jQuery(document).ready(function () {
             requestType = "PP";
         }
 
-        XPay.updateConfig(card["xpay-card"], {
-            serviceType: "paga_oc3d",
-            requestType: requestType,
-        });
+        if (card["xpay-card"]) {
+            XPay.updateConfig(card["xpay-card"], {
+                serviceType: "paga_oc3d",
+                requestType: requestType,
+            });
+        }
     });
 
     // if any error is returned from the payment process, forces form to refresh and reload the build form
     jQuery(document.body).on("checkout_error", function () {
         if (
-            jQuery("#payment_method_xpay_build").is(":checked") &&
-            ("new" === jQuery('input[name="wc-xpay_build-payment-token"]:checked').val() ||
-                typeof jQuery('input[name="wc-xpay_build-payment-token"]:checked').val() ===
-                    "undefined")
+            jQuery("#payment_method_xpay").is(":checked") &&
+            ("new" === jQuery('input[name="wc-xpay-payment-token"]:checked').val() ||
+                typeof jQuery('input[name="wc-xpay-payment-token"]:checked').val() === "undefined")
         ) {
             if (jQuery("#xpayNonce").val().length !== 0) {
                 jQuery("form.checkout").trigger("update");
@@ -203,20 +217,18 @@ jQuery(document).ready(function () {
     });
 });
 
-function CreateXpayBuildForm(identifier = "xpay-card", isSavedMethod = false) {
+function CreateXpayBuildForm(isSavedMethod, identifier) {
     try {
-        xpay_new_payment_info_object = document.getElementById("xpay_new_payment_info");
+        let xpay_new_payment_info_object = document.getElementById("xpay_new_payment_info");
 
         if (xpay_new_payment_info_object === undefined || xpay_new_payment_info_object === null) {
             return;
         }
 
-        xpay_new_payment_info_json = xpay_new_payment_info_object.value;
-
-        xpay_new_payment_info = JSON.parse(xpay_new_payment_info_json);
+        let xpay_new_payment_info = JSON.parse(xpay_new_payment_info_object.value);
 
         // Configurazione del pagamento
-        xpayConfig = {
+        let xpayConfig = {
             baseConfig: {
                 apiKey: xpay_new_payment_info.apiKey,
                 enviroment: xpay_new_payment_info.enviroment,
@@ -232,108 +244,115 @@ function CreateXpayBuildForm(identifier = "xpay-card", isSavedMethod = false) {
             language: xpay_new_payment_info.language,
         };
 
-        var tds_param = {
-            buyer: {},
-            destinationAddress: {},
-            billingAddress: {},
-            cardHolderAcctInfo: {},
-        };
-
-        if (xpay_new_payment_info.Buyer_email !== "") {
-            tds_param.buyer.email = xpay_new_payment_info.Buyer_email;
-        }
-        if (xpay_new_payment_info.Buyer_homePhone !== "") {
-            tds_param.buyer.homePhone = xpay_new_payment_info.Buyer_homePhone;
-        }
-        if (xpay_new_payment_info.Buyer_account !== "") {
-            tds_param.buyer.account = xpay_new_payment_info.Buyer_account;
-        }
-
-        if (xpay_new_payment_info.Dest_city !== "") {
-            tds_param.destinationAddress.city = xpay_new_payment_info.Dest_city;
-        }
-        if (xpay_new_payment_info.Dest_country !== "") {
-            tds_param.destinationAddress.countryCode = xpay_new_payment_info.Dest_country;
-        }
-        if (xpay_new_payment_info.Dest_street !== "") {
-            tds_param.destinationAddress.street = xpay_new_payment_info.Dest_street;
-        }
-        if (xpay_new_payment_info.Dest_street2 !== "") {
-            tds_param.destinationAddress.street2 = xpay_new_payment_info.Dest_street2;
-        }
-        if (xpay_new_payment_info.Dest_cap !== "") {
-            tds_param.destinationAddress.postalCode = xpay_new_payment_info.Dest_cap;
-        }
-        if (xpay_new_payment_info.Dest_state !== "") {
-            tds_param.destinationAddress.stateCode = xpay_new_payment_info.Dest_state;
-        }
-
-        if (xpay_new_payment_info.Bill_city !== "") {
-            tds_param.billingAddress.city = xpay_new_payment_info.Bill_city;
-        }
-        if (xpay_new_payment_info.Bill_country !== "") {
-            tds_param.billingAddress.countryCode = xpay_new_payment_info.Bill_country;
-        }
-        if (xpay_new_payment_info.Bill_street !== "") {
-            tds_param.billingAddress.street = xpay_new_payment_info.Bill_street;
-        }
-        if (xpay_new_payment_info.Bill_street2 !== "") {
-            tds_param.billingAddress.street2 = xpay_new_payment_info.Bill_street2;
-        }
-        if (xpay_new_payment_info.Bill_cap !== "") {
-            tds_param.billingAddress.postalCode = xpay_new_payment_info.Bill_cap;
-        }
-        if (xpay_new_payment_info.Bill_state !== "") {
-            tds_param.billingAddress.stateCode = xpay_new_payment_info.Bill_state;
-        }
-
-        if (xpay_new_payment_info.chAccDate !== "") {
-            tds_param.cardHolderAcctInfo.chAccDate = xpay_new_payment_info.chAccDate;
-        }
-        if (xpay_new_payment_info.chAccAgeIndicator !== "") {
-            tds_param.cardHolderAcctInfo.chAccAgeIndicator =
-                xpay_new_payment_info.chAccAgeIndicator;
-        }
-        if (xpay_new_payment_info.nbPurchaseAccount !== "") {
-            tds_param.cardHolderAcctInfo.nbPurchaseAccount =
-                xpay_new_payment_info.nbPurchaseAccount;
-        }
-        if (xpay_new_payment_info.destinationAddressUsageDate !== "") {
-            tds_param.cardHolderAcctInfo.destinationAddressUsageDate =
-                xpay_new_payment_info.destinationAddressUsageDate;
-        }
-        if (xpay_new_payment_info.destinationNameIndicator !== "") {
-            tds_param.cardHolderAcctInfo.destinationNameIndicator =
-                xpay_new_payment_info.destinationNameIndicator;
-        }
-
-        if (Object.keys(tds_param.buyer).length === 0) {
-            delete tds_param.buyer;
-        }
-        if (Object.keys(tds_param.destinationAddress).length === 0) {
-            delete tds_param.destinationAddress;
-        }
-        if (Object.keys(tds_param.billingAddress).length === 0) {
-            delete tds_param.billingAddress;
-        }
-        if (Object.keys(tds_param.cardHolderAcctInfo).length === 0) {
-            delete tds_param.cardHolderAcctInfo;
-        }
-
-        var enabled3ds = parseInt(document.getElementById("xpay_build_3ds").value);
+        let enabled3ds = parseInt(document.getElementById("xpay_3ds").value);
 
         if (enabled3ds === 1) {
+            let tds_param = {
+                buyer: {},
+                destinationAddress: {},
+                billingAddress: {},
+                cardHolderAcctInfo: {},
+            };
+
+            if (xpay_new_payment_info.Buyer_email !== "") {
+                tds_param.buyer.email = xpay_new_payment_info.Buyer_email;
+            }
+            if (xpay_new_payment_info.Buyer_homePhone !== "") {
+                tds_param.buyer.homePhone = xpay_new_payment_info.Buyer_homePhone;
+            }
+            if (xpay_new_payment_info.Buyer_account !== "") {
+                tds_param.buyer.account = xpay_new_payment_info.Buyer_account;
+            }
+
+            if (xpay_new_payment_info.Dest_city !== "") {
+                tds_param.destinationAddress.city = xpay_new_payment_info.Dest_city;
+            }
+            if (xpay_new_payment_info.Dest_country !== "") {
+                tds_param.destinationAddress.countryCode = xpay_new_payment_info.Dest_country;
+            }
+            if (xpay_new_payment_info.Dest_street !== "") {
+                tds_param.destinationAddress.street = xpay_new_payment_info.Dest_street;
+            }
+            if (xpay_new_payment_info.Dest_street2 !== "") {
+                tds_param.destinationAddress.street2 = xpay_new_payment_info.Dest_street2;
+            }
+            if (xpay_new_payment_info.Dest_cap !== "") {
+                tds_param.destinationAddress.postalCode = xpay_new_payment_info.Dest_cap;
+            }
+            if (xpay_new_payment_info.Dest_state !== "") {
+                tds_param.destinationAddress.stateCode = xpay_new_payment_info.Dest_state;
+            }
+
+            if (xpay_new_payment_info.Bill_city !== "") {
+                tds_param.billingAddress.city = xpay_new_payment_info.Bill_city;
+            }
+            if (xpay_new_payment_info.Bill_country !== "") {
+                tds_param.billingAddress.countryCode = xpay_new_payment_info.Bill_country;
+            }
+            if (xpay_new_payment_info.Bill_street !== "") {
+                tds_param.billingAddress.street = xpay_new_payment_info.Bill_street;
+            }
+            if (xpay_new_payment_info.Bill_street2 !== "") {
+                tds_param.billingAddress.street2 = xpay_new_payment_info.Bill_street2;
+            }
+            if (xpay_new_payment_info.Bill_cap !== "") {
+                tds_param.billingAddress.postalCode = xpay_new_payment_info.Bill_cap;
+            }
+            if (xpay_new_payment_info.Bill_state !== "") {
+                tds_param.billingAddress.stateCode = xpay_new_payment_info.Bill_state;
+            }
+
+            if (xpay_new_payment_info.chAccDate !== "") {
+                tds_param.cardHolderAcctInfo.chAccDate = xpay_new_payment_info.chAccDate;
+            }
+            if (xpay_new_payment_info.chAccAgeIndicator !== "") {
+                tds_param.cardHolderAcctInfo.chAccAgeIndicator =
+                    xpay_new_payment_info.chAccAgeIndicator;
+            }
+            if (xpay_new_payment_info.nbPurchaseAccount !== "") {
+                tds_param.cardHolderAcctInfo.nbPurchaseAccount =
+                    xpay_new_payment_info.nbPurchaseAccount;
+            }
+            if (xpay_new_payment_info.destinationAddressUsageDate !== "") {
+                tds_param.cardHolderAcctInfo.destinationAddressUsageDate =
+                    xpay_new_payment_info.destinationAddressUsageDate;
+            }
+            if (xpay_new_payment_info.destinationNameIndicator !== "") {
+                tds_param.cardHolderAcctInfo.destinationNameIndicator =
+                    xpay_new_payment_info.destinationNameIndicator;
+            }
+
+            if (Object.keys(tds_param.buyer).length === 0) {
+                delete tds_param.buyer;
+            }
+            if (Object.keys(tds_param.destinationAddress).length === 0) {
+                delete tds_param.destinationAddress;
+            }
+            if (Object.keys(tds_param.billingAddress).length === 0) {
+                delete tds_param.billingAddress;
+            }
+            if (Object.keys(tds_param.cardHolderAcctInfo).length === 0) {
+                delete tds_param.cardHolderAcctInfo;
+            }
+
             xpayConfig.informazioniSicurezza = tds_param;
         }
 
+        let operationType;
+
         if (isSavedMethod) {
-            cvvDiv = jQuery("#" + identifier);
+            let cvvDiv = jQuery("#" + identifier);
+
             xpayConfig.paymentParams.transactionId = cvvDiv.attr("data-codTransCvv");
             xpayConfig.paymentParams.timeStamp = cvvDiv.attr("data-timestampCvv");
             xpayConfig.paymentParams.mac = cvvDiv.attr("data-macCvv");
+
             xpayConfig.customParams.num_contratto = "" + cvvDiv.attr("data-token");
+
             xpayConfig.serviceType = "paga_oc3d";
             xpayConfig.requestType = "PR";
+
+            operationType = XPay.OPERATION_TYPES.CARD;
         } else {
             xpayConfig.paymentParams.transactionId = xpay_new_payment_info.transactionId;
             xpayConfig.paymentParams.timeStamp = xpay_new_payment_info.timestamp;
@@ -346,19 +365,25 @@ function CreateXpayBuildForm(identifier = "xpay-card", isSavedMethod = false) {
                 xpayConfig.serviceType = "paga_oc3d";
                 xpayConfig.requestType = "PA";
             }
+
+            operationType = XPay.OPERATION_TYPES.SPLIT_CARD;
         }
 
-        // Configurazione SDK
         XPay.setConfig(xpayConfig);
 
-        // Creazione dell elemento carta
-        style = JSON.parse(jQuery("#xpay_build_style").val());
+        card[identifier] = XPay.create(operationType, JSON.parse(jQuery("#xpay_style").val()));
 
-        card[identifier] = XPay.create(XPay.OPERATION_TYPES.CARD, style);
+        if (isSavedMethod) {
+            document.getElementById(identifier).innerHTML = "";
 
-        document.getElementById(identifier).innerHTML = "";
+            card[identifier].mount(identifier);
+        } else {
+            document.getElementById("xpay-pan").innerHTML = "";
+            document.getElementById("xpay-expiry").innerHTML = "";
+            document.getElementById("xpay-cvv").innerHTML = "";
 
-        card[identifier].mount(identifier);
+            card[identifier].mount("xpay-pan", "xpay-expiry", "xpay-cvv");
+        }
     } catch (error) {
         console.error(error);
     }

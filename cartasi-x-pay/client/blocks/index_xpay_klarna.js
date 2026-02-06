@@ -1,6 +1,7 @@
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { getPaymentMethodOptions } from './commons';
+import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 
-const PAYMENT_METHOD_NAME = 'xpay_klarna';
+import { getPaymentMethodOptions } from "./commons";
 
-registerPaymentMethod( getPaymentMethodOptions( PAYMENT_METHOD_NAME ) );
+const PAYMENT_METHOD_NAME = "xpay_klarna";
+
+registerPaymentMethod(getPaymentMethodOptions(PAYMENT_METHOD_NAME));

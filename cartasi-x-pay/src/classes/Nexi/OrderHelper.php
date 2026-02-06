@@ -36,7 +36,7 @@ class OrderHelper
                             return $meta;
                         }
                     } catch (\Exception $e) {
-                        \Nexi\Log::actionDebug("exception: " . json_encode($e));
+                        \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
                     }
                 }
 
@@ -45,11 +45,11 @@ class OrderHelper
                     $meta = $order->get_meta($metaKey, $single);
                     return $meta;
                 } catch (\Exception $e) {
-                    \Nexi\Log::actionDebug("exception: " . json_encode($e));
+                    \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
                 }
             }
         } catch (\Exception $e) {
-            \Nexi\Log::actionDebug("exception: " . json_encode($e));
+            \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
         }
 
         return get_post_meta($orderId, $metaKey, $single);
@@ -76,11 +76,11 @@ class OrderHelper
                     $order->update_meta_data($metaKey, $value);
                     $order->save_meta_data();
                 } catch (\Exception $e) {
-                    \Nexi\Log::actionDebug("order exception: " . json_encode($e));
+                    \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
                 }
             }
         } catch (\Exception $e) {
-            \Nexi\Log::actionDebug("exception: " . json_encode($e));
+            \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
         }
 
         update_post_meta($orderId, $metaKey, $value);
@@ -96,7 +96,7 @@ class OrderHelper
                 return;
             }
         } catch (\Exception $e) {
-            \Nexi\Log::actionDebug("exception: " . json_encode($e));
+            \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
         }
         delete_post_meta($orderId, $metaKey);
     }

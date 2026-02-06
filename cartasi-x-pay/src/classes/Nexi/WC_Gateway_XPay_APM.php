@@ -16,21 +16,17 @@ namespace Nexi;
 class WC_Gateway_XPay_APM extends WC_Gateway_XPay_Generic_Method
 {
 
-    protected $selectedCard;
+    public $selectedCard;
 
-    public function __construct($code, $description, $selectedCard, $img)
+    public function __construct($code, $title, $description, $selectedCard, $img)
     {
         parent::__construct('xpay_' . strtolower($code), \Nexi\WC_Gateway_Nexi_Register_Available::is_xpay_recurring($code));
 
         $this->selectedCard = $selectedCard;
 
-        if ($this->selectedCard === "PAGODIL") {
-            $this->method_title = __("Pay in installments without interest", "woocommerce-gateway-nexi-xpay");
-        } else {
-            $this->method_title = $description;
-        }
+        $this->method_title = $title;
+        $this->method_description = $description;
 
-        $this->method_description = $description . __(" via Nexi XPay", "woocommerce-gateway-nexi-xpay");
         $this->title = $this->method_title;
         $this->icon = $img;
         $this->description = $this->method_description;

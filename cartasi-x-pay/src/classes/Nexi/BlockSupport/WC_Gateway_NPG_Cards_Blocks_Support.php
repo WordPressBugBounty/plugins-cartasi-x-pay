@@ -15,64 +15,72 @@ namespace Nexi\BlockSupport;
 
 class WC_Gateway_NPG_Cards_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
 {
-    public function __construct(
-    ) {
+
+    public function __construct()
+    {
         parent::__construct();
     }
 
     protected function getLabel()
     {
-        return __('Payment cards', WC_LANG_KEY);
+        return __('Payment cards', 'woocommerce-gateway-nexi-xpay');
     }
 
     protected function getContent()
     {
-        return __('Pay securely by credit, debit and prepaid card. Powered by Nexi.', WC_LANG_KEY);
+        return __('Pay securely by credit, debit and prepaid card. Powered by Nexi.', 'woocommerce-gateway-nexi-xpay');
     }
 
-    protected function getIcons()
+    protected function getAllCardsIcons()
     {
-        $available_methods_npg = json_decode(\WC_Admin_Settings::get_option('xpay_npg_available_methods'), true);
-
         $contentIcons = [];
 
-        if (is_array($available_methods_npg)) {
-            foreach ($available_methods_npg as $am) {
-                if ($am['paymentMethodType'] != "CARDS") {
-                    continue;
-                }
-                $imageLink = $am['imageLink'] ?? '';
-                if (!empty($imageLink) && $imageLink !== 'no image') {
-                    $contentIcons[$am['circuit'] . '-nexipay'] = [
-                        'src' => $am['imageLink'],
-                        'alt' => __($am['circuit'] . " logo", WC_LANG_KEY)
-                    ];
-                }
+        foreach (\Nexi\WC_Nexi_Helper::get_npg_cards() as $am) {
+            if ($am['imageLink']) {
+                $contentIcons[$am['circuit'] . '-nexipay'] = [
+                    'src' => $am['imageLink'],
+                    'alt' => $am['circuit'] . " logo",
+                ];
             }
         }
 
         return $contentIcons;
     }
 
+    protected function getIcons()
+    {
+        return [
+            'xpay-nexixpay' => [
+                'src' => WC_GATEWAY_XPAY_PLUGIN_URL . '/assets/images/card.png',
+                'alt' => 'Payment cards',
+            ]
+        ];
+    }
+
     protected function getContentIcons()
     {
-        return [];
+        return [
+            'xpay-nexipay' => [
+                'src' => \WC_Admin_Settings::get_option('xpay_logo_small'),
+                'alt' => __("Nexi XPay logo", 'woocommerce-gateway-nexi-xpay')
+            ],
+        ];
     }
 
     protected function savedCardsSupport()
     {
-        $gatewaySettings = \WC_Admin_Settings::get_option('woocommerce_xpay_settings') ?? [];
+        $gatewaySettings = \Nexi\WC_Nexi_Helper::get_nexi_settings();
+
         if (empty($gatewaySettings) || ($gatewaySettings['nexi_xpay_oneclick_enabled'] ?? '') !== 'yes') {
             return false;
         }
+
         return true;
     }
 
     protected function getInstallmentsInfo()
     {
-        $gw = new \Nexi\WC_Gateway_NPG_Cards();
-
-        $installmentsInfo = $gw->get_installments_info();
+        $installmentsInfo = \Nexi\WC_Gateway_NPG_Cards_Redirect::get_installments_info();
 
         return [
             'enabled' => !\Nexi\WC_Nexi_Helper::cart_contains_subscription() && $installmentsInfo['installments_enabled'],
@@ -80,8 +88,6 @@ class WC_Gateway_NPG_Cards_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
             'title_text' => __('Installments', 'woocommerce-gateway-nexi-xpay'),
             'one_solution_text' => __('One time solution', 'woocommerce-gateway-nexi-xpay'),
         ];
-
-
     }
 
     protected function getRecurringInfo()
@@ -91,6 +97,5 @@ class WC_Gateway_NPG_Cards_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
             'disclaimer_text' => __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay')
         ];
     }
-
 
 }

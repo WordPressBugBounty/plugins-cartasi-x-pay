@@ -16,6 +16,25 @@ namespace Nexi;
 class WC_Gateway_XPay_Process_Completion
 {
 
+    public static function action_template_redirect()
+    {
+        global $wp_query;
+
+        if (isset($wp_query->query_vars['woocommerce-gateway-nexi-xpay-redirect'])) {
+            $safe_get_params = \Nexi\WC_Nexi_Helper::get_safe_get_params();
+
+            $safe_get_params['id'] = get_query_var('nexi_order_id');
+
+            self::redirect($safe_get_params);
+        } else if (isset($wp_query->query_vars['woocommerce-gateway-nexi-xpay-cancel'])) {
+            $safe_get_params = \Nexi\WC_Nexi_Helper::get_safe_get_params();
+
+            $safe_get_params['id'] = get_query_var('nexi_order_id');
+
+            self::cancel($safe_get_params);
+        }
+    }
+
     public static function rest_api_init()
     {
         register_rest_route(
@@ -25,7 +44,7 @@ class WC_Gateway_XPay_Process_Completion
                 'methods' => 'POST',
                 'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::s2s',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => '__return_true',
             )
@@ -33,43 +52,132 @@ class WC_Gateway_XPay_Process_Completion
 
         register_rest_route(
             'woocommerce-gateway-nexi-xpay',
-            '/redirect/xpay/(?P<id>\d+)',
-            array(
-                'methods' => array('GET', 'POST'),
-                'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::redirect',
-                'args' => [
-                    'id' => array(),
-                ],
-                'permission_callback' => '__return_true',
-            )
-        );
-
-        register_rest_route(
-            'woocommerce-gateway-nexi-xpay',
-            '/cancel/xpay/(?P<id>\d+)',
-            array(
-                'methods' => 'GET',
-                'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::cancel',
-                'args' => [
-                    'id' => array(),
-                ],
-                'permission_callback' => '__return_true',
-            )
-        );
-
-        register_rest_route(
-            'woocommerce-gateway-nexi-xpay',
-            '/process_account/xpay' . '/(?P<id>\d+)',
+            '/process_account/xpay/(?P<id>\d+)',
             array(
                 'methods' => array('POST'),
                 'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::process_account',
                 'args' => [
-                    'id' => array(),
+                    'id' => [],
                 ],
                 'permission_callback' => function () {
                     return current_user_can('manage_woocommerce');
                 }
             )
+        );
+
+        register_rest_route(
+            'woocommerce-gateway-nexi-xpay',
+            '/gpay/redirect/(?P<id>\d+)',
+            array(
+                'methods' => 'GET',
+                'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::gpayRedirect',
+                'args' => [
+                    'id' => [],
+                ],
+                'permission_callback' => '__return_true',
+            )
+        );
+
+        register_rest_route(
+            'woocommerce-gateway-nexi-xpay',
+            '/xpay/gpay/result/(?P<id>\d+)',
+            array(
+                'methods' => 'GET',
+                'callback' => '\Nexi\WC_Gateway_XPay_Process_Completion::xpayGpayResult',
+                'args' => [
+                    'id' => [],
+                ],
+                'permission_callback' => '__return_true',
+            )
+        );
+    }
+
+    public static function gpayRedirect($data)
+    {
+        $params = $data->get_params();
+
+        $order_id = $params["id"];
+
+        Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
+
+        $gpayHtml = \Nexi\OrderHelper::getOrderMeta($order_id, 'gpay_html', true);
+
+        if ($gpayHtml) {
+            header('Content-Type: text/html');
+            echo $gpayHtml;
+            exit;
+        } else {
+            $order = new \WC_Order($order_id);
+
+            return new \WP_REST_Response(
+                "redirecting success...",
+                "303",
+                array("Location" => $order->get_checkout_order_received_url())
+            );
+        }
+    }
+
+    public static function xpayGpayResult($data)
+    {
+        $params = $data->get_params();
+
+        $order_id = $params["id"];
+
+        $order = new \WC_Order($order_id);
+
+        Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
+
+        if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_gpay_mac($_REQUEST)) {
+            $nonce = $_REQUEST["xpayNonce"];
+            $importo = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
+            $codiceTransazione = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_transaction_id", true);
+            $divisa = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_divisa", true);
+
+            try {
+                \Nexi\WC_Gateway_XPay_API::getInstance()->paga3DS($codiceTransazione, $importo, $nonce, $divisa, $order);
+
+                if (!in_array($order->get_status(), ['completed', 'processing'])) {
+                    WC_Save_Order_Meta::saveSuccessXPay(
+                        $order_id,
+                        \Nexi\WC_Gateway_XPay_API::getInstance()->get_build_alias(),
+                        '',
+                        $codiceTransazione,
+                        ''
+                    );
+
+                    $order->payment_complete($codiceTransazione);
+                }
+
+                return new \WP_REST_Response(
+                    "redirecting success...",
+                    "303",
+                    array("Location" => $order->get_checkout_order_received_url())
+                );
+            } catch (\Throwable $th) {
+                Log::actionWarning(__FUNCTION__ . ": error: " . $th->getMessage());
+
+                if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
+                    $order->update_status('failed');
+                }
+
+                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_REQUEST["messaggio"]);
+
+                $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_REQUEST["messaggio"]);
+            }
+        } else {
+            if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
+                $order->update_status('failed');
+            }
+
+            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_REQUEST["messaggio"]);
+
+            $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_REQUEST["messaggio"]);
+        }
+
+        return new \WP_REST_Response(
+            "redirecting failed...",
+            "303",
+            array("Location" => $order->get_cancel_order_url_raw())
         );
     }
 
@@ -125,7 +233,7 @@ class WC_Gateway_XPay_Process_Completion
                         $order->update_status('failed');
                     }
 
-                    \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'last_error', $_POST["messaggio"]);
+                    \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_POST["messaggio"]);
 
                     $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_POST["messaggio"]);
 
@@ -137,31 +245,28 @@ class WC_Gateway_XPay_Process_Completion
                 }
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'post_notification_timestamp', time());
-
+            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_post_notification_timestamp', time());
         } catch (\Exception $exc) {
             Log::actionInfo(__FUNCTION__ . ": " . $exc->getTraceAsString());
         }
 
-        return new \WP_REST_Response($payload, $status, array());
+        return new \WP_REST_Response($payload, $status, []);
     }
 
-    public static function redirect($data)
+    public static function redirect($params)
     {
-        $params = $data->get_params();
-
         $order_id = $params["id"];
 
         $order = new \WC_Order($order_id);
 
-        $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'post_notification_timestamp', true);
+        $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_post_notification_timestamp', true);
 
         //s2s not recived, so we need to update the order based the data recived in params
         if ($post_notification_timestamp == "") {
             Log::actionInfo(__FUNCTION__ . ": s2s notification for order id " . $order_id . " not recived, changing oreder status from request params");
 
             if ($params['esito'] == "OK") {
-                if (!in_array($order->get_status(), ['completed', 'processing'])) {
+                if (!\in_array($order->get_status(), ['completed', 'processing'])) {
                     WC_Save_Order_Meta::saveSuccessXPay(
                         $order_id,
                         $params['alias'],
@@ -178,72 +283,63 @@ class WC_Gateway_XPay_Process_Completion
                     $order->update_status('pd-pending-status');
                 }
             } else {
-                if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
+                if (!\in_array($order->get_status(), ['failed', 'cancelled'])) {
                     $order->update_status('failed');
                 }
 
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'last_error', $params["messaggio"]);
+                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $params["messaggio"]);
 
                 $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $params["messaggio"]);
-
             }
         }
 
         Log::actionInfo(__FUNCTION__ . ": user redirect for order id " . $order_id . ' - ' . (array_key_exists('esito', $params) ? $params['esito'] : ''));
 
         if ($order->needs_payment() || $order->get_status() == 'cancelled') {
+            $lastErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_last_error', true);
 
-            $lastErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'last_error', true);
             if ($lastErrorXpay != "") {
                 if (isset(WC()->session)) {
                     wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay') . " (" . htmlentities($lastErrorXpay) . ")", 'error');
-                }                
+                }
             }
-            $paymentErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_' . 'payment_error', true);
+
+            $paymentErrorXpay = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_payment_error', true);
+
             if ($paymentErrorXpay != "") {
                 if (isset(WC()->session)) {
                     wc_add_notice(htmlentities($paymentErrorXpay), 'error');
                 }
             }
 
-            return new \WP_REST_Response(
-                "redirecting failed...",
-                "303",
-                array("Location" => $order->get_cancel_order_url_raw())
-            );
+            wp_safe_redirect(wc_get_cart_url());
+            exit;
         }
 
-        return new \WP_REST_Response(
-            "redirecting success...",
-            "303",
-            array("Location" => $order->get_checkout_order_received_url())
-        );
+        wp_safe_redirect($order->get_checkout_order_received_url());
+        exit;
     }
 
-    public static function cancel($data)
+    public static function cancel($params)
     {
-        $params = $data->get_params();
-
         $order_id = $params["id"];
 
         if (($params['esito'] ?? '') === "ERRORE" && $params['warning']) {
-
             if (stripos($params['warning'], 'deliveryMethod') !== false) {
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('It was not possible to process the payment, check that the shipping address set is correct.', 'woocommerce-gateway-nexi-xpay'));
+                $message = __('It was not possible to process the payment, check that the shipping address set is correct.', 'woocommerce-gateway-nexi-xpay');
             } else {
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('Payment canceled: ', 'woocommerce-gateway-nexi-xpay') . $params['warning']);
+                $message = __('Payment canceled: ', 'woocommerce-gateway-nexi-xpay') . $params['warning'];
             }
         } else {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_' . 'payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
+            $message = __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay');
         }
+
+        \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_payment_error', $message);
 
         $order = new \WC_Order($order_id);
 
-        return new \WP_REST_Response(
-            "failed...",
-            "303",
-            array("Location" => $order->get_cancel_order_url_raw())
-        );
+        wp_safe_redirect($order->get_cancel_order_url_raw());
+        exit;
     }
 
     public static function process_account($data)
@@ -263,7 +359,7 @@ class WC_Gateway_XPay_Process_Completion
             $codTrans = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
 
             if (empty($codTrans)) {
-                throw new \Exception(sprintf(__('Unable to capture order %s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id));
+                throw new \Exception(\sprintf(__('Unable to capture order %s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id));
             }
 
             return WC_Gateway_XPay_API::getInstance()->account($codTrans, $amount, $order->get_currency());

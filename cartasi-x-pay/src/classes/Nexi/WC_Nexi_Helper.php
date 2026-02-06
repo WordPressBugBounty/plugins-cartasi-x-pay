@@ -47,10 +47,10 @@ class WC_Nexi_Helper
         if ($xpay_details_order != "") {
             $details_order = json_decode($xpay_details_order);
 
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "alias", $details_order->alias);
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "scadenza_pan", $details_order->scadenza_pan);
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "num_contratto", $details_order->num_contratto);
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_" . "codTrans", $details_order->codTrans);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_alias", $details_order->alias);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_scadenza_pan", $details_order->scadenza_pan);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_num_contratto", $details_order->num_contratto);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_codTrans", $details_order->codTrans);
 
             return $details_order->{$key};
         }
@@ -109,7 +109,10 @@ class WC_Nexi_Helper
         $config = get_option(WC_SETTINGS_KEY);
 
         if (!is_array($config)) {
-            $config = [];
+            $config = [
+                'nexi_gateway' => GATEWAY_XPAY,
+                'integration_type' => 'redirect',
+            ];
         }
 
         return $config;
@@ -122,6 +125,42 @@ class WC_Nexi_Helper
         }
 
         return static::nexi_array_key_exists_and_equals($config, 'nexi_gateway', GATEWAY_NPG);
+    }
+
+    public static function nexi_is_gateway_XPay($config = null)
+    {
+        if ($config === null) {
+            $config = static::get_nexi_settings();
+        }
+
+        return static::nexi_array_key_exists_and_equals($config, 'nexi_gateway', GATEWAY_XPAY);
+    }
+
+    public static function nexi_is_build($config = null)
+    {
+        if ($config === null) {
+            $config = static::get_nexi_settings();
+        }
+
+        return static::nexi_array_key_exists_and_equals($config, 'integration_type', 'build');
+    }
+
+    public static function is_google_button_enabled($config = null)
+    {
+        if ($config === null) {
+            $config = static::get_nexi_settings();
+        }
+
+        return static::nexi_array_key_exists_and_equals($config, 'gpay_integration_type', 'button');
+    }
+
+    public static function is_apple_button_enabled($config = null)
+    {
+        if ($config === null) {
+            $config = static::get_nexi_settings();
+        }
+
+        return static::nexi_array_key_exists_and_equals($config, 'applepay_integration_type', 'button');
     }
 
     public static function nexi_array_key_exists($array, $key)
@@ -137,6 +176,100 @@ class WC_Nexi_Helper
     public static function nexi_array_key_exists_and_in_array($array, $key, $value)
     {
         return static::nexi_array_key_exists($array, $key) && in_array($value, $array[$key]);
+    }
+
+    public static function get_xpay_cards()
+    {
+        $availableMethods = \Nexi\WC_Nexi_Helper::get_xpay_available_methods();
+
+        $cards = [
+            'MASTERCARD',
+            'MAESTRO',
+            'VISA',
+            'AMEX',
+            'JCB',
+            'UPI',
+            'DINERS',
+        ];
+
+        foreach ($availableMethods as $i => $availableMethod) {
+            if ($availableMethod['type'] === 'CC') {
+                $order = array_search($availableMethod['code'], $cards);
+
+                $availableMethods[$i]['order'] = $order !== false ? $order : 100;
+            } else {
+                unset($availableMethods[$i]);
+            }
+        }
+
+        array_multisort(array_column($availableMethods, 'order'), SORT_ASC, array_column($availableMethods, 'description'), SORT_ASC, $availableMethods);
+
+        return $availableMethods;
+    }
+
+    public static function get_npg_cards()
+    {
+        $availableMethods = \Nexi\WC_Nexi_Helper::get_npg_available_methods();
+
+        $cards = [
+            'MC',
+            'MAE',
+            'VISA',
+            'AMEX',
+            'JCB',
+            'UPI',
+            'DINERS',
+        ];
+
+        foreach ($availableMethods as $i => $availableMethod) {
+            if ($availableMethod['paymentMethodType'] === 'CARDS') {
+                $order = array_search($availableMethod['circuit'], $cards);
+
+                $availableMethods[$i]['order'] = $order !== false ? $order : 100;
+            } else {
+                unset($availableMethods[$i]);
+            }
+        }
+
+        array_multisort(array_column($availableMethods, 'order'), SORT_ASC, array_column($availableMethods, 'circuit'), SORT_ASC, $availableMethods);
+
+        return $availableMethods;
+    }
+
+    public static function get_xpay_available_methods()
+    {
+        $availableMethods = json_decode(\WC_Admin_Settings::get_option('xpay_available_methods') ?? '[]', true);
+
+        return is_array($availableMethods) ? $availableMethods : [];
+    }
+
+    public static function get_npg_available_methods()
+    {
+        $availableMethods = json_decode(\WC_Admin_Settings::get_option('xpay_npg_available_methods') ?? '[]', true);
+
+        return is_array($availableMethods) ? $availableMethods : [];
+    }
+
+    public static function enable_payment_method($key)
+    {
+        $config = get_option($key, []);
+
+        if (!isset($config) || !isset($config['enabled'])) {
+            $config['enabled'] = 'yes';
+        }
+
+        update_option($key, $config);
+    }
+
+    public static function get_safe_get_params()
+    {
+        $safe_vars = [];
+
+        foreach ($_GET as $key => $value) {
+            $safe_vars[$key] = sanitize_text_field($value);
+        }
+
+        return $safe_vars;
     }
 
 }

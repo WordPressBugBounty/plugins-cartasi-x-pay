@@ -31,7 +31,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         return self::$instance;
     }
 
-    public $id = WC_GATEWAY_NEXI_PLUGIN_VARIANT;
+    public $id = 'xpay';
     private $nexi_xpay_alias;
     private $nexi_xpay_mac;
     private $nexi_xpay_group = "";
@@ -51,11 +51,8 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         if ($this->settings["nexi_xpay_test_mode"] == "no") {
             $this->base_url = 'https://ecommerce.nexi.it/';
             $this->xpay_build_enviroment = "PROD";
-        } else if (WC_GATEWAY_XPAY_PLUGIN_COLL) {
-            $this->base_url = 'https://coll-ecommerce.nexi.it/';
-            $this->xpay_build_enviroment = "INTEG";
         } else {
-            $this->base_url = 'https://int-ecommerce.nexi.it/';
+            $this->base_url = 'https://int-ecommerce.nexi.it/'; // 'https://coll-ecommerce.nexi.it/'; // 
             $this->xpay_build_enviroment = "INTEG";
         }
 
@@ -89,6 +86,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             delete_option('xpay_available_methods');
             delete_option('xpay_logo_small');
             delete_option('xpay_logo_large');
+
             return null;
         }
 
@@ -135,19 +133,24 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         update_option('xpay_logo_small', $profile_info['urlLogoNexiSmall']);
         update_option('xpay_logo_large', $profile_info['urlLogoNexiLarge']);
 
-        if (is_array($profile_info['availableMethods'])) {
-            foreach ($profile_info['availableMethods'] as $method) {
-                $config_name = "woocommerce_xpay_" . $method['code'] . "_settings";
-
-                $config = get_option($config_name, array());
-
-                $config['enabled'] = 'yes';
-
-                update_option($config_name, $config);
-            }
-        }
+        self::enable_apms();
 
         return $profile_info;
+    }
+
+    public static function enable_apms()
+    {
+        \Nexi\WC_Nexi_Helper::enable_payment_method(WC_SETTINGS_KEY);
+
+        foreach (\Nexi\WC_Nexi_Helper::get_xpay_available_methods() as $method) {
+            if ($method['type'] === 'APM') {
+                \Nexi\WC_Nexi_Helper::enable_payment_method("woocommerce_xpay_" . $method['selectedcard'] . "_settings");
+
+                if (in_array(strtolower($method['selectedcard']), ['googlepay', 'applepay'])) {
+                    \Nexi\WC_Nexi_Helper::enable_payment_method("woocommerce_xpay_" . $method['selectedcard'] . "_button_settings");
+                }
+            }
+        }
     }
 
     public function get_payment_form($order, $selectedcard, $recurringPaymentRequired)
@@ -156,16 +159,26 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
 
         $chiaveSegreta = $this->nexi_xpay_mac;
 
+        $redirectUrl = add_query_arg(
+            ['nexi_order_id' => $order->get_id()],
+            wc_get_endpoint_url('woocommerce-gateway-nexi-xpay-redirect', '', home_url('/'))
+        );
+
+        $backUrl = add_query_arg(
+            ['nexi_order_id' => $order->get_id()],
+            wc_get_endpoint_url('woocommerce-gateway-nexi-xpay-cancel', '', home_url('/'))
+        );
+
         $params = array(
             'alias' => $this->nexi_xpay_alias,
             'importo' => $importo,
             'divisa' => $order->get_currency(),
             'mail' => $order->get_billing_email(),
-            'url' => get_rest_url(null, "woocommerce-gateway-nexi-xpay/redirect/xpay/" . $order->get_id()), //returning URL
-            'url_back' => get_rest_url(null, "woocommerce-gateway-nexi-xpay/cancel/xpay/" . $order->get_id()), //cancel URL
-            'languageId' => WC_Gateway_XPay_Generic_Method::get_language_id(), //checkout page lang
+            'url' => $redirectUrl,
+            'url_back' => $backUrl,
+            'languageId' => WC_Gateway_XPay_Generic_Method::get_language_id(),
             'descrizione' => "WC Order: " . $order->get_order_number(),
-            'urlpost' => get_rest_url(null, "woocommerce-gateway-nexi-xpay/s2s/xpay/" . $order->get_id()), //S2S notification URL
+            'urlpost' => get_rest_url(null, "woocommerce-gateway-nexi-xpay/s2s/xpay/" . $order->get_id()),
             'selectedcard' => $selectedcard,
             'TCONTAB' => $this->nexi_xpay_accounting,
             'Note1' => 'woocommerce',
@@ -186,7 +199,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             $chiaveSegreta = $this->nexi_xpay_recurring_mac;
 
             // Contract number
-            $md5_hash = md5($costumer_id . "@" . $order->get_order_number() . "@" . time() . '@' . get_option('nexi_unique'));
+            $md5_hash = md5($costumer_id . '@' . $order->get_order_number() . '@' . time() . '@' . get_option('nexi_unique'));
             $params['num_contratto'] = substr("RP" . base_convert($md5_hash, 16, 36), 0, 30);
 
             $params['tipo_servizio'] = "paga_multi"; // static param for recurring payments
@@ -243,7 +256,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             $params = array_merge($params, WC_Klarna_Data_Provider::calculate_params($order));
         }
 
-        \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_xpay_" . "codTrans", $params['codTrans']);
+        \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_xpay_codTrans", $params['codTrans']);
 
         return array(
             "target_url" => $this->base_url . "ecomm/ecomm/DispatcherServlet",
@@ -331,6 +344,23 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
     private static function is_recurring($cod_trans)
     {
         return substr($cod_trans, 0, 2) == "PR";
+    }
+
+    public function validate_gpay_mac($request_parameters)
+    {
+        $mac = sha1('esito=' . ($request_parameters['esito'] ?? '') .
+            'idOperazione=' . ($request_parameters['idOperazione'] ?? '') .
+            'xpayNonce=' . ($request_parameters['xpayNonce'] ?? '') .
+            'timeStamp=' . ($request_parameters['timeStamp'] ?? '') .
+            $this->nexi_xpay_mac);
+
+        if ($mac == ($request_parameters["mac"] ?? '')) {
+            return true;
+        }
+
+        Log::actionWarning(__FUNCTION__ . ": error: " . ($request_parameters["mac"] ?? '') . " != " . $mac);
+
+        return false;
     }
 
     public function validate_return_mac($request_parameters)
@@ -502,7 +532,11 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         }
 
         if (is_array($operation_info["report"]) && count($operation_info["report"]) > 0) {
-            return $operation_info["report"][count($operation_info["report"]) - 1];
+            usort($operation_info["report"], function ($item1, $item2) {
+                return $item2['dataTransazione'] <=> $item1['dataTransazione'];
+            });
+
+            return $operation_info["report"][0];
         }
 
         return [];
@@ -730,6 +764,190 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         }
 
         return true;
+    }
+
+    public function googlePayPayment($codiceTransazione, $importo, $divisa, $googlePayJson, $url, $order)
+    {
+        $timeStamp = (time()) * 1000;
+
+        // Calcolo MAC
+        $macString = 'apiKey=' . $this->nexi_xpay_alias
+            . 'codiceTransazione=' . $codiceTransazione
+            . 'importo=' . $importo
+            . 'divisa=' . $divisa
+            . 'timeStamp=' . $timeStamp . $this->nexi_xpay_mac;
+
+        $mac = sha1($macString);
+
+        $pay_load = array(
+            'apiKey' => $this->nexi_xpay_alias,
+            'codiceTransazione' => $codiceTransazione,
+            'importo' => $importo,
+            'divisa' => $divisa,
+            'googlePay' => $googlePayJson,
+            'urlRisposta' => $url,
+            'timeStamp' => $timeStamp,
+            'mac' => $mac,
+            'parametriAggiuntivi' => array(
+                'mail' => $order->get_billing_email(),
+                'nome' => $order->get_billing_first_name(),
+                'cognome' => $order->get_billing_last_name(),
+                'TCONTAB' => $this->nexi_xpay_accounting,
+                'Note1' => 'woocommerce',
+                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
+                'Note3' => WC_GATEWAY_XPAY_VERSION
+            )
+        );
+
+        \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode($pay_load));
+
+        $uri = "ecomm/api/paga/v2/pagaGooglePay";
+
+        \Nexi\Log::actionDebug("DEBUG - uri: " . json_encode($uri));
+
+        $operation_info = $this->exec_curl_post_json($uri, $pay_load);
+
+        \Nexi\Log::actionDebug("DEBUG - response: " . json_encode($operation_info));
+
+        // Calcolo MAC di risposta
+        $MACrisposta = sha1('esito=' . $operation_info['esito'] . 'idOperazione=' . $operation_info['idOperazione'] . 'timeStamp=' . $operation_info['timeStamp'] . $this->nexi_xpay_mac);
+
+        // Check on the response MAC
+        if ($operation_info['mac'] != $MACrisposta) {
+            Log::actionWarning(__FUNCTION__ . ": mac error: " . $operation_info["mac"] . " != " . $MACrisposta);
+            throw new \Exception(__('Error in the calculation of the return MAC parameter', 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        // Check on the outcome of the operation
+        if ($operation_info['esito'] != 'OK') {
+            Log::actionWarning(__FUNCTION__ . ": remote error: " . $operation_info['errore']['messaggio']);
+            throw new \Exception(__($operation_info['errore']['messaggio'], 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        return $operation_info;
+    }
+
+    public function applePayPayment($codiceTransazione, $importo, $divisa, $applePay, $order)
+    {
+        $timeStamp = (time()) * 1000;
+
+        // Calcolo MAC
+        $macString = 'apiKey=' . $this->nexi_xpay_alias
+            . 'codiceTransazione=' . $codiceTransazione
+            . 'importo=' . $importo
+            . 'divisa=' . $divisa
+            . 'timeStamp=' . $timeStamp . $this->nexi_xpay_mac;
+
+        $mac = sha1($macString);
+
+        $pay_load = array(
+            'apiKey' => $this->nexi_xpay_alias,
+            'codiceTransazione' => $codiceTransazione,
+            'importo' => $importo,
+            'divisa' => $divisa,
+            'applePay' => $applePay,
+            'timeStamp' => $timeStamp,
+            'mac' => $mac,
+            'parametriAggiuntivi' => array(
+                'mail' => $order->get_billing_email(),
+                'nome' => $order->get_billing_first_name(),
+                'cognome' => $order->get_billing_last_name(),
+                'TCONTAB' => $this->nexi_xpay_accounting,
+                'Note1' => 'woocommerce',
+                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
+                'Note3' => WC_GATEWAY_XPAY_VERSION
+            )
+        );
+
+        \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode($pay_load));
+
+        $uri = "ecomm/api/paga/applePay";
+
+        \Nexi\Log::actionDebug("DEBUG - uri: " . json_encode($uri));
+
+        $operation_info = $this->exec_curl_post_json($uri, $pay_load);
+
+        \Nexi\Log::actionDebug("DEBUG - response: " . json_encode($operation_info));
+
+        // Calcolo MAC di risposta
+        $MACrisposta = sha1('esito=' . $operation_info['esito'] . 'idOperazione=' . $operation_info['idOperazione'] . 'timeStamp=' . $operation_info['timeStamp'] . $this->nexi_xpay_mac);
+
+        // Check on the response MAC
+        if ($operation_info['mac'] != $MACrisposta) {
+            Log::actionWarning(__FUNCTION__ . ": mac error: " . $operation_info["mac"] . " != " . $MACrisposta);
+            throw new \Exception(__('Error in the calculation of the return MAC parameter', 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        // Check on the outcome of the operation
+        if ($operation_info['esito'] != 'OK') {
+            Log::actionWarning(__FUNCTION__ . ": remote error: " . $operation_info['errore']['messaggio']);
+            throw new \Exception(__($operation_info['errore']['messaggio'], 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        return $operation_info;
+    }
+
+    public function paga3DS($codiceTransazione, $importo, $nonce, $divisa, $order)
+    {
+        $timeStamp = (time()) * 1000;
+
+        // Calcolo MAC
+        $macString = 'apiKey=' . $this->nexi_xpay_alias
+            . 'codiceTransazione=' . $codiceTransazione
+            . 'importo=' . $importo
+            . 'divisa=' . $divisa
+            . 'xpayNonce=' . $nonce
+            . 'timeStamp=' . $timeStamp . $this->nexi_xpay_mac;
+
+        $mac = sha1($macString);
+
+        $pay_load = array(
+            'apiKey' => $this->nexi_xpay_alias,
+            'codiceTransazione' => $codiceTransazione,
+            'importo' => $importo,
+            'divisa' => $divisa,
+            'xpayNonce' => $nonce,
+            'timeStamp' => $timeStamp,
+            'mac' => $mac,
+            'parametriAggiuntivi' => array(
+                'mail' => $order->get_billing_email(),
+                'nome' => $order->get_billing_first_name(),
+                'cognome' => $order->get_billing_last_name(),
+                'TCONTAB' => $this->nexi_xpay_accounting,
+                'Note1' => 'woocommerce',
+                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
+                'Note3' => WC_GATEWAY_XPAY_VERSION
+            )
+        );
+
+        \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode($pay_load));
+
+        $uri = "ecomm/api/paga/paga3DS";
+
+        \Nexi\Log::actionDebug("DEBUG - uri: " . json_encode($uri));
+
+        $operation_info = $this->exec_curl_post_json($uri, $pay_load);
+
+        \Nexi\Log::actionDebug("DEBUG - response: " . json_encode($operation_info));
+
+        // Calcolo MAC di risposta
+        $MACrisposta = sha1('esito=' . $operation_info['esito']
+            . 'idOperazione=' . $operation_info['idOperazione']
+            . 'timeStamp=' . $operation_info['timeStamp'] . $this->nexi_xpay_mac);
+
+        // Check on the response MAC
+        if ($operation_info['mac'] != $MACrisposta) {
+            Log::actionWarning(__FUNCTION__ . ": mac error: " . $operation_info["mac"] . " != " . $MACrisposta);
+            throw new \Exception(__('Error in the calculation of the return MAC parameter', 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        // Check on the outcome of the operation
+        if ($operation_info['esito'] != 'OK') {
+            Log::actionWarning(__FUNCTION__ . ": remote error: " . $operation_info['errore']['messaggio']);
+            throw new \Exception(__($operation_info['errore']['messaggio'], 'woocommerce-gateway-nexi-xpay'), $operation_info['errore']['codice']);
+        }
+
+        return $operation_info;
     }
 
     public function calculate_mac_for_build_oneclick($codTransCvv, $divisa, $importoCvv)

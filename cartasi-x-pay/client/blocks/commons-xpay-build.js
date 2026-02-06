@@ -117,6 +117,8 @@ export const createXPayBuildForm = (
             xpayConfig.informazioniSicurezza = tds_param;
         }
 
+        var operationType;
+
         if (tokenData !== null) {
             xpayConfig.paymentParams.transactionId = tokenData.cod_trans_cvv;
             xpayConfig.paymentParams.timeStamp = tokenData.timestamp_cvv;
@@ -126,21 +128,33 @@ export const createXPayBuildForm = (
 
             xpayConfig.serviceType = "paga_oc3d";
             xpayConfig.requestType = "PR";
+
+            operationType = XPay.OPERATION_TYPES.CARD;
         } else {
             xpayConfig.paymentParams.transactionId = paymentPayload.transactionId;
             xpayConfig.paymentParams.timeStamp = paymentPayload.timestamp;
             xpayConfig.paymentParams.mac = paymentPayload.mac;
+
+            operationType = XPay.OPERATION_TYPES.SPLIT_CARD;
         }
 
         // Configurazione SDK
         XPay.setConfig(xpayConfig);
 
         // Creazione dell elemento carta
-        const card = XPay.create(XPay.OPERATION_TYPES.CARD, buildStyle);
+        const card = XPay.create(operationType, buildStyle);
 
-        document.getElementById(identifier).innerHTML = "";
+        if (tokenData !== null) {
+            document.getElementById(identifier).innerHTML = "";
 
-        card.mount(identifier);
+            card.mount(identifier);
+        } else {
+            document.getElementById("xpay-pan").innerHTML = "";
+            document.getElementById("xpay-expiry").innerHTML = "";
+            document.getElementById("xpay-cvv").innerHTML = "";
+
+            card.mount("xpay-pan", "xpay-expiry", "xpay-cvv");
+        }
 
         return card;
     } catch (error) {

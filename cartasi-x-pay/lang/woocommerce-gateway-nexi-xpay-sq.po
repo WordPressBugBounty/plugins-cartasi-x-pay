@@ -1,0 +1,1747 @@
+# Copyright (C) 2025 Nexi SpA
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: Nexi XPay 8.1.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/module\n"
+"Last-Translator: \n"
+"Language-Team: Albanian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-12-10T15:17:49+00:00\n"
+"PO-Revision-Date: 2025-12-10 15:26+0000\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Domain: woocommerce-gateway-nexi-xpay\n"
+"Language: sq\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Loco-Version: 2.8.0; wp-6.9; php-8.4.12"
+
+#. Plugin Name of the plugin
+#: woocommerce-gateway-nexi-xpay.php src/classes/Nexi/WC_Gateway_Admin.php:22
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:70
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:44
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:48
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:44
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:44
+msgid "Nexi XPay"
+msgstr "Nexi XPay"
+
+#. Description of the plugin
+#: woocommerce-gateway-nexi-xpay.php src/classes/Nexi/WC_Gateway_Admin.php:23
+msgid ""
+"Payment plugin for payment cards and alternative methods. Powered by Nexi."
+msgstr ""
+"Plugin pagese për kartat e pagesës dhe metodat alternative. Mundësuar nga "
+"Nexi."
+
+#. Author of the plugin
+#: woocommerce-gateway-nexi-xpay.php
+msgid "Nexi SpA"
+msgstr "Nexi SpA"
+
+#. Author URI of the plugin
+#: woocommerce-gateway-nexi-xpay.php
+msgid "https://www.nexi.it"
+msgstr "https://www.nexi.it"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_APM_Blocks_Support.php:73
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:97
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:225
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Google_Pay_Button_Blocks_Support.php:67
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_APM_Blocks_Support.php:134
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Apple_Pay_Button_Blocks_Support.php:67
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Blocks_Support.php:79
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Build_Blocks_Support.php:252
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Google_Pay_Button_Blocks_Support.php:67
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:47
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Redirect.php:101
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:167
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:95
+msgid ""
+"Attention, the order for which you are making payment contains recurring "
+"payments, payment data will be stored securely by Nexi."
+msgstr ""
+"Vëmendje, porosia për të cilën po kryeni pagesën përmban pagesa të "
+"përsëritura, të dhënat e pagesës do të ruhen në mënyrë të sigurt nga Nexi."
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:26
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:159
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Blocks_Support.php:26
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Build_Blocks_Support.php:176
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:25
+#: src/classes/Nexi/WC_Gateway_XPay_Cards.php:25
+msgid "Payment cards"
+msgstr "Kartat e pagesës"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:31
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:160
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Blocks_Support.php:31
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Build_Blocks_Support.php:177
+#: src/classes/Nexi/WC_Gateway_Admin.php:25
+#: src/classes/Nexi/WC_Gateway_NPG_Cards.php:26
+#: src/classes/Nexi/WC_Gateway_XPay_Cards.php:26
+msgid "Pay securely by credit, debit and prepaid card. Powered by Nexi."
+msgstr ""
+"Paguaj në mënyrë të sigurt me kartë krediti, debiti dhe parapagimi. "
+"Mundësuar nga Nexi."
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:65
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:216
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Blocks_Support.php:65
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Build_Blocks_Support.php:243
+msgid "Nexi XPay logo"
+msgstr "Logoja e Nexi XPay"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:88
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Redirect.php:124
+msgid "Installments"
+msgstr "Këste"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Blocks_Support.php:89
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Redirect.php:127
+msgid "One time solution"
+msgstr "Zgjidhje një herëshe"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:161
+#: templates/npg_build_payment.php:8
+msgid "Incorrect or missing data"
+msgstr "Të dhëna të pasakta ose që mungojnë"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_NPG_Cards_Build_Blocks_Support.php:162
+#: templates/npg_build_payment.php:10
+msgid "XPay Build session expired"
+msgstr "Seanca e ndërtimit të XPay skadoi"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_APM_Blocks_Support.php:85
+#: templates/pagodil_checkout.php:22
+msgid "Choose the number of installments"
+msgstr "Zgjidhni numrin e kësteve"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_APM_Blocks_Support.php:88
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:73
+#: src/classes/Nexi/WC_Pagodil_Widget.php:59
+#, php-format
+msgid "Amount: %s installments of %s€"
+msgstr "Shuma: %s këste prej %s€"
+
+#: src/classes/Nexi/BlockSupport/WC_Gateway_XPay_Cards_Build_Blocks_Support.php:178
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:119
+msgid "The transaction has been declined, please retry."
+msgstr "Transaksioni është refuzuar, ju lutemi provoni përsëri."
+
+#: src/classes/Nexi/WC_Admin_Page.php:126
+msgid "Nexi payment details"
+msgstr "Detajet e pagesës në Nexi"
+
+#: src/classes/Nexi/WC_Admin_Page.php:137
+msgid "XPay payment details"
+msgstr "Detajet e pagesës XPay"
+
+#: src/classes/Nexi/WC_Admin_Page.php:159
+msgid "Euros"
+msgstr "Euro"
+
+#: src/classes/Nexi/WC_Admin_Page.php:160
+msgid "Czech Kurun"
+msgstr "Kurun Çek"
+
+#: src/classes/Nexi/WC_Admin_Page.php:161
+msgid "Zloty"
+msgstr "Zloti"
+
+#: src/classes/Nexi/WC_Admin_Page.php:162
+#: src/classes/Nexi/WC_Admin_Page.php:163
+msgid "Dollars"
+msgstr "Dollarë"
+
+#: src/classes/Nexi/WC_Admin_Page.php:180
+msgid "Missing codTrans"
+msgstr "Mungon codTrans"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:64
+msgid "Invalid credentials. Check and try again."
+msgstr "Kredencialet janë të pavlefshme. Kontrolloni dhe provoni përsëri."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:73
+msgid "Invalid API Key. Check and try again."
+msgstr "Çelës API i pavlefshëm. Kontrolloni dhe provoni përsëri."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:165
+msgid ""
+"For a correct behavior of the module, check in the configuration section of "
+"the Nexi back-office that the transaction cancellation in the event of a "
+"failed notification is set."
+msgstr ""
+"Për një sjellje të saktë të modulit, kontrolloni në seksionin e konfigurimit "
+"të Nexi back-office nëse është vendosur anulimi i transaksionit në rast të "
+"një njoftimi të dështuar."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:166
+msgid ""
+"A POST notification by the Nexi servers is sent to the following address, "
+"containing information on the outcome of the payment."
+msgstr ""
+"Një njoftim POST nga serverat Nexi dërgohet në adresën e mëposhtme, që "
+"përmban informacion mbi rezultatin e pagesës."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:168
+msgid ""
+"The notification is essential for the functioning of the plugin, it is "
+"therefore necessary that it is not blocked or filtered by the site "
+"infrastructure."
+msgstr ""
+"Njoftimi është thelbësor për funksionimin e plugin-it, prandaj është e "
+"nevojshme që ai të mos bllokohet ose filtrohet nga infrastruktura e faqes."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:171
+msgid ""
+"The 3D Secure 2 protocol adopted by the main international circuits (Visa, "
+"MasterCard, American Express), introduces new authentication methods, able "
+"to improve and speed up the cardholder's purchase experience."
+msgstr ""
+"Protokolli 3D Secure 2 i miratuar nga qarqet kryesore ndërkombëtare (Visa, "
+"MasterCard, American Express), prezanton metoda të reja autentifikimi, të "
+"afta të përmirësojnë dhe përshpejtojnë përvojën e blerjes së mbajtësit të "
+"kartës."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:173
+msgid ""
+"By activating this option it is established that the terms and conditions "
+"that you submit to your customers, with particular reference to the privacy "
+"policy, are foreseen to include the acquisition and processing of additional "
+"data provided by the"
+msgstr ""
+"Duke aktivizuar këtë opsion, përcaktohet se termat dhe kushtet që ju u "
+"paraqisni klientëve tuaj, me referencë të veçantë politikën e privatësisë, "
+"parashikohen të përfshijnë marrjen dhe përpunimin e të dhënave shtesë të "
+"ofruara nga"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:174
+#: src/classes/Nexi/WC_Gateway_Admin.php:175
+msgid "3D Secure 2 Service"
+msgstr "Shërbimi 3D Secure 2"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:176
+msgid ""
+"(for example, shipping and / or invoicing address, payment details). Nexi "
+"and the International Circuits use the additional data collected separately "
+"for the purpose of fraud prevention."
+msgstr ""
+"(për shembull, adresa e dërgesës dhe/ose faturimit, detajet e pagesës). Nexi "
+"dhe Qarqet Ndërkombëtare përdorin të dhënat shtesë të mbledhura veçmas për "
+"qëllime të parandalimit të mashtrimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:180
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:79
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:53
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:57
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:53
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:53
+msgid "Enable/Disable"
+msgstr "Aktivizo/Çaktivizo"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:182
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:81
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:55
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:59
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:55
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:55
+msgid "Enable Nexi XPay payment plugin."
+msgstr "Aktivizo shtesën e pagesave Nexi XPay."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:190
+msgid "Choose the type of credentials you have available for XPay"
+msgstr "Zgjidhni llojin e kredencialeve që keni në dispozicion për XPay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:193
+msgid "Alias and MAC Key"
+msgstr "Pseudonimi dhe çelësi MAC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:194
+msgid "APIKey"
+msgstr "APIKey"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:196
+msgid ""
+"Select \"Alias and MAC Key\" option if you received the credentials of the "
+"production environment in the Welcome Mail received from Nexi during the "
+"activation of the service"
+msgstr ""
+"Zgjidhni opsionin \"Alias dhe MAC Key\" nëse keni marrë kredencialet e "
+"mjedisit të prodhimit në emailin e mirëseardhjes të marrë nga Nexi gjatë "
+"aktivizimit të shërbimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:197
+msgid ""
+"Select \"APIKey\" option if you use the API Key as the credential of the "
+"production environment generated from the Back Office XPay. Follow the "
+"directions in the developer portal for the correct generation process."
+msgstr ""
+"Zgjidhni opsionin \"APIKey\" nëse përdorni Çelësin API si kredencialin e "
+"mjedisit të prodhimit të gjeneruar nga Back Office XPay. Ndiqni udhëzimet në "
+"portalin e zhvilluesit për procesin e saktë të gjenerimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:204
+msgid "Type of integration"
+msgstr "Lloji i integrimit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:207
+msgid "Hosted Payment Page with redirect"
+msgstr "Faqe Pagesash e Pritur me Ridrejtim"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:208
+msgid "Build with embedded checkout"
+msgstr "Ndërto me arkëtim të integruar"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:210
+msgid ""
+"Select \"Hosted Payment Page with redirect\" if you want to use \"Hosted "
+"Payment Page\" integration type where the customer is redirected to XPay "
+"external checkout page."
+msgstr ""
+"Zgjidhni \"Faqja e Pagesës së Hostuar me ridrejtim\" nëse doni të përdorni "
+"llojin e integrimit \"Faqja e Pagesës së Hostuar\" ku klienti ridrejtohet në "
+"faqen e arkëtimit të jashtme të XPay."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:211
+msgid ""
+"Select \"Build with embedded checkout\" if you want to use \"XPay Build\" "
+"integration type where the payment form is on checkout."
+msgstr ""
+"Zgjidhni \"Ndërto me arkë të integruar\" nëse doni të përdorni llojin e "
+"integrimit \"XPay Build\" ku formulari i pagesës është në arkë."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:218
+msgid "Alias"
+msgstr "Pseudonim"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:220
+#: src/classes/Nexi/WC_Gateway_Admin.php:226
+#: src/classes/Nexi/WC_Gateway_Admin.php:640
+#: src/classes/Nexi/WC_Gateway_Admin.php:646
+#: src/classes/Nexi/WC_Gateway_Admin.php:652
+msgid "Given to Merchant by Nexi."
+msgstr "I është dhënë Tregtarit nga Nexi."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:224
+msgid "Key MAC"
+msgstr "MAC kyç"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:233
+msgid "API Key"
+msgstr "Çelësi API"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:235
+msgid ""
+"Generated from the Back Office XPay. Follow the directions in the developer "
+"portal for the correct generation process."
+msgstr ""
+"Gjeneruar nga Back Office XPay. Ndiqni udhëzimet në portalin e zhvilluesit "
+"për procesin e saktë të gjenerimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:242
+msgid "Enable/Disable TEST Mode"
+msgstr "Aktivizo/çaktivizo Modalitetin TEST"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:244
+msgid "Enable Nexi XPay plugin in testing mode."
+msgstr "Aktivizo plugin-in Nexi XPay në modalitetin e testimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:246
+msgid "Please register at"
+msgstr "Ju lutemi regjistrohuni në"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:246
+msgid "to get the test credentials."
+msgstr "për të marrë kredencialet e testimit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:246
+msgid "Please refer to Dev Portal to get access to the Sandbox"
+msgstr ""
+"Ju lutemi referojuni Portalit të Zhvillimit për të pasur akses në Sandbox."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:250
+msgid "Capture method"
+msgstr "Metoda e kapjes"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:253
+msgid "Immediate"
+msgstr "I menjëhershëm"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:254
+msgid "Deferred"
+msgstr "Shtyrë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:256
+msgid ""
+"This field identifies the collection method the merchant wishes to apply to "
+"the individual transaction. If set to:<br />-C (immediate), the transaction, "
+"if authorized, is also collected without further intervention by the "
+"operator and regardless of the default profile set on the terminal.<br />-D "
+"(deferred), meaning the field is left blank, the transaction, if authorized, "
+"is handled according to the terminal profile."
+msgstr ""
+"Kjo fushë identifikon metodën e mbledhjes që tregtari dëshiron të aplikojë "
+"për transaksionin individual. Nëse vendoset në:<br /> -C (i menjëhershëm), "
+"transaksioni, nëse autorizohet, mblidhet gjithashtu pa ndërhyrje të "
+"mëtejshme nga operatori dhe pavarësisht profilit të parazgjedhur të vendosur "
+"në terminal.<br /> -D (e shtyrë), që do të thotë se fusha lihet bosh, "
+"transaksioni, nëse autorizohet, trajtohet sipas profilit të terminalit."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:260
+msgid "Enable 3D Secure 2 service"
+msgstr "Aktivizo shërbimin 3D Secure 2"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:262
+msgid "Enable the sending of the fields for the 3D Secure 2 service"
+msgstr "Aktivizoni dërgimin e fushave për shërbimin 3D Secure 2"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:267
+msgid "Enable/Disable OneClick"
+msgstr "Aktivizo/çaktivizo OneClick"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:269
+msgid "Enable Nexi XPay for OneClick payment"
+msgstr "Aktivizo Nexi XPay për pagesën me një klikim"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:271
+msgid ""
+"Enable Nexi XPay for OneClick payment. Make sure that this option is also "
+"enabled on your terminal configuration."
+msgstr ""
+"Aktivizoni Nexi XPay për pagesat me OneClick. Sigurohuni që ky opsion të "
+"jetë i aktivizuar edhe në konfigurimin e terminalit tuaj."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:278
+msgid "Enable/Disable Multicurrency"
+msgstr "Aktivizo/çaktivizo shumëmonedha"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:280
+msgid "Enable Nexi XPay for Multicurrency payments"
+msgstr "Aktivizo Nexi XPay për pagesat me shumë valuta"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:282
+msgid ""
+"Enable this option to make the payment methods available for different "
+"currencies. If your shop only supports a currency other than the euro, "
+"please enable the feature. To have the complete list of the supported "
+"currencies, please visit the developer Portal. Make sure that this option is "
+"also enabled on your terminal configuration."
+msgstr ""
+"Aktivizoni këtë opsion për të bërë të disponueshme metodat e pagesës për "
+"monedha të ndryshme. Nëse dyqani juaj mbështet vetëm një monedhë tjetër "
+"përveç euros, ju lutemi aktivizoni këtë funksion. Për të pasur listën e "
+"plotë të monedhave të mbështetura, ju lutemi vizitoni Portalin e Zhvilluesit."
+" Sigurohuni që ky opsion të jetë i aktivizuar edhe në konfigurimin e "
+"terminalit tuaj."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:289
+#: src/classes/Nexi/WC_Gateway_Admin.php:291
+msgid "Enable/Disable Installment Payments"
+msgstr "Aktivizo/Çaktivizo Pagesat me Këste"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:293
+msgid ""
+"Enable this option to use installment payments via XPay. This functionality "
+"is only available to merchants with Greek VAT Number. Before enabling this "
+"functionality, make sure it is available on your terminal with your payment "
+"provider."
+msgstr ""
+"Aktivizoni këtë opsion për të përdorur pagesat me këste nëpërmjet XPay. Ky "
+"funksionalitet është i disponueshëm vetëm për tregtarët me Numër Grek të "
+"TVSH-së. Përpara se ta aktivizoni këtë funksionalitet, sigurohuni që të jetë "
+"i disponueshëm në terminalin tuaj me ofruesin e pagesave."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:306
+#: src/classes/Nexi/WC_Gateway_Admin.php:309
+#: src/classes/Nexi/WC_Gateway_Admin.php:329
+#: src/classes/Nexi/WC_Gateway_Admin.php:332
+msgid "Maximum number of installments regardless of the total order amount"
+msgstr "Numri maksimal i kësteve pavarësisht nga shuma totale e porosisë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:311
+#: src/classes/Nexi/WC_Gateway_Admin.php:334
+msgid ""
+"1 to 99 installments, 1 for one shot payment. Before set up a configuration, "
+"make sure to check with your payment provider what is the maximum number "
+"accepted for your terminal."
+msgstr ""
+"1 deri në 99 këste, 1 për pagesë të vetme. Përpara se të konfiguroni një "
+"konfigurim, sigurohuni që të kontrolloni me ofruesin tuaj të pagesave se "
+"cili është numri maksimal i pranuar për terminalin tuaj."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:318
+#: src/classes/Nexi/WC_Gateway_Admin.php:320
+#: src/classes/Nexi/WC_Gateway_Admin.php:341
+#: src/classes/Nexi/WC_Gateway_Admin.php:343
+msgid "Maximum number of installments depending on the total order amount"
+msgstr "Numri maksimal i kësteve në varësi të shumës totale të porosisë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:322
+#: src/classes/Nexi/WC_Gateway_Admin.php:345
+msgid "Add amount and installments for each row. The installments limit is 99"
+msgstr ""
+"Shtoni shumën dhe këstet për secilin rresht. Limiti i kësteve është 99."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:352
+#: src/classes/Nexi/WC_Gateway_Admin.php:353
+msgid "Google Pay configuration"
+msgstr "Konfigurimi i Google Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:358
+msgid "Google Pay instructions"
+msgstr "Udhëzime për Google Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:363
+#: src/classes/Nexi/WC_Gateway_Admin.php:364
+#: src/classes/Nexi/WC_Gateway_Admin.php:443
+#: src/classes/Nexi/WC_Gateway_Admin.php:444
+msgid "Redirect or button"
+msgstr "Ridrejto ose buton"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:367
+#: src/classes/Nexi/WC_Gateway_Admin.php:447
+msgid "Redirect"
+msgstr "Ridrejto"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:368
+#: src/classes/Nexi/WC_Gateway_Admin.php:448
+msgid "Button"
+msgstr "Buton"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:375
+#: src/classes/Nexi/WC_Gateway_Admin.php:376
+msgid "Google merchant name"
+msgstr "Emri i tregtarit në Google"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:383
+#: src/classes/Nexi/WC_Gateway_Admin.php:384
+msgid "Google merchant Id"
+msgstr "ID-ja e tregtarit të Google"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:391
+#: src/classes/Nexi/WC_Gateway_Admin.php:392
+msgid "Google gateway merchant Id"
+msgstr "ID-ja e tregtarit të portës së Google-it"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:399
+#: src/classes/Nexi/WC_Gateway_Admin.php:400
+#: src/classes/Nexi/WC_Gateway_Admin.php:487
+#: src/classes/Nexi/WC_Gateway_Admin.php:488
+msgid "Button type"
+msgstr "Lloji i butonit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:403
+#: src/classes/Nexi/WC_Gateway_Admin.php:495
+msgid "Buy"
+msgstr "Bli"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:404
+#: src/classes/Nexi/WC_Gateway_Admin.php:494
+msgid "Book"
+msgstr "Libër"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:405
+msgid "Checkout"
+msgstr "Arka"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:406
+#: src/classes/Nexi/WC_Gateway_Admin.php:498
+msgid "Donate"
+msgstr "Dhuro"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:407
+#: src/classes/Nexi/WC_Gateway_Admin.php:499
+msgid "Order"
+msgstr "Porosit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:408
+#: src/classes/Nexi/WC_Gateway_Admin.php:500
+msgid "Pay"
+msgstr "Paguaj"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:409
+#: src/classes/Nexi/WC_Gateway_Admin.php:491
+msgid "Plain"
+msgstr "I thjeshtë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:410
+#: src/classes/Nexi/WC_Gateway_Admin.php:504
+msgid "Subscribe"
+msgstr "Abonohu"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:417
+#: src/classes/Nexi/WC_Gateway_Admin.php:418
+msgid "Button color"
+msgstr "Ngjyra e butonit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:421
+msgid "Default"
+msgstr "Parazgjedhur"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:422
+#: src/classes/Nexi/WC_Gateway_Admin.php:518
+msgid "Black"
+msgstr "E zezë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:423
+#: src/classes/Nexi/WC_Gateway_Admin.php:520
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:259
+msgid "White"
+msgstr "E bardhë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:433
+msgid "Apple Pay configuration"
+msgstr "Konfigurimi i Apple Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:438
+msgid "Apple Pay instructions"
+msgstr "Udhëzime për Apple Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:455
+#: src/classes/Nexi/WC_Gateway_Admin.php:456
+msgid "Merchant label"
+msgstr "Etiketa e tregtarit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:462
+#: src/classes/Nexi/WC_Gateway_Admin.php:463
+msgid "Merchant identifier"
+msgstr "Identifikuesi i tregtarit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:469
+msgid "Merchant identifier certificate"
+msgstr "Certifikata e identifikuesit të tregtarit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:475
+msgid "Merchant identifier certificate key"
+msgstr "Çelësi i certifikatës së identifikuesit të tregtarit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:481
+msgid "CA root certificate"
+msgstr "Certifikatë rrënjë CA"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:492
+msgid "Continue"
+msgstr "Vazhdo"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:493
+msgid "Add Money"
+msgstr "Shto Para"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:496
+msgid "Check Out"
+msgstr "Kontrolloni"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:497
+msgid "Contribute"
+msgstr "Kontribuo"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:501
+msgid "Reload"
+msgstr "Ringarko"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:502
+msgid "Rent"
+msgstr "Qira"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:503
+msgid "Set Up"
+msgstr "Konfiguro"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:505
+msgid "Support"
+msgstr "Mbështetje"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:506
+msgid "Tip"
+msgstr "Bakshish"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:507
+msgid "Top Up"
+msgstr "Mbushje"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:514
+#: src/classes/Nexi/WC_Gateway_Admin.php:515
+msgid "Button style"
+msgstr "Stili i butonit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:519
+msgid "White with outline"
+msgstr "E bardhë me kontur"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:530
+msgid "Style configuration"
+msgstr "Konfigurimi i stilit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:532
+msgid ""
+"By using this configurator you can change the look and feel of your module"
+msgstr ""
+"Duke përdorur këtë konfigurues, mund të ndryshoni pamjen dhe ndjesinë e "
+"modulit tuaj."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:536
+msgid "Preview"
+msgstr "Pamje paraprake"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:543
+msgid "Font family"
+msgstr "Familja e shkronjave"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:545
+msgid "The font family in the CC Form"
+msgstr "Familja e shkronjave në formularin CC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:551
+msgid "Font size"
+msgstr "Madhësia e shkronjave"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:553
+msgid "The size of the font in the CC Form in pixel"
+msgstr "Madhësia e fontit në formularin CC në piksel"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:559
+msgid "Font style"
+msgstr "Stili i shkronjave"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:561
+msgid "Font style in the CC Form"
+msgstr "Stili i shkronjave në formularin CC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:568
+msgid "Font variant"
+msgstr "Varianti i fontit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:570
+msgid "Font variant in the CC Form"
+msgstr "Varianti i shkronjave në formularin CC"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:577
+msgid "Letter spacing"
+msgstr "Hapësira e shkronjave"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:579
+msgid "The space between letters in pixel"
+msgstr "Hapësira midis shkronjave në piksel"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:585
+msgid "Border Color"
+msgstr "Ngjyra e kufirit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:587
+msgid "When form is empty or correct"
+msgstr "Kur formulari është bosh ose i saktë"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:594
+msgid "Error Border Color"
+msgstr "Ngjyra e kufirit të gabimit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:596
+msgid "When form has error"
+msgstr "Kur formulari ka një gabim"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:603
+msgid "Placeholder Color"
+msgstr "Ngjyra e vendmbajtësit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:605
+msgid "Text color of placeholder"
+msgstr "Ngjyra e tekstit të vendmbajtësit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:612
+msgid "Text Color"
+msgstr "Ngjyra e tekstit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:614
+msgid "Text color in input field"
+msgstr "Ngjyra e tekstit në fushën e futjes"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:627
+msgid "Subscription configuration"
+msgstr "Konfigurimi i abonimit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:631
+msgid "Enable/Disable Recurring"
+msgstr "Aktivizo/çaktivizo përsëritjen"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:633
+msgid "Enable Nexi XPay for subscription's payment"
+msgstr "Aktivizoni Nexi XPay për pagesën e abonimit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:638
+msgid "Recurring Alias"
+msgstr "Pseudonim i përsëritur"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:644
+msgid "Recurring key MAC"
+msgstr "MAC çelës përsëritës"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:650
+msgid "Group"
+msgstr "Grup"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:672
+#: src/classes/Nexi/WC_Gateway_Admin.php:689
+msgid "Instructions for setting up Google Pay in a production environment"
+msgstr "Udhëzime për konfigurimin e Google Pay në një mjedis prodhimi"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:673
+#: src/classes/Nexi/WC_Gateway_Admin.php:682
+#: src/classes/Nexi/WC_Gateway_Admin.php:690
+#: src/classes/Nexi/WC_Gateway_Admin.php:699
+msgid "To enable Google Pay, follow these steps:"
+msgstr "Për të aktivizuar Google Pay, ndiqni këto hapa:"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:675
+msgid ""
+"Enable APM: Verify that the alternative payment method (APM) is enabled on "
+"the terminal by accessing the portal <a href='https://business.nexi.it'>"
+"https://business.nexi.it</a> in the XPay Back office -> Alternative Payments "
+"-> Google Pay section"
+msgstr ""
+"Aktivizo APM: Verifikoni që metoda alternative e pagesës (APM) është "
+"aktivizuar në terminal duke hyrë në portalin <a href='https://business.nexi."
+"it'>https://business.nexi.it</a> në seksionin XPay Back office -&gt; Pagesat "
+"Alternative -&gt; Google Pay."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:676
+#: src/classes/Nexi/WC_Gateway_Admin.php:693
+#: src/classes/Nexi/WC_Gateway_Admin.php:702
+msgid ""
+"Register your domain: Go to the Google Pay Business Console (<a href='https:"
+"//pay.google.com/business/console/home'>https://pay.google."
+"com/business/console/home</a>) and register your domain (Google Pay API -> "
+"Integrate with your website). Google must approve it before you can proceed. "
+"<i>(Note: If you don't have a Google Merchant account, you'll be able to "
+"create one during this process.)</i>"
+msgstr ""
+"Regjistro domenin tënd: Shko te Google Pay Business Console ( <a href='https:"
+"//pay.google.com/business/console/home'>https://pay.google."
+"com/business/console/home</a> ) dhe regjistro domenin tënd (Google Pay API -"
+"&gt; Integroje me faqen tënde të internetit). Google duhet ta miratojë atë "
+"përpara se të vazhdosh. <i>(Shënim: Nëse nuk ke një llogari Google Merchant, "
+"do të jesh në gjendje të krijosh një gjatë këtij procesi.)</i>"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:677
+#: src/classes/Nexi/WC_Gateway_Admin.php:694
+#: src/classes/Nexi/WC_Gateway_Admin.php:703
+msgid ""
+"Retrieve merchant data: Once your domain is approved, retrieve the following "
+"data from the Google Pay console:"
+msgstr ""
+"Merrni të dhënat e tregtarit: Pasi të miratohet domeni juaj, merrni të "
+"dhënat e mëposhtme nga konsola e Google Pay:"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:678
+#: src/classes/Nexi/WC_Gateway_Admin.php:686
+msgid ""
+"Set up your Gateway Merchant ID: Your Google Gateway Merchant ID is the "
+"numeric part of your alias."
+msgstr ""
+"Konfiguroni ID-në tuaj të tregtarit të Gateway: ID-ja juaj e tregtarit të "
+"Google Gateway është pjesa numerike e pseudonimit tuaj."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:681
+#: src/classes/Nexi/WC_Gateway_Admin.php:698
+msgid "Instructions for setting up Google Pay in a test environment"
+msgstr "Udhëzime për konfigurimin e Google Pay në një mjedis testimi"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:684
+msgid ""
+"Enable APM: Verify that the alternative payment method (APM) is enabled on "
+"the terminal by accessing <a href='https://ecommerce.nexi.it/area-test'>"
+"https://ecommerce.nexi.it/area-test</a> -> Simple/OneClick Payment -> Back "
+"office access data -> Alternative payments -> Google Pay"
+msgstr ""
+"Aktivizo APM-në: Verifikoni që metoda alternative e pagesës (APM) është "
+"aktivizuar në terminal duke hyrë në <a href='https://ecommerce.nexi.it/area-"
+"test'>https://ecommerce.nexi.it/area-test</a> -&gt; Pagesë e Thjeshtë/Me Një "
+"Klikim -&gt; Të dhënat e aksesit në zyrën e prapme -&gt; Pagesa alternative -"
+"&gt; Google Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:685
+msgid ""
+"Retrieve merchant data: For the test environment, dummy data can be used to "
+"populate the Google Merchant Name (e.g. Test Merchant) and Google Merchant "
+"ID (e.g. 1234567890123456) parameters."
+msgstr ""
+"Marrja e të dhënave të tregtarit: Për mjedisin e testimit, të dhënat "
+"artificiale mund të përdoren për të populluar parametrat Emri i Tregtarit të "
+"Google (p.sh. Tregtari Testues) dhe ID e Tregtarit të Google (p.sh. "
+"1234567890123456)."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:692
+msgid ""
+"Enable APM: Verify that the alternative payment method (APM) is enabled on "
+"the terminal by accessing the portal <a href='https://business.nexi.it/'>"
+"https://business.nexi.it/</a> -> Services -> Ecommerce solutions -> XPay Web "
+"- Login -> Configurations -> Alternative payments -> Google Pay"
+msgstr ""
+"Aktivizo APM: Verifikoni që metoda alternative e pagesës (APM) është "
+"aktivizuar në terminal duke hyrë në portalin <a href='https://business.nexi."
+"it/'>https://business.nexi.it/</a> -&gt; Shërbime -&gt; Zgjidhje të tregtisë "
+"elektronike -&gt; XPay Web - Hyrje -&gt; Konfigurime -&gt; Pagesa "
+"alternative -&gt; Google Pay"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:695
+#: src/classes/Nexi/WC_Gateway_Admin.php:704
+msgid ""
+"Set the Gateway Merchant ID: Set this parameter to a randomly generated UUID "
+"v4 string"
+msgstr ""
+"Cakto ID-në e Tregtarit të Portës: Cakto këtë parametër në një varg UUID v4 "
+"të gjeneruar rastësisht."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:701
+msgid ""
+"Enable APM: The payment method is already enabled on public test terminals "
+"(<a href='https://developer.nexi.it/it/area-test/api-key'>https://developer."
+"nexi.it/it/area-test/api-key</a>)"
+msgstr ""
+"Aktivizo APM: Metoda e pagesës është aktivizuar tashmë në terminalet publike "
+"të testimit ( <a href='https://developer.nexi.it/it/area-test/api-key'>https:"
+"//developer.nexi.it/it/area-test/api-key</a> )"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:734
+msgid "Instructions for setting up Apple Pay in a production environment"
+msgstr "Udhëzime për konfigurimin e Apple Pay në një mjedis prodhimi"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:735
+#: src/classes/Nexi/WC_Gateway_Admin.php:752
+msgid "To properly set up Apple Pay, follow these steps:"
+msgstr "Për të konfiguruar siç duhet Apple Pay, ndiqni këto hapa:"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:737
+#: src/classes/Nexi/WC_Gateway_Admin.php:754
+msgid "Registering as an Apple Merchant"
+msgstr "Regjistrimi si Tregtar i Apple"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:738
+#: src/classes/Nexi/WC_Gateway_Admin.php:755
+msgid ""
+"Go to <a href='https://developer.apple."
+"com/account/resources/identifiers/list/merchant'>Apple Developer - Merchant "
+"IDs</a> to register as a merchant in your Apple Developer account."
+msgstr ""
+"Shkoni te <a href='https://developer.apple."
+"com/account/resources/identifiers/list/merchant'>Apple Developer - ID-të e "
+"tregtarëve</a> për t&#39;u regjistruar si tregtar në llogarinë tuaj Apple "
+"Developer."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:738
+#: src/classes/Nexi/WC_Gateway_Admin.php:755
+msgid ""
+"<i>(Note: If you don't have an Apple Developer account, you'll be able to "
+"create one during this process.)</i>"
+msgstr ""
+"<i>(Shënim: Nëse nuk keni një llogari Apple Developer, do të jeni në gjendje "
+"të krijoni një të tillë gjatë këtij procesi.)</i>"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:739
+#: src/classes/Nexi/WC_Gateway_Admin.php:756
+msgid "Generating certificates"
+msgstr "Gjenerimi i certifikatave"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:740
+#: src/classes/Nexi/WC_Gateway_Admin.php:757
+msgid ""
+"After registration, generate the required certificates. These will need to "
+"be uploaded both to the plugin configuration and to the back office, as "
+"indicated in the following steps."
+msgstr ""
+"Pas regjistrimit, gjeneroni certifikatat e kërkuara. Këto do të duhet të "
+"ngarkohen si në konfigurimin e plugin-it ashtu edhe në zyrën e pasme, siç "
+"tregohet në hapat e mëposhtëm."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:741
+#: src/classes/Nexi/WC_Gateway_Admin.php:758
+msgid "Enabling the payment method in the Nexi back office"
+msgstr "Aktivizimi i metodës së pagesës në zyrën e Nexi-t"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:742
+msgid ""
+"Log in to the <a href='https://business.nexi.it'>https://business.nexi.it</a>"
+" portal and go to XPay Back office -> Alternative payments -> Apple Pay, "
+"then in the Apple Pay S2S Management section upload one of the generated "
+"certificates."
+msgstr ""
+"Kyçuni në portalin <a href='https://business.nexi.it'>https://business.nexi."
+"it</a> dhe shkoni te XPay Back office -&gt; Pagesat alternative -&gt; Apple "
+"Pay, pastaj në seksionin Apple Pay S2S Management ngarkoni një nga "
+"certifikatat e gjeneruara."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:743
+#: src/classes/Nexi/WC_Gateway_Admin.php:760
+msgid "Uploading certificates to the plugin"
+msgstr "Duke ngarkuar certifikatat në plugin"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:744
+#: src/classes/Nexi/WC_Gateway_Admin.php:761
+msgid ""
+"Once Apple Pay is enabled on the terminal, upload the other certificates in "
+"the plugin configuration section, following the instructions in the official "
+"documentation: <a href='https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay'>https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay</a>"
+msgstr ""
+"Pasi të aktivizohet Apple Pay në terminal, ngarkoni certifikatat e tjera në "
+"seksionin e konfigurimit të plugin-it, duke ndjekur udhëzimet në "
+"dokumentacionin zyrtar: <a href='https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay'>https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay</a>"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:745
+#: src/classes/Nexi/WC_Gateway_Admin.php:762
+msgid "Retrieving parameters"
+msgstr "Duke marrë parametrat"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:746
+#: src/classes/Nexi/WC_Gateway_Admin.php:763
+msgid ""
+"The Merchant ID and Merchant Name parameters are available in the merchant "
+"management section within your Apple Developer account."
+msgstr ""
+"Parametrat e ID-së së Tregtarit dhe Emrit të Tregtarit janë të disponueshëm "
+"në seksionin e menaxhimit të tregtarit brenda llogarisë suaj të Zhvilluesit "
+"Apple."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:747
+#: src/classes/Nexi/WC_Gateway_Admin.php:764
+msgid "Domain Registration"
+msgstr "Regjistrimi i domenit"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:748
+#: src/classes/Nexi/WC_Gateway_Admin.php:765
+msgid ""
+"Finally, register your domain following the official Apple instructions: <a "
+"href='https://developer.apple.com/help/account/capabilities/configure-apple-"
+"pay-on-the-web'>https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay-on-the-web</a>"
+msgstr ""
+"Së fundmi, regjistroni domenin tuaj duke ndjekur udhëzimet zyrtare të Apple: "
+"<a href='https://developer.apple.com/help/account/capabilities/configure-"
+"apple-pay-on-the-web'>https://developer.apple."
+"com/help/account/capabilities/configure-apple-pay-on-the-web</a>"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:751
+msgid "Instructions for setting up Apple Pay in a test environment"
+msgstr "Udhëzime për konfigurimin e Apple Pay në një mjedis testimi"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:759
+msgid ""
+"Access the test area at the link <a href='https://ecommerce.nexi.it/area-"
+"test'>https://ecommerce.nexi.it/area-test</a> and go to Simple "
+"Payment/OneClick->Back office access data->Alternative payments->Apple Pay, "
+"then in the Apple Pay S2S Management section upload one of the generated "
+"certificates."
+msgstr ""
+"Hyni në zonën e testimit në linkun <a href='https://ecommerce.nexi.it/area-"
+"test'>https://ecommerce.nexi.it/area-test</a> dhe shkoni te Pagesa e "
+"Thjeshtë/OneClick-&gt;Të dhënat e aksesit në zyrën e prapavijës-&gt;Pagesat "
+"alternative-&gt;Apple Pay, pastaj në seksionin Menaxhimi i Apple Pay S2S "
+"ngarkoni një nga certifikatat e gjeneruara."
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:820
+msgid "Up to an amount of"
+msgstr "Deri në një sasi prej"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:821
+msgid "Maximum installments"
+msgstr "Këstet maksimale"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:831
+msgid "Add rule"
+msgstr "Shto rregull"
+
+#: src/classes/Nexi/WC_Gateway_Admin.php:835
+msgid "Delete"
+msgstr "Fshij"
+
+#: src/classes/Nexi/WC_Gateway_Apple_Pay.php:78
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:593
+msgid "Can't connect!"
+msgstr "Nuk mund të lidhet!"
+
+#: src/classes/Nexi/WC_Gateway_Apple_Pay.php:110
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:607
+#, php-format
+msgid "CURL exec error: %s"
+msgstr "Gabim ekzekutimi i CURL: %s"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:382
+msgid ""
+"Simply pay by bank transfer directly from your home banking with PagoinConto"
+msgstr ""
+"Paguaj thjesht me transfer bankar direkt nga sistemi yt i shërbimeve bankare "
+"në shtëpi me PagoinConto"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:392
+msgid ""
+"Simply pay by bank transfer directly from your home banking with PayByBank"
+msgstr ""
+"Paguaj thjesht me transfer bankar direkt nga banka juaj në shtëpi me "
+"PayByBank"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:402
+msgid "Easily pay with your Google Pay wallet"
+msgstr "Paguaj lehtësisht me portofolin tënd Google Pay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:412
+msgid "Easily pay with your Apple Pay wallet"
+msgstr "Paguaj lehtësisht me portofolin tënd Apple Pay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:422
+msgid "Pay via BANCOMAT Pay just by entering your phone number"
+msgstr ""
+"Paguaj nëpërmjet BANCOMAT Paguaj vetëm duke futur numrin tënd të telefonit"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:432
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:652
+msgid "Pay securely by bank transfer with MyBank"
+msgstr "Paguaj në mënyrë të sigurt me transfer bankar me MyBank"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:442
+msgid "Pay quickly and easily with your AliPay wallet"
+msgstr "Paguaj shpejt dhe lehtë me portofolin tënd AliPay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:452
+msgid "Pay quickly and easily with your WeChat Pay wallet"
+msgstr "Paguaj shpejt dhe lehtë me portofolin tënd WeChat Pay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:462
+msgid "Pay directly from your bank account with Giropay"
+msgstr "Paguaj direkt nga llogaria jote bankare me Giropay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:472
+msgid "Pay directly from your bank account with iDEAL"
+msgstr "Paguaj direkt nga llogaria jote bankare me iDEAL"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:482
+msgid "Pay easily with Bancontact"
+msgstr "Paguaj lehtë me Bancontact"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:492
+msgid "Real time payment directly from your bank account with EPS"
+msgstr "Pagesë në kohë reale direkt nga llogaria juaj bankare me EPS"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:502
+msgid "Secure payment directly from your bank account with Przelewy24"
+msgstr "Pagesë e sigurt direkt nga llogaria juaj bankare me Przelewy24"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:512
+msgid "Pay quickly and easily with your Skrill wallet"
+msgstr "Paguaj shpejt dhe lehtë me portofolin tënd Skrill"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:522
+msgid "Pay in one tap with your Skrill wallet"
+msgstr "Paguaj me një prekje të vetme me portofolin tënd Skrill"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:532
+msgid "Secure payment directly from your bank account with PayU"
+msgstr "Pagesë e sigurt direkt nga llogaria juaj bankare me PayU"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:542
+msgid "Secure payment directly from your home banking with Blik"
+msgstr "Pagesë e sigurt direkt nga banka juaj në shtëpi me Blik"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:552
+msgid "Secure payment directly from your home banking with Multibanco"
+msgstr "Pagesë e sigurt direkt nga banka juaj në shtëpi me Multibanco"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:562
+msgid "Pay easily with your Satispay account"
+msgstr "Paguaj lehtë me llogarinë tënde Satispay"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:572
+msgid "Pay easily with your Amazon account"
+msgstr "Paguaj lehtë me llogarinë tënde në Amazon"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:582
+msgid "Pay securely with your PayPal account"
+msgstr "Paguaj në mënyrë të sigurt me llogarinë tënde PayPal"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:592
+msgid "Pay in 3 or 4 installments by credit, debit or Postepay card with Oney"
+msgstr "Paguaj me 3 ose 4 këste me kartë krediti, debiti ose Postepay me Oney"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:602
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:662
+msgid "Pay in 3 installments with Klarna interest-free"
+msgstr "Paguaj me 3 këste me Klarna pa interes"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:612
+msgid "Buy now and pay a little by little with PagoDIL"
+msgstr "Bli tani dhe paguaj pak nga pak me PagoDIL"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:622
+msgid "Pay in installments with HeyLight"
+msgstr "Paguaj me këste me HeyLight"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:632
+msgid "Pay in 3 installments with PayPal"
+msgstr "Paguaj me 3 këste me PayPal"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:642
+msgid "Pay securely with POLi"
+msgstr "Paguaj në mënyrë të sigurt me POLi"
+
+#: src/classes/Nexi/WC_Gateway_Nexi_Register_Available.php:672
+msgid "Pay securely with IRIS"
+msgstr "Paguaj në mënyrë të sigurt me IRIS"
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:96
+msgid "Error while checking credentials."
+msgstr "Gabim gjatë kontrollit të kredencialeve."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:195
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:642
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:744
+msgid "Unable to initialize the payment."
+msgstr "Nuk mund të inicializohet pagesa."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:295
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:316
+msgid "Unable to retrive customer related info."
+msgstr "Nuk mund të rikuperohen informacionet që lidhen me klientin."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:312
+msgid "Customer not found."
+msgstr "Klienti nuk u gjet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:328
+msgid "NPG orderId not found for order: "
+msgstr "ID-ja e porosisë NPG nuk u gjet për porosinë:"
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:335
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:343
+msgid "Unable to retrive order related info."
+msgstr "Nuk mund të rikuperohen informacionet që lidhen me porosinë."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:339
+msgid "Order not found."
+msgstr "Porosia nuk u gjet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:421
+msgid "Unable to complete refund operation."
+msgstr "Operacioni i rimbursimit nuk mund të përfundohet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:487
+msgid "Unable to complete capture operation."
+msgstr "Operacioni i kapjes nuk mund të përfundohet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:538
+msgid "Unable to perform the recurring payment."
+msgstr "Pamundësia për të kryer pagesën e përsëritur."
+
+#: src/classes/Nexi/WC_Gateway_NPG_API.php:665
+msgid "Unable to finalize the payment."
+msgstr "Pagesa nuk mund të finalizohet."
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:67
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:41
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:45
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:41
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:41
+msgid "APMs do not have a custom configuration. "
+msgstr "APM-të nuk kanë një konfigurim të personalizuar."
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:69
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:43
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:47
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:43
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:43
+msgid "Please use "
+msgstr "Ju lutem përdorni"
+
+#: src/classes/Nexi/WC_Gateway_NPG_APM.php:71
+#: src/classes/Nexi/WC_Gateway_NPG_Google_Pay_Button.php:45
+#: src/classes/Nexi/WC_Gateway_XPay_APM.php:49
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:45
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:45
+msgid " configurations"
+msgstr "konfigurime"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:38
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:92
+msgid "New payment methods can only be added during checkout"
+msgstr ""
+"Metodat e reja të pagesës mund të shtohen vetëm gjatë përfundimit të blerjes"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Build.php:105
+msgid "Error during payment proccess"
+msgstr "Gabim gjatë procesit të pagesës"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Redirect.php:83
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:90
+msgid "New payment methods can only be added during checkout."
+msgstr ""
+"Metodat e reja të pagesës mund të shtohen vetëm gjatë përfundimit të blerjes."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Cards_Redirect.php:114
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:173
+msgid "Remember the payment option."
+msgstr "Mbani mend opsionin e pagesës."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Generic_Method.php:102
+#: src/classes/Nexi/WC_Gateway_XPay_Generic_Method.php:187
+msgid "Invalid refund amount."
+msgstr "Shumë e pavlefshme rimbursimi."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:142
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:310
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:314
+msgid "Payment error, please try again"
+msgstr "Gabim pagese, ju lutemi provoni përsëri."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:391
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:397
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:124
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:295
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:127
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:172
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:181
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:245
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:302
+#: woocommerce-gateway-nexi-xpay.php:247
+msgid "Payment error"
+msgstr "Gabim pagese"
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:448
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:352
+msgid "Payment has been cancelled."
+msgstr "Pagesa është anuluar."
+
+#: src/classes/Nexi/WC_Gateway_NPG_Process_Completion.php:468
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:373
+msgid "Invalid amount."
+msgstr "Shuma e pavlefshme."
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:116
+msgid "Response KO"
+msgstr "Përgjigje KO"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:129
+msgid "Mac verification failed"
+msgstr "Verifikimi i Mac dështoi"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:429
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:470
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:515
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:576
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:673
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:747
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:808
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:868
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:931
+msgid "Error in the calculation of the return MAC parameter"
+msgstr "Gabim në llogaritjen e parametrit MAC të kthimit"
+
+#: src/classes/Nexi/WC_Gateway_XPay_API.php:614
+msgid "JSON error"
+msgstr "Gabim JSON"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:101
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:272
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:103
+msgid "Nexi XPay payment successful"
+msgstr "Pagesa me Nexi XPay u krye me sukses."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:127
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:298
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:130
+msgid "Payment denied, please retry the transaction using the same card."
+msgstr ""
+"Pagesa u refuzua, ju lutemi provoni përsëri transaksionin duke përdorur të "
+"njëjtën kartë."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:129
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:300
+#: src/classes/Nexi/WC_Gateway_XPay_Google_Pay_Button.php:132
+msgid ""
+"Thank you for shopping with us. However, the transaction has been declined."
+msgstr ""
+"Faleminderit që bëtë pazar tek ne. Megjithatë, transaksioni është refuzuar."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:264
+msgid "Nexi XPay payment and card tokenization successful"
+msgstr "Pagesa dhe tokenizimi i kartës me Nexi XPay u krye me sukses."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:268
+msgid "Nexi XPay payment with tokenized card successful"
+msgstr "Pagesa Nexi XPay me kartë tokenizuar u krye me sukses"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:334
+#, php-format
+msgid "%1$s ending in %2$s (expires %3$s/%4$s)"
+msgstr "%1$s që mbaron me %2$s (skadon %3$s/%4$s)"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:347
+msgid ""
+"It was not possible to process the payment, check that the shipping address "
+"set is correct."
+msgstr ""
+"Nuk ishte e mundur të përpunohej pagesa, kontrolloni që adresa e dërgesës e "
+"caktuar është e saktë."
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:349
+msgid "Payment canceled: "
+msgstr "Pagesa u anulua:"
+
+#: src/classes/Nexi/WC_Gateway_XPay_Process_Completion.php:381
+#, php-format
+msgid "Unable to capture order %s. Order does not have XPay capture reference."
+msgstr ""
+"Nuk mund të kapet porosia %s. Porosia nuk ka referencë kapjeje të XPay."
+
+#: src/classes/Nexi/WC_Klarna_Data_Provider.php:66
+msgid "Shipping"
+msgstr "Transporti"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:37
+msgid "PagoDIL by Cofidis"
+msgstr "PagoDIL nga Cofidis"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:42
+msgid "Enable PagoDIL"
+msgstr "Aktivizo PagoDIL"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:44
+msgid "Activate the PagoDIL payment method within the store."
+msgstr "Aktivizoni metodën e pagesës PagoDIL brenda dyqanit."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:49
+msgid "Minimum cart value"
+msgstr "Vlera minimale e shportës"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:52
+msgid ""
+"Minimum cart value (in Euro) for which it will be possible to proceed "
+"through installment payments with PagoDIL. This value corresponds to the "
+"amount set in the XPay back office."
+msgstr ""
+"Vlera minimale e shportës (në Euro) për të cilën do të jetë e mundur të "
+"vazhdohet me pagesa me këste me PagoDIL. Kjo vlerë korrespondon me shumën e "
+"vendosur në zyrën e XPay."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:57
+msgid "Maximum cart value"
+msgstr "Vlera maksimale e shportës"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:60
+msgid ""
+"Maximum cart value (in Euro) for which it will be possible to proceed "
+"through installment payments with PagoDIL. This value corresponds to the "
+"amount set in the XPay back office."
+msgstr ""
+"Vlera maksimale e shportës (në Euro) për të cilën do të jetë e mundur të "
+"vazhdohet me pagesa me këste me PagoDIL. Kjo vlerë korrespondon me shumën e "
+"vendosur në zyrën e XPay."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:65
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:123
+msgid "Number of installments"
+msgstr "Numri i kësteve"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:68
+msgid ""
+"Number of installments made available for payment via PagoDIL. The rates "
+"displayed correspond to the values set in the XPay back office."
+msgstr ""
+"Numri i kësteve të vëna në dispozicion për pagesë nëpërmjet PagoDIL. Tarifat "
+"e shfaqura korrespondojnë me vlerat e vendosura në zyrën e XPay."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:73
+msgid "Installment products"
+msgstr "Produkte me këste"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:76
+msgid "For selected categories"
+msgstr "Për kategoritë e zgjedhura"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:77
+msgid "All categories"
+msgstr "Të gjitha kategoritë"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:79
+msgid ""
+"Setting up installment products:<br>- For selected categories: select the "
+"categories of products of the store that you want to set as payable in "
+"installments from the drop-down list below.<br>- All categories: all the "
+"products in the store will be configured as payable in installments."
+msgstr ""
+"Konfigurimi i produkteve me këste:<br>- Për kategoritë e zgjedhura: zgjidhni "
+"kategoritë e produkteve të dyqanit që dëshironi të vendosni si të pagueshme "
+"me këste nga lista zbritëse më poshtë.<br>- Të gjitha kategoritë: të gjitha "
+"produktet në dyqan do të konfigurohen si të pagueshme me këste."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:84
+msgid "Categories"
+msgstr "Kategoritë"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:87
+msgid "Select the categories on which you want to enable payment via PagoDIL."
+msgstr ""
+"Zgjidhni kategoritë për të cilat dëshironi të aktivizoni pagesën nëpërmjet "
+"PagoDIL."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:91
+msgid "Tax code"
+msgstr "Kodi tatimor"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:94
+msgid ""
+"Select the field of your shop that corresponds to the tax code, it will be "
+"used by the plugin during the payment phase with PagoDIl: in this way the "
+"customer will not have to enter this data manually on the PagoDIL payment "
+"page."
+msgstr ""
+"Zgjidhni fushën e dyqanit tuaj që korrespondon me kodin tatimor, ai do të "
+"përdoret nga plugin gjatë fazës së pagesës me PagoDIl: në këtë mënyrë "
+"klienti nuk do të duhet t'i fusë këto të dhëna manualisht në faqen e pagesës "
+"së PagoDIL."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:99
+msgid "Number of products in the cart (Optional)"
+msgstr "Numri i produkteve në shportë (Opsionale)"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:101
+msgid ""
+"Maximum number of products in the cart for which it will be possible to "
+"proceed through installment payments with PagoDIL."
+msgstr ""
+"Numri maksimal i produkteve në shportë për të cilat do të jetë e mundur të "
+"vazhdohet me pagesa me këste me PagoDIL."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:105
+msgid "Cofidis product code (Optional)"
+msgstr "Kodi i produktit Cofidis (Opsional)"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:107
+msgid ""
+"If you have more than one Cofidis product code, enter the code that will be "
+"used by the plugin for payment via PagoDIL."
+msgstr ""
+"Nëse keni më shumë se një kod produkti Cofidis, futni kodin që do të "
+"përdoret nga plugin-i për pagesën nëpërmjet PagoDIL."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:111
+msgid "Widget PagoDIL"
+msgstr "Widget PagoDIL"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:116
+msgid "Show widget"
+msgstr "Shfaq miniaplikacionin"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:118
+msgid ""
+"Enable the PagoDIL widget on products that can be paid in installments. The "
+"widget shows information relating to the installment payments made available "
+"on the product."
+msgstr ""
+"Aktivizoni vegël PagoDIL në produktet që mund të paguhen me këste. Vegël "
+"tregon informacion në lidhje me pagesat me këste të disponueshme për "
+"produktin."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:126
+msgid ""
+"Number of installments displayed within the widget. It is possible to select "
+"only one value (e.g. or 5 interest-free installments)."
+msgstr ""
+"Numri i kësteve të shfaqura brenda vegël. Është e mundur të zgjidhni vetëm "
+"një vlerë (p.sh. ose 5 këste pa interes)."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:131
+msgid "Logo type"
+msgstr "Lloji i logos"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:134
+msgid "Select the PagoDIL logo displayed in the widget."
+msgstr "Zgjidhni logon PagoDIL të shfaqur në widget."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:139
+msgid "\"Find out more\" link"
+msgstr "Lidhja \"Mëso më shumë\""
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:141
+msgid ""
+"The PagoDIL widget has an information icon pointing to a predefined web "
+"address. It is possible to change the information section by entering a new "
+"address in the form."
+msgstr ""
+"Vegël PagoDIL ka një ikonë informacioni që tregon një adresë të paracaktuar "
+"në internet. Është e mundur të ndryshoni seksionin e informacionit duke "
+"futur një adresë të re në formular."
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:167
+msgid "select Tax Code Field"
+msgstr "zgjidhni fushën e kodit tatimor"
+
+#: src/classes/Nexi/WC_Pagodil_Configuration.php:258
+msgid "PagoDIL institutional logo"
+msgstr "Logoja institucionale e PagoDIL"
+
+#: src/classes/Nexi/WC_Pagodil_Widget.php:202
+#, php-format
+msgid ""
+"Do you want to pay convenient installments without interest with PagoDIL by "
+"Cofidis? Reach the minimum amount of %s€ in the cart"
+msgstr ""
+"Dëshironi të paguani këste të përshtatshme pa interes me PagoDIL nga Cofidis?"
+" Arritni shumën minimale prej %s€ në shportë"
+
+#: src/classes/Nexi/WC_Pending_Status.php:22
+#: src/classes/Nexi/WC_Pending_Status.php:33
+msgid "Nexi: pending payment"
+msgstr "Nexi: pagesa në pritje"
+
+#: src/classes/Nexi/WC_Pending_Status.php:27
+#, php-format
+msgid "Nexi: pending payment (%s)"
+msgid_plural "Nexi: pending payment (%s)"
+msgstr[0] "Nexi: pagesa në pritje (%s)"
+msgstr[1] "Nexi: pagesa në pritje (%s)"
+
+#: templates/build_preview.php:6
+msgid "Card Number"
+msgstr "Numri i Kartës"
+
+#: templates/build_preview.php:10
+msgid "MM/YY"
+msgstr "MM/VV"
+
+#: templates/npg_payment_detail.php:36 templates/xpay_payment_detail.php:4
+msgid "Cardholder"
+msgstr "Mbajtësi i kartës"
+
+#: templates/npg_payment_detail.php:39 templates/xpay_payment_detail.php:7
+msgid "Name: "
+msgstr "Emri:"
+
+#: templates/npg_payment_detail.php:43
+msgid "Mail: "
+msgstr "Posta:"
+
+#: templates/npg_payment_detail.php:51 templates/xpay_payment_detail.php:17
+msgid "Card detail"
+msgstr "Detajet e kartës"
+
+#: templates/npg_payment_detail.php:54 templates/xpay_payment_detail.php:20
+msgid "Card: "
+msgstr "Kartë:"
+
+#: templates/npg_payment_detail.php:57 templates/xpay_payment_detail.php:26
+msgid "Card pan: "
+msgstr "Pan i kartës:"
+
+#: templates/npg_payment_detail.php:70 templates/xpay_payment_detail.php:35
+msgid "Transaction detail"
+msgstr "Detajet e transaksionit"
+
+#: templates/npg_payment_detail.php:78 templates/xpay_payment_detail.php:38
+msgid "Date: "
+msgstr "Data:"
+
+#: templates/npg_payment_detail.php:85
+msgid "Installments: "
+msgstr "Këste:"
+
+#: templates/npg_payment_detail.php:90 templates/xpay_payment_detail.php:41
+msgid "Amount: "
+msgstr "Shuma:"
+
+#: templates/npg_payment_detail.php:93
+msgid "Order ID: "
+msgstr "ID e porosisë:"
+
+#: templates/npg_payment_detail.php:104 templates/xpay_payment_detail.php:62
+msgid "Accounting operations"
+msgstr "Operacionet kontabël"
+
+#: templates/npg_payment_detail.php:106 templates/xpay_payment_detail.php:64
+msgid "New accounting operation"
+msgstr "Operacion i ri kontabël"
+
+#: templates/npg_payment_detail.php:114 templates/xpay_payment_detail.php:73
+msgid "Type of operation"
+msgstr "Lloji i operacionit"
+
+#: templates/npg_payment_detail.php:115
+msgid "Result"
+msgstr "Rezultati"
+
+#: templates/npg_payment_detail.php:116 templates/xpay_payment_detail.php:74
+msgid "Amount"
+msgstr "Shuma"
+
+#: templates/npg_payment_detail.php:117 templates/xpay_payment_detail.php:72
+msgid "Date"
+msgstr "Data"
+
+#: templates/npg_payment_detail.php:162 templates/xpay_payment_detail.php:110
+msgid "Do you confirm to capture"
+msgstr "A e konfirmoni kapjen"
+
+#: templates/npg_payment_detail.php:163
+msgid "Capture successful"
+msgstr "Kapja u krye me sukses"
+
+#: templates/npg_payment_detail.php:166 templates/xpay_payment_detail.php:114
+msgid "Capture"
+msgstr "Kap"
+
+#: templates/pagodil_checkout.php:4
+msgid ""
+"With PagoDIL by Cofidis, the merchant allows you to defer the payment in "
+"convenient installments without costs or interest."
+msgstr ""
+"Me PagoDIL nga Cofidis, tregtari ju lejon të shtyni pagesën në këste të "
+"përshtatshme pa kosto ose interesa."
+
+#: templates/xpay_payment_detail.php:23
+msgid "Nationality: "
+msgstr "Kombësia:"
+
+#: templates/xpay_payment_detail.php:29
+msgid "Expiry date: "
+msgstr "Data e skadimit:"
+
+#: templates/xpay_payment_detail.php:44
+msgid "Transaction code: "
+msgstr "Kodi i transaksionit:"
+
+#: templates/xpay_payment_detail.php:48
+msgid "Contract number: "
+msgstr "Numri i kontratës:"
+
+#: templates/xpay_payment_detail.php:51
+msgid "Status: "
+msgstr "Statusi:"
+
+#: templates/xpay_payment_detail.php:111
+#, php-format
+msgid "Capture of transaction %s successful"
+msgstr "Kapja e transaksionit %s është e suksesshme"
+
+#: woocommerce-gateway-nexi-xpay.php:357
+msgid ""
+"Warning, the PHP extension bcmath is not enabled. The amounts calculated by "
+"the plugin may be incorrect; please enable it to ensure correct calculations."
+msgstr ""
+"Kujdes, zgjerimi PHP bcmath nuk është i aktivizuar. Shumat e llogaritura nga "
+"shtojca mund të jenë të pasakta; ju lutemi aktivizojeni atë për të siguruar "
+"llogaritjet e sakta."
+
+#: build/index_xpay_build.js:1 build/index_xpay_googlepay_button.js:1
+#: build/index_xpay_npg_build.js:1 build/index_xpay_npg_googlepay_button.js:1
+#: client/blocks/index_xpay_build.js:300 client/blocks/index_xpay_build.js:530
+#: client/blocks/index_xpay_googlepay_button.js:333
+#: client/blocks/index_xpay_npg_build.js:305
+#: client/blocks/index_xpay_npg_googlepay_button.js:335
+msgid "There was an error"
+msgstr "Pati një gabim"
+
+#: build/index_xpay_build.js:1 client/blocks/index_xpay_build.js:303
+#: client/blocks/index_xpay_build.js:533
+msgid "Payment canceled"
+msgstr "Pagesa u anulua"

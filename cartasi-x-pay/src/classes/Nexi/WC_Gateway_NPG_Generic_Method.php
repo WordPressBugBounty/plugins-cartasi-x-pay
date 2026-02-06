@@ -26,47 +26,19 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
         add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
     }
 
-    public function get_sorted_cards_images()
+    public function get_npg_cards_icon()
     {
-        $available_methods_npg = json_decode(\WC_Admin_Settings::get_option('xpay_npg_available_methods'), true);
-        $cards = [
-            'MC',
-            'MAE',
-            'VISA',
-            'AMEX',
-            'JCB',
-            'DINERS',
-        ];
+        $img_list = "";
 
-        $image_list = array_fill(0, count($cards), null);
-
-        if (is_array($available_methods_npg)) {
-            foreach ($available_methods_npg as $apm) {
-                if ($apm['paymentMethodType'] != 'CARDS') {
-                    continue;
-                }
-
-                if (!in_array($apm['circuit'], $cards)) {
-                    continue;
-                }
-
-                array_splice($image_list, array_search($apm['circuit'], $cards), 1, [$apm['imageLink']]);
-            }
+        foreach (\Nexi\WC_Nexi_Helper::get_npg_cards() as $am) {
+            $img_list .= '<div class="img-container"><img src="' . $am['imageLink'] . '" alt="' . $am['circuit'] . '"></div>';
         }
 
-        $image_list = array_filter($image_list);
-
-        $img_list_html = "";
-
-        foreach ($image_list as $img) {
-            $img_list_html .= '  <div class="img-container"><img src="' . $img . '"></div>';
+        if ($img_list != "") {
+            return '<div class="nexixpay-loghi-container flex"><div class="internal-container">' . $img_list . '</div></div>';
         }
 
-        if ($img_list_html != "") {
-            $img_list_html = '<div class="nexixpay-loghi-container">' . $img_list_html . '</div>';
-        }
-
-        return $img_list_html;
+        return "";
     }
 
     function process_admin_save()
@@ -94,7 +66,7 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
 
                 Log::actionInfo(__METHOD__ . "::" . __LINE__ . ' $idToUse ' . json_encode($idToUse));
 
-                $contractId = \Nexi\OrderHelper::getOrderMeta($idToUse, '_npg_' . 'recurringContractId', true);
+                $contractId = \Nexi\OrderHelper::getOrderMeta($idToUse, '_npg_recurringContractId', true);
 
                 if ($contractId === null || $contractId === '') {
                     throw new \Exception('Invalid contract id');
@@ -105,7 +77,7 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
                 $newOrderId = \Nexi\WC_Gateway_NPG_API::getInstance()->recurring_payment($order, $contractId, \Nexi\WC_Gateway_NPG_Currency::calculate_amount_to_min_unit($amount_to_charge, $currency));
 
                 // must be updated otherwise refferrs to the the first payment
-                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), '_npg_' . "orderId", $newOrderId);
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_orderId", $newOrderId);
 
                 $order->payment_complete($newOrderId);
             } catch (\Exception $exc) {
@@ -136,6 +108,30 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
             return $res;
         } catch (\Exception $exc) {
             return new \WP_Error("refund_operation_error", $exc->getMessage());
+        }
+    }
+
+    public function check_npg_operation($order_id, $operation)
+    {
+        if (isset($operation) && !empty($operation)) {
+            \Nexi\WC_Gateway_NPG_Process_Completion::change_order_status_by_operation($order_id, $operation);
+
+            $order = new \WC_Order($order_id);
+
+            if (in_array($order->get_status(), ['failed', 'cancelled'])) {
+                $result = 'failure';
+                $redirectLink = $this->get_return_url($order);
+            } else {
+                $result = 'success';
+                $redirectLink = $this->get_return_url($order);
+            }
+
+            return [
+                $result,
+                $redirectLink,
+            ];
+        } else {
+            throw new \Exception('Operation not set on finalize response: ' . $order_id);
         }
     }
 

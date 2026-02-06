@@ -20,39 +20,88 @@ class WC_Klarna_Data_Provider
 
     public static function calculate_params($order)
     {
-        $params = array();
+        $params = [];
 
         try {
             $params['nome'] = $order->get_billing_first_name();
             $params['cognome'] = $order->get_billing_last_name();
 
-            $allItems = $order->get_items();
-
             $itemsNumber = 0;
 
-            $itemsAmountCalculated = 0;
-
-            foreach ($allItems as $item) {
+            foreach ($order->get_items('line_item') as $item) {
                 $itemsNumber++;
+
+                $product = $item->get_product();
 
                 $params['Item_quantity_' . $itemsNumber] = $item->get_quantity();
-                $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($item->get_product()->get_price(), 100, 0);
+                $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($product->get_regular_price(), 100, 0);
                 $params['Item_name_' . $itemsNumber] = self::escapeKlarnaSpecialCharacters($item->get_name());
 
-                $itemsAmountCalculated += $item->get_total() * $item->get_quantity();
+                if ($product->get_sale_price()) {
+                    $singleProductDiscount = ((float) $product->get_regular_price()) - ((float) $product->get_sale_price());
+                } else {
+                    $singleProductDiscount = 0;
+                }
+
+                if ($singleProductDiscount) {
+                    $totalProductDiscount = WC_Nexi_Helper::mul_bcmul($singleProductDiscount, $item->get_quantity());
+
+                    $params['Item_totalDiscountAmount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($totalProductDiscount, 100, 0);
+                } else {
+                    $params['Item_totalDiscountAmount_' . $itemsNumber] = 0;
+                }
+
+                if ($product->get_virtual()) {
+                    $params['Item_type_' . $itemsNumber] = "DIGITAL";
+                } else {
+                    $params['Item_type_' . $itemsNumber] = "PHYSICAL";
+                }
             }
 
-            $extraFee = $order->get_total() - $itemsAmountCalculated;
-
-            if ($extraFee > 0) {
+            foreach ($order->get_items('shipping') as $shippingLine) {
                 $itemsNumber++;
 
+                $params['Item_name_' . $itemsNumber] = __('Shipping', 'woocommerce-gateway-nexi-xpay');
                 $params['Item_quantity_' . $itemsNumber] = 1;
-                $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($extraFee, 100, 0);
-                $params['Item_name_' . $itemsNumber] = self::escapeKlarnaSpecialCharacters("Extra Fee");
+                $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($shippingLine->get_total(), 100, 0);
+                $params['Item_type_' . $itemsNumber] = "SHIPPING_FEE";
+                $params['Item_totalDiscountAmount_' . $itemsNumber] = 0;
+            }
+
+            foreach ($order->get_items('coupon') as $couponLine) {
+                $itemsNumber++;
+
+                $params['Item_name_' . $itemsNumber] = "Coupon";
+                $params['Item_quantity_' . $itemsNumber] = 1;
+                $params['Item_amount_' . $itemsNumber] = "-" . WC_Nexi_Helper::mul_bcmul($couponLine->get_discount(), 100, 0);
+                $params['Item_type_' . $itemsNumber] = "DISCOUNT";
+                $params['Item_totalDiscountAmount_' . $itemsNumber] = 0;
+            }
+
+            foreach ($order->get_items('tax') as $taxLine) {
+                if ($taxLine->get_tax_total()) {
+                    $itemsNumber++;
+
+                    $params['Item_name_' . $itemsNumber] = "Tax";
+                    $params['Item_quantity_' . $itemsNumber] = 1;
+                    $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($taxLine->get_tax_total(), 100, 0);
+                    $params['Item_type_' . $itemsNumber] = "SURCHARGE";
+                    $params['Item_totalDiscountAmount_' . $itemsNumber] = 0;
+                }
+
+                if ($taxLine->get_shipping_tax_total()) {
+                    $itemsNumber++;
+
+                    $params['Item_name_' . $itemsNumber] = "Shipping Tax";
+                    $params['Item_quantity_' . $itemsNumber] = 1;
+                    $params['Item_amount_' . $itemsNumber] = WC_Nexi_Helper::mul_bcmul($taxLine->get_shipping_tax_total(), 100, 0);
+                    $params['Item_type_' . $itemsNumber] = "SURCHARGE";
+                    $params['Item_totalDiscountAmount_' . $itemsNumber] = 0;
+                }
             }
 
             $params['itemsNumber'] = $itemsNumber;
+            $params['itemsAmount'] = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
 
             if ($order->has_shipping_address()) {
                 $params['Dest_city'] = $order->get_shipping_city();

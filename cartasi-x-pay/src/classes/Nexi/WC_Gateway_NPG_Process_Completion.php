@@ -16,52 +16,64 @@ namespace Nexi;
 class WC_Gateway_NPG_Process_Completion
 {
 
+    public static function action_template_redirect()
+    {
+        global $wp_query;
+
+        if (isset($wp_query->query_vars['woocommerce-gateway-nexi-npg-redirect'])) {
+            $safe_get_params = \Nexi\WC_Nexi_Helper::get_safe_get_params();
+
+            $safe_get_params['id'] = get_query_var('nexi_order_id');
+
+            self::redirect($safe_get_params);
+        } else if (isset($wp_query->query_vars['woocommerce-gateway-nexi-npg-cancel'])) {
+            $safe_get_params = \Nexi\WC_Nexi_Helper::get_safe_get_params();
+
+            $safe_get_params['id'] = get_query_var('nexi_order_id');
+
+            self::cancel($safe_get_params);
+        } else if (isset($wp_query->query_vars['woocommerce-gateway-nexi-npg-googlepay-redirect'])) {
+            $safe_get_params = \Nexi\WC_Nexi_Helper::get_safe_get_params();
+
+            $safe_get_params['id'] = get_query_var('nexi_order_id');
+
+            self::googlepay_npgredirect($safe_get_params);
+        }
+    }
+
     public static function rest_api_init()
     {
         register_rest_route(
             'woocommerce-gateway-nexi-xpay',
             '/s2s/npg/(?P<id>\d+)',
-            array(
+            [
                 'methods' => 'POST',
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::s2s',
                 'args' => [
                     'id' => [],
                 ],
                 'permission_callback' => '__return_true',
-            )
+            ]
         );
 
         register_rest_route(
             'woocommerce-gateway-nexi-xpay',
-            '/redirect/npg/(?P<id>\d+)',
-            array(
-                'methods' => array('GET', 'POST'),
-                'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::redirect',
+            '/googlepay/panonly/(?P<id>\d+)',
+            [
+                'methods' => ['GET', 'POST'],
+                'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::googlepay_panonly',
                 'args' => [
                     'id' => [],
                 ],
                 'permission_callback' => '__return_true',
-            )
-        );
-
-        register_rest_route(
-            'woocommerce-gateway-nexi-xpay',
-            '/cancel/npg/(?P<id>\d+)',
-            array(
-                'methods' => 'GET',
-                'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::cancel',
-                'args' => [
-                    'id' => [],
-                ],
-                'permission_callback' => '__return_true',
-            )
+            ]
         );
 
         register_rest_route(
             'woocommerce-gateway-nexi-xpay',
             '/process_account/npg/(?P<id>\d+)',
-            array(
-                'methods' => array('POST'),
+            [
+                'methods' => ['POST'],
                 'callback' => '\Nexi\WC_Gateway_NPG_Process_Completion::process_account',
                 'args' => [
                     'id' => [],
@@ -69,8 +81,63 @@ class WC_Gateway_NPG_Process_Completion
                 'permission_callback' => function () {
                     return current_user_can('manage_woocommerce');
                 }
-            )
+            ]
         );
+    }
+
+    public static function googlepay_panonly($data)
+    {
+        $params = $data->get_params();
+
+        $order_id = $params["id"];
+
+        Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
+
+        $googlePayResponse = json_decode(\Nexi\OrderHelper::getOrderMeta($order_id, 'googlepay_npg_response', true), true);
+
+        $urlBuildSdk = WC_Gateway_NPG_API::getInstance()->getUrlNpgBuildJS();
+
+        $redirectUrl = add_query_arg(
+            ['nexi_order_id' => $order_id],
+            wc_get_endpoint_url('woocommerce-gateway-nexi-npg-googlepay-redirect', '', home_url('/'))
+        );
+
+        header('Content-Type: text/html');
+
+        include_once plugin_dir_path(WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE) . 'templates/googlepay_npg.php';
+        exit;
+    }
+
+    public static function googlepay_npgredirect($params)
+    {
+        $order_id = $params["id"];
+
+        Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
+
+        $googlePayResponse = json_decode(\Nexi\OrderHelper::getOrderMeta($order_id, 'googlepay_npg_response', true), true);
+
+        $sessionId = $googlePayResponse["iframe"]["sessionId"];
+
+        $buildState = WC_Gateway_NPG_API::getInstance()->build_state($sessionId);
+
+        if ($buildState['state'] == 'PAYMENT_COMPLETE') {
+            static::change_order_status_by_operation($order_id, $buildState['operation']);
+
+            $order = new \WC_Order($order_id);
+
+            if ($order->needs_payment() || $order->get_status() == 'cancelled') {
+                wc_add_notice(__('Payment error, please try again', 'woocommerce-gateway-nexi-xpay'), 'error');
+
+                wp_safe_redirect($order->get_cancel_order_url_raw());
+                exit;
+            } else {
+                wp_safe_redirect($order->get_checkout_order_received_url());
+                exit;
+            }
+        } else if ($buildState['state'] == 'REDIRECTED_TO_EXTERNAL_DOMAIN') {
+            wp_safe_redirect($buildState['url']);
+            exit;
+        }
     }
 
     /**
@@ -110,7 +177,7 @@ class WC_Gateway_NPG_Process_Completion
 
         $securityToken = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_securityToken", true);
 
-        if ($params['securityToken'] != $securityToken) {
+        if ($securityToken != "noCheck" && $params['securityToken'] != $securityToken) {
             Log::actionWarning(__FUNCTION__ . ': Invalid securityToken for order: ' . $order_id . ' - Request: ' . json_encode($params));
 
             return new \WP_REST_Response($payload, $status, []);
@@ -149,11 +216,9 @@ class WC_Gateway_NPG_Process_Completion
         return new \WP_REST_Response($payload, $status, []);
     }
 
-    public static function redirect($data)
+    public static function redirect($params)
     {
         sleep(2);
-
-        $params = $data->get_params();
 
         $order_id = static::check_if_build_and_get_wc_order_id($params["id"]);
 
@@ -166,11 +231,8 @@ class WC_Gateway_NPG_Process_Completion
 
             $order = new \WC_Order($order_id);
 
-            return new \WP_REST_Response(
-                "redirecting failed...",
-                "303",
-                array("Location" => $order->get_cancel_order_url_raw())
-            );
+            wp_safe_redirect($order->get_cancel_order_url_raw());
+            exit;
         }
 
         Log::actionInfo(__FUNCTION__ . ': got lock - ' . date('d-m-Y H:i:s'));
@@ -230,18 +292,12 @@ class WC_Gateway_NPG_Process_Completion
                 }
             }
 
-            return new \WP_REST_Response(
-                "redirecting failed...",
-                "303",
-                ["Location" => $order->get_cancel_order_url_raw()]
-            );
+            wp_safe_redirect(wc_get_cart_url());
+            exit;
         }
 
-        return new \WP_REST_Response(
-            "redirecting success...",
-            "303",
-            ["Location" => $order->get_checkout_order_received_url()]
-        );
+        wp_safe_redirect($order->get_checkout_order_received_url());
+        exit;
     }
 
     public static function change_order_status_by_operation($order_id, $operation)
@@ -350,21 +406,16 @@ class WC_Gateway_NPG_Process_Completion
         }
     }
 
-    public static function cancel($data)
+    public static function cancel($params)
     {
-        $params = $data->get_params();
-
         $order_id = static::check_if_build_and_get_wc_order_id($params["id"]);
 
         \Nexi\OrderHelper::updateOrderMeta($order_id, '_npg_payment_error', __('Payment has been cancelled.', 'woocommerce-gateway-nexi-xpay'));
 
         $order = new \WC_Order($order_id);
 
-        return new \WP_REST_Response(
-            "failed...",
-            "303",
-            array("Location" => $order->get_cancel_order_url_raw())
-        );
+        wp_safe_redirect($order->get_cancel_order_url_raw());
+        exit;
     }
 
     public static function process_account($data)

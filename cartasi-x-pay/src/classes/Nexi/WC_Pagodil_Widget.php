@@ -281,13 +281,9 @@ class WC_Pagodil_Widget
      */
     public static function getPagodilConfig()
     {
-        $availableMethods = json_decode(\WC_Admin_Settings::get_option('xpay_available_methods'), true);
-
-        if (is_array($availableMethods)) {
-            foreach ($availableMethods as $method) {
-                if ($method['code'] === 'PAGODIL') {
-                    return $method;
-                }
+        foreach (\Nexi\WC_Nexi_Helper::get_xpay_available_methods() as $method) {
+            if ($method['selectedcard'] === 'PAGODIL') {
+                return $method;
             }
         }
 
@@ -472,7 +468,7 @@ class WC_Pagodil_Widget
      */
     public static function getXPaySettings()
     {
-        return WC_Nexi_Helper::get_nexi_settings();
+        return \Nexi\WC_Nexi_Helper::get_nexi_settings();
     }
 
     /**

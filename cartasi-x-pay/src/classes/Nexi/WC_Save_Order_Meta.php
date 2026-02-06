@@ -19,6 +19,7 @@ class WC_Save_Order_Meta
     public static function saveSuccessXPay($order_id, $alias, $num_contratto, $codTrans, $scadenza_pan)
     {
         $metaPrefix = "_xpay_";
+
         \Nexi\OrderHelper::deleteOrderMeta($order_id, $metaPrefix . "last_error");
 
         if (
@@ -56,6 +57,7 @@ class WC_Save_Order_Meta
     public static function saveSuccessNpg($order_id, $authorization)
     {
         $metaPrefix = "_npg_";
+
         \Nexi\OrderHelper::deleteOrderMeta($order_id, $metaPrefix . "last_error");
 
         // if it is a subscription, in addition to the order a subscription order is created, in which we need to save some information about the original order
