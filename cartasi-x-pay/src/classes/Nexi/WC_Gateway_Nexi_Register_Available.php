@@ -424,7 +424,7 @@ class WC_Gateway_Nexi_Register_Available
                 'max_amount' => null,
                 'recurring_npg' => false,
                 'recurring_xpay' => false,
-                'selected_card_xpay' => 'BANCOMAT',
+                'selected_card_xpay' => 'BANCOMATPAY',
                 'selected_card_npg' => 'BANCOMATPAY',
             ],
             [

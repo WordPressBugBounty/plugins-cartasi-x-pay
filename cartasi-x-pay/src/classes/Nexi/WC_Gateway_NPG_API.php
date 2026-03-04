@@ -46,7 +46,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         if ($this->settings["nexi_xpay_test_mode"] == "no") {
             $this->base_url = 'https://xpay.nexigroup.com';
         } else {
-            $this->base_url = 'https://stg-ta.nexigroup.com';
+            $this->base_url = 'https://xpaysandbox.nexigroup.com';
         }
 
         $this->nexi_npg_api_key = $this->settings["nexi_npg_api_key"];

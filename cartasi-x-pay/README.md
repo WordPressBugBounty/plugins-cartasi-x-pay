@@ -4,10 +4,10 @@ Tags: nexi, nexi payments, xpay, payment gateway, e-commerce
 Author URI: https://ecommerce.nexi.it
 Author: Nexi Payments SpA
 Requires at least: 4.6
-Tested up to: 6.9
+Tested up to: 6.9.1
 WC Requires at least: 2.7.0
-WC Tested up to: 10.4.2
-Stable tag: 8.2.0
+WC Tested up to: 10.5.3
+Stable tag: 8.3.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -313,4 +313,10 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Added - Discount management for Klarna APM (only for alias and secret key credential types)
  * Added - Translations for Croatian and Albanian languages
  * Added - New invoiceId parameter (only for API key credential type)
+ * Fixed - Minor issues
+ 
+= 8.3.0 =
+ * Changed - Test mode endpoint (from stg-ta to xpaysandbox)
+ * Added - Greek translation for Payment Cards
+ * Added - Province code management for foreign countries (EE) with 3DSecure 2
  * Fixed - Minor issues

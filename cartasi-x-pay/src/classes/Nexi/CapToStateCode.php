@@ -4706,7 +4706,7 @@ class CapToStateCode
             return $cap_to_state_code[$cap];
         }
 
-        return null;
+        return 'EE';
     }
 
 }

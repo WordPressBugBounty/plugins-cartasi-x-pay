@@ -13,17 +13,15 @@
 
 namespace Nexi\BlockSupport;
 
-abstract class WC_Gateway_Xpay_Blocks_Support extends WC_Gateway_Generic_Blocks_Support
+abstract class WC_Gateway_XPay_Blocks_Support extends WC_Gateway_Generic_Blocks_Support
 {
 
-    public function __construct(
-        $apm = '',
-        $isBuild = false
-    ) {
+    public function __construct($apm = '')
+    {
         if ($apm !== null && !empty($apm)) {
-            parent::__construct('xpay_' . strtolower($apm), 'xpay', 'xpay', $apm, $isBuild);
+            parent::__construct('xpay_' . strtolower($apm), GATEWAY_XPAY, 'xpay', $apm);
         } else {
-            parent::__construct('xpay', 'xpay', 'xpay', $apm, $isBuild);
+            parent::__construct('xpay', GATEWAY_XPAY, 'xpay', $apm);
         }
     }
 

@@ -1183,7 +1183,7 @@ msgstr "Η πληρωμή ακυρώθηκε:"
 #: src/classes/Nexi/WC_Gateway_NPG_Cards.php:25
 #: src/classes/Nexi/WC_Gateway_XPay_Cards.php:25
 msgid "Payment cards"
-msgstr "Αποδεκτές Κάρτες"
+msgstr "Πληρωμή με κάρτα"
 
 #: src/classes/Nexi/WC_Gateway_XPay_Apple_Pay_Button.php:127
 #: src/classes/Nexi/WC_Gateway_XPay_Cards_Build.php:298
