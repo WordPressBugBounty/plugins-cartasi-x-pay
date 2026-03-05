@@ -7,7 +7,7 @@ Requires at least: 4.6
 Tested up to: 6.9.1
 WC Requires at least: 2.7.0
 WC Tested up to: 10.5.3
-Stable tag: 8.3.0
+Stable tag: 8.3.1
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
