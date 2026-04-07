@@ -13,6 +13,10 @@
 
 namespace Nexi\BlockSupport;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_XPay_Blocks_Support
 {
 
@@ -85,7 +89,8 @@ class WC_Gateway_XPay_APM_Blocks_Support extends WC_Gateway_XPay_Blocks_Support
                 'title_text' => __('Choose the number of installments', 'woocommerce-gateway-nexi-xpay'),
                 'default_option' => $firstInstallmentArray[0] ?? '',
                 'is_pago_dil' => true,
-                'pago_dil_installment_amount_label' => sprintf(__('Amount: %s installments of %s€', 'woocommerce-gateway-nexi-xpay'), end($firstInstallmentArray), $firstInstallmentAmount),
+                // translators: 1: installments number, 2: installment amount.
+                'pago_dil_installment_amount_label' => sprintf(__('Amount: %1$s installments of %2$s€', 'woocommerce-gateway-nexi-xpay'), end($firstInstallmentArray), $firstInstallmentAmount),
                 'pago_dil_admin_url' => admin_url(),
             ];
         }

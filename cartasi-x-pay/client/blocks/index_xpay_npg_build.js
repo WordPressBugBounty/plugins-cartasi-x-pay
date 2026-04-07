@@ -302,7 +302,7 @@ const CreditCardContent = ({ eventRegistration, emitResponse }) => {
             } catch (error) {
                 return {
                     type: emitResponse.responseTypes.ERROR,
-                    message: __("There was an error", "woocommerce-gateway-nexi-xpay"),
+                    message: __("There was an error", 'woocommerce-gateway-nexi-xpay'),
                 };
             }
         });
@@ -378,7 +378,7 @@ const getPaymentMethodOptions = () => {
         edit: <CreditCardContent content={getContent()} icons={contentIcons} />,
         icons: cardIcons,
         canMakePayment: canMakePayment,
-        ariaLabel: __(label, "woocommerce-gateway-nexi-xpay"),
+        ariaLabel: __(label, 'woocommerce-gateway-nexi-xpay'),
         supports: {
             showSavedCards: getShowSavedCards(),
             showSaveOption: getShowSaveOption(),

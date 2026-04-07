@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_Google_Pay
 {
 
@@ -38,7 +42,7 @@ class WC_Gateway_Google_Pay
 
         if (\Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG()) {
             $gateway = 'nexigtw';
-            $testMode = false;
+            $testMode = $currentConfig['nexi_xpay_test_mode'] === "yes";
 
             foreach (\Nexi\WC_Nexi_Helper::get_npg_cards() as $am) {
                 if (isset($cardsMapping[$am['circuit']])) {

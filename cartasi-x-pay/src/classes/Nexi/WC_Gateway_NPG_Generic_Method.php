@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Method
 {
 
@@ -31,7 +35,7 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
         $img_list = "";
 
         foreach (\Nexi\WC_Nexi_Helper::get_npg_cards() as $am) {
-            $img_list .= '<div class="img-container"><img src="' . $am['imageLink'] . '" alt="' . $am['circuit'] . '"></div>';
+            $img_list .= '<div class="img-container"><img src="' . esc_attr($am['imageLink']) . '" alt="' . esc_attr($am['circuit']) . '"></div>';
         }
 
         if ($img_list != "") {
@@ -131,7 +135,7 @@ abstract class WC_Gateway_NPG_Generic_Method extends WC_Gateway_XPay_Generic_Met
                 $redirectLink,
             ];
         } else {
-            throw new \Exception('Operation not set on finalize response: ' . $order_id);
+            throw new \Exception(esc_html('Operation not set on finalize response: ' . $order_id));
         }
     }
 

@@ -13,8 +13,38 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Pagodil_Widget
 {
+    private static function getPagodilAllowedHtml()
+    {
+        return [
+            'div' => [
+                'style' => true,
+                'class' => true,
+                'id' => true,
+            ],
+            'pagodil-sticker' => [
+                'data-amount' => true,
+                'data-installments-number' => true,
+                'data-min-amount' => true,
+                'data-max-amount' => true,
+                'data-logo-kind' => true,
+                'data-info-link' => true,
+                'data-language' => true,
+                'data-amount-bold' => true,
+                'data-amount-selector' => true,
+                'data-amount-change-listener-selector' => true,
+                'data-amount-multiplier' => true,
+                'data-language-mode' => true,
+                'data-show-logo' => true,
+            ],
+        ];
+    }
+
 
     public static function register()
     {
@@ -22,7 +52,7 @@ class WC_Pagodil_Widget
         add_action('wp_ajax_nopriv_calc_installments', '\Nexi\WC_Pagodil_Widget::calc_installments');
 
         // Load widget script
-        add_action('wp_head', '\Nexi\WC_Pagodil_Widget::wp_head');
+        add_action('wp_enqueue_scripts', '\Nexi\WC_Pagodil_Widget::enqueue_scripts');
 
         // Add widget in product details
         add_action('woocommerce_before_add_to_cart_button', '\Nexi\WC_Pagodil_Widget::woocommerce_before_add_to_cart_button');
@@ -48,7 +78,7 @@ class WC_Pagodil_Widget
     public static function calc_installments($installments = null)
     {
         if ($installments == null && !empty($_REQUEST['installments'])) {
-            $installments = sanitize_text_field($_REQUEST['installments']);
+            $installments = sanitize_text_field(wp_unslash($_REQUEST['installments']));
         }
 
         $total = self::getCartTotal(WC()->cart);
@@ -56,7 +86,8 @@ class WC_Pagodil_Widget
         $installments_amount = self::calcInstallmentsAmount($total, $installments);
 
         wp_send_json(array(
-            'installmentsLabel' => sprintf(__('Amount: %s installments of %s€', 'woocommerce-gateway-nexi-xpay'), $installments, $installments_amount),
+            // translators: 1: installments number, 2: installment amount.
+            'installmentsLabel' => sprintf(__('Amount: %1$s installments of %2$s€', 'woocommerce-gateway-nexi-xpay'), $installments, $installments_amount),
             'installments' => $installments,
             'installmentsAmount' => $installments_amount,
         ));
@@ -72,15 +103,28 @@ class WC_Pagodil_Widget
 
         $xpaySettings = self::getXPaySettings();
 
-        if ($xpaySettings['pd_field_name_cf']) {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, $xpaySettings['pd_field_name_cf'], esc_attr($_POST[$xpaySettings['pd_field_name_cf']]));
+        if (isset($xpaySettings['pd_field_name_cf']) && isset($_POST[$xpaySettings['pd_field_name_cf']]) && $xpaySettings['pd_field_name_cf']) {
+            $postXpaySettings = sanitize_text_field(wp_unslash($_POST[$xpaySettings['pd_field_name_cf']]));
+            \Nexi\OrderHelper::updateOrderMeta($order_id, $xpaySettings['pd_field_name_cf'], esc_attr($postXpaySettings));
         }
     }
 
-    public static function wp_head()
+    public static function enqueue_scripts()
     {
-        echo '<script src="' . plugins_url('assets/js/pagodil-sticker.min.js', WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE) . '?v=' . WC_GATEWAY_XPAY_VERSION . '"></script>'
-            . '<style>.pagodil-sticker-container { display: inline-block; margin-bottom: 60px; } </style>';
+        wp_enqueue_script(
+            'pagodil-script',
+            plugins_url('assets/js/pagodil-sticker.min.js', WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE),
+            array(),
+            WC_GATEWAY_XPAY_VERSION,
+            true
+        );
+
+        wp_enqueue_style('pagodil-sticker-style');
+
+        wp_add_inline_style(
+            'pagodil-sticker-style',
+            '.pagodil-sticker-container { display: inline-block; margin-bottom: 60px; }'
+        );
     }
 
     /**
@@ -113,7 +157,8 @@ class WC_Pagodil_Widget
                     'data-language-mode' => 'B',
                 );
 
-                echo '<div style="display: block; margin-bottom: 20px;">' . self::getPagodilSticker(WC_Nexi_Helper::mul_bcmul($product->get_price(), 100, 0), $xpaySettings, $pagodilConfig, $extraAttributes) . '</div>';
+                $stickerHtml = '<div style="display: block; margin-bottom: 20px;">' . self::getPagodilSticker(WC_Nexi_Helper::mul_bcmul($product->get_price(), 100, 0), $xpaySettings, $pagodilConfig, $extraAttributes) . '</div>';
+                echo wp_kses($stickerHtml, self::getPagodilAllowedHtml());
             }
         }
     }
@@ -141,7 +186,7 @@ class WC_Pagodil_Widget
             $installableCategories = self::getEnabledCategories($xpaySettings);
 
             if (self::isProductInstallable($installableCategories, $xpaySettings, $pagodilConfig, $product) && $xpaySettings['pd_show_widget'] == "yes") {
-                echo self::getPagodilSticker(WC_Nexi_Helper::mul_bcmul($product->get_price(), 100, 0), $xpaySettings, $pagodilConfig, array('data-show-logo' => 'false'));
+                echo wp_kses(self::getPagodilSticker(WC_Nexi_Helper::mul_bcmul($product->get_price(), 100, 0), $xpaySettings, $pagodilConfig, array('data-show-logo' => 'false')), self::getPagodilAllowedHtml());
             }
         }
     }
@@ -168,7 +213,8 @@ class WC_Pagodil_Widget
                 'data-language-mode' => 'B',
             );
 
-            echo '<div style="margin-bottom: 20px;">' . self::getPagodilSticker(self::getCartTotal($woocommerce->cart), $xpaySettings, $pagodilConfig, $extraAttributes) . '</div>';
+            $stickerHtml = '<div style="margin-bottom: 20px;">' . self::getPagodilSticker(self::getCartTotal($woocommerce->cart), $xpaySettings, $pagodilConfig, $extraAttributes) . '</div>';
+            echo wp_kses($stickerHtml, self::getPagodilAllowedHtml());
         }
     }
 
@@ -199,7 +245,8 @@ class WC_Pagodil_Widget
         ) {
             wc_add_notice(
                 sprintf(
-                    __('Do you want to pay convenient installments without interest with PagoDIL by Cofidis? Reach the minimum amount of %s€ in the cart', 'woocommerce-gateway-nexi-xpay'),
+                    // translators: 1: minimum amount for PagoDIL eligibility.
+                    __('Do you want to pay convenient installments without interest with PagoDIL by Cofidis? Reach the minimum amount of %1$s€ in the cart', 'woocommerce-gateway-nexi-xpay'),
                     WC_Nexi_Helper::div_bcdiv(self::getPagodilMinAmount($pagodilConfig), 100, 2)
                 ),
                 'notice'

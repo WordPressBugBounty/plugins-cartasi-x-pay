@@ -13,6 +13,9 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
 class Log
 {
 
@@ -39,6 +42,11 @@ class Log
     {
         $logger = wc_get_logger();
         $logger->log("warning", $message, self::getContext());
+    }
+
+    public static function actionError($message) {
+        $logger = wc_get_logger();
+        $logger->log('error', $message, self::getContext());
     }
 
 }

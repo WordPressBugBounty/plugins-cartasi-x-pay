@@ -1,13 +1,19 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+?>
+
 <div class='stylePreview'>
     <div class='content-anteprima'>
         <div class='Bricks'>
             <div class="build-row">
                 <input class="placePan" type="text"
-                    placeholder="<?php echo __('Card Number', 'woocommerce-gateway-nexi-xpay'); ?>" maxlength="16" />
+                    placeholder="<?php echo esc_attr__('Card Number', 'woocommerce-gateway-nexi-xpay'); ?>" maxlength="16" />
             </div>
             <div class="build-row">
-                <input class="placeExp" type="text"
-                    placeholder="<?php echo __('MM/YY', 'woocommerce-gateway-nexi-xpay'); ?>" maxlength="5" />
+                <input class="placeExp" type="text" placeholder="<?php echo esc_attr__('MM/YY', 'woocommerce-gateway-nexi-xpay'); ?>"
+                    maxlength="5" />
                 <input class="placeCvv" type="text" placeholder="CVV" maxlength="3" />
             </div>
         </div>

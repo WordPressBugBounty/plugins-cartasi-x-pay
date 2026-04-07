@@ -14,6 +14,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_NPG_Currency
 {
     /**
@@ -99,7 +103,7 @@ class WC_Gateway_NPG_Currency
     public static function get_currency_min_unit_multiplier($currency)
     {
         if (!in_array($currency, static::get_npg_supported_currency_list())) {
-            throw new \Exception("Currency not supported: " . $currency);
+            throw new \Exception(esc_html("Currency not supported: " . $currency));
         }
 
         $decimals = static::$npgCurrenciesList[$currency];
@@ -107,7 +111,7 @@ class WC_Gateway_NPG_Currency
         $mul = pow(10, $decimals);
 
         if ($mul === false) {
-            throw new \Exception("Error calculating min unit multiplier, currency: " . $currency . " - decimals: " . $decimals);
+            throw new \Exception(esc_html("Error calculating min unit multiplier, currency: " . $currency . " - decimals: " . $decimals));
         }
 
         return $mul;

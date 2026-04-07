@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Pending_Status
 {
 
@@ -24,6 +28,7 @@ class WC_Pending_Status
             'exclude_from_search' => false,
             'show_in_admin_all_list' => true,
             'show_in_admin_status_list' => true,
+            // translators: %s: number of orders in pending payment status.
             'label_count' => _n_noop('Nexi: pending payment (%s)', 'Nexi: pending payment (%s)', 'woocommerce-gateway-nexi-xpay')
         ));
     }

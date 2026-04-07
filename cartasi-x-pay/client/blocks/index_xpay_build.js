@@ -4,7 +4,6 @@ import "./xpay-build.scss";
 import React, { useEffect, useRef, useState } from "react";
 
 import $ from "jquery";
-import _ from "lodash";
 
 import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 import { __ } from "@wordpress/i18n";
@@ -297,10 +296,10 @@ const CreditCardContent = ({ eventRegistration, shouldSavePayment, emitResponse 
             } catch (error) {
                 var codice = parseInt(error?.errore?.codice);
 
-                let errorMessage = __("There was an error", "woocommerce-gateway-nexi-xpay");
+                let errorMessage = __("There was an error", 'woocommerce-gateway-nexi-xpay');
 
                 if (codice === 600) {
-                    errorMessage = __("Payment canceled", "woocommerce-gateway-nexi-xpay");
+                    errorMessage = __("Payment canceled", 'woocommerce-gateway-nexi-xpay');
                 }
 
                 return {
@@ -527,10 +526,10 @@ const SavedTokenComponent = ({ eventRegistration, token, emitResponse }) => {
             } catch (error) {
                 var codice = parseInt(error?.errore?.codice);
 
-                let errorMessage = __("There was an error", "woocommerce-gateway-nexi-xpay");
+                let errorMessage = __("There was an error", 'woocommerce-gateway-nexi-xpay');
 
                 if (codice === 600) {
-                    errorMessage = __("Payment canceled", "woocommerce-gateway-nexi-xpay");
+                    errorMessage = __("Payment canceled", 'woocommerce-gateway-nexi-xpay');
                 }
 
                 return {
@@ -578,7 +577,7 @@ const getPaymentMethodOptions = () => {
         edit: <CreditCardContent content={getContent()} icons={contentIcons} />,
         icons: cardIcons,
         canMakePayment: canMakePayment,
-        ariaLabel: __(label, "woocommerce-gateway-nexi-xpay"),
+        ariaLabel: __(label, 'woocommerce-gateway-nexi-xpay'),
         supports: {
             showSavedCards: getShowSavedCards(),
             showSaveOption: getShowSaveOption(),

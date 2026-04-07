@@ -13,6 +13,10 @@
 
 namespace Nexi\BlockSupport;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 abstract class WC_Gateway_XPay_Blocks_Support extends WC_Gateway_Generic_Blocks_Support
 {
 

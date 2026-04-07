@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class OrderHelper
 {
 
@@ -36,7 +40,7 @@ class OrderHelper
                             return $meta;
                         }
                     } catch (\Exception $e) {
-                        \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
+                        \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
                     }
                 }
 
@@ -45,13 +49,17 @@ class OrderHelper
                     $meta = $order->get_meta($metaKey, $single);
                     return $meta;
                 } catch (\Exception $e) {
-                    \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
+                    \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
                 }
             }
         } catch (\Exception $e) {
-            \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
+            \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " exception: " . json_encode([$orderId, $metaKey, $e->getMessage()]));
         }
+        return get_post_meta($orderId, $metaKey, $single);
+    }
 
+    public static function getPostMeta($orderId, $metaKey, $single = false)
+    {
         return get_post_meta($orderId, $metaKey, $single);
     }
 
@@ -67,7 +75,7 @@ class OrderHelper
                             $subscription->save();
                         }
                     } catch (\Exception $e) {
-                        \Nexi\Log::actionDebug("subscription exception: " . json_encode($e));
+                        \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " subscription exception: " . json_encode($e));
                     }
                 }
 
@@ -76,13 +84,17 @@ class OrderHelper
                     $order->update_meta_data($metaKey, $value);
                     $order->save_meta_data();
                 } catch (\Exception $e) {
-                    \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
+                    \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
                 }
             }
         } catch (\Exception $e) {
-            \Nexi\Log::actionDebug("exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
+            \Nexi\Log::actionDebug(__FUNCTION__ . ' ' . __LINE__ . " exception: " . json_encode([$orderId, $metaKey, $value, $e->getMessage()]));
         }
+        update_post_meta($orderId, $metaKey, $value);
+    }
 
+    public static function updatePostMeta($orderId, $metaKey, $value)
+    {
         update_post_meta($orderId, $metaKey, $value);
     }
 
@@ -110,7 +122,7 @@ class OrderHelper
                 'orderby' => 'date',
                 'order' => 'desc',
                 'customer_id' => get_current_user_id(),
-                'date_created' => '>' . date('Y-m-d', strtotime('- 6 month')),
+                'date_created' => '>' . gmdate('Y-m-d', strtotime('- 6 month')),
             ];
             $orders = wc_get_orders($args);
         } else {
@@ -123,7 +135,7 @@ class OrderHelper
                 'post_type' => wc_get_order_types(),
                 'post_status' => array_keys(wc_get_order_statuses()),
                 'date_query' => array(
-                    'after' => date('Y-m-d', strtotime('- 6 month'))
+                    'after' => gmdate('Y-m-d', strtotime('- 6 month'))
                 )
             );
             $orders = get_posts($args);

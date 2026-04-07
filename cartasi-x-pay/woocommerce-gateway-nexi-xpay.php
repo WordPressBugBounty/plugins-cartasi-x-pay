@@ -4,7 +4,7 @@
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 8.3.1
+ * Version: 8.3.2
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
@@ -26,7 +26,7 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "8.3.1");
+        define("WC_GATEWAY_XPAY_VERSION", "8.3.2");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
@@ -271,12 +271,12 @@ function nexi_xpay_plugins_loaded()
             // add a 'nexi_polling_schedule' schedule to the existing set
             $schedules['nexi_polling_schedule'] = array(
                 'interval' => 300,
-                'display' => __('5 minutes')
+                'display' => __('5 minutes', 'woocommerce-gateway-nexi-xpay')
             );
 
             $schedules['nexi_polling_schedule_2h'] = array(
                 'interval' => 7200,
-                'display' => __('2 hours'),
+                'display' => __('2 hours', 'woocommerce-gateway-nexi-xpay'),
             );
 
             return $schedules;
@@ -326,7 +326,7 @@ function nexi_xpay_plugins_loaded()
         function xpay_plugin_action_links($links)
         {
             $plugin_links = array(
-                '<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=xpay')) . '">' . __('Settings') . '</a>',
+                '<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=xpay')) . '">' . __('Settings', 'woocommerce-gateway-nexi-xpay') . '</a>',
             );
 
             return array_merge($plugin_links, $links);
@@ -386,7 +386,7 @@ function nexi_xpay_plugins_loaded()
                 </div>
             ';
 
-                echo $notice;
+                echo wp_kses_post($notice);
             }
         }
 

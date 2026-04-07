@@ -300,7 +300,7 @@ export const getPaymentMethodOptions = (
         edit: <CreditCardContent content={getContent(paymentMethodName)} icons={contentIcons} />,
         icons: cardIcons,
         canMakePayment: _canMakePayment,
-        ariaLabel: __(label, "woocommerce-gateway-nexi-xpay"),
+        ariaLabel: __(label, 'woocommerce-gateway-nexi-xpay'),
         supports: {
             showSavedCards: getShowSavedCards(paymentMethodName),
             showSaveOption: getShowSaveOption(paymentMethodName),

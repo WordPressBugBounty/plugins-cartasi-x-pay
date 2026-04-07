@@ -4,10 +4,10 @@ Tags: nexi, nexi payments, xpay, payment gateway, e-commerce
 Author URI: https://ecommerce.nexi.it
 Author: Nexi Payments SpA
 Requires at least: 4.6
-Tested up to: 6.9.1
+Tested up to: 6.9.4
 WC Requires at least: 2.7.0
-WC Tested up to: 10.5.3
-Stable tag: 8.3.1
+WC Tested up to: 10.6.2
+Stable tag: 8.3.2
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -15,7 +15,7 @@ XPay is the payment gateway provided by Nexi, a leading group in Italy with the 
 
 == Description ==
 
-This module allows you to connect your e-commerce website to the XPay payment gateway. 
+This module allows you to connect your e-commerce website to the XPay payment gateway.
 XPay is Nexi's service that enables you to accept online and mobile payments easily and quickly.
 
 XPay is the payment gateway provided by Nexi, a leading group in Italy with the goal of shaping the future of digital payments.
@@ -33,7 +33,7 @@ The extension is regularly updated to incorporate the advancements and improveme
 == XPay Module Features ==
 
 -	**Simple Payment**: Redirects the customer to Nexi's secure payment gateway.
--   **XPay Build**: Entry form for card data on your site without redirections on external cash pages.  
+-   **XPay Build**: Entry form for card data on your site without redirections on external cash pages.
 -	**One-Click Payment**: Allows the end customer to store their credit card data and use it for future purchases with a single click.
 -	**Recurring Payment**: Enables the merchant to tokenize the customer's card data, allowing for recurring billing and subscriptions. To enable recurring payments, you need to install the WooCommerce Subscriptions extension.
 -	**Pay-By-Link**: Enables sending a payment link to the customer via email or social media.
@@ -196,32 +196,32 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Added - 3DS 2.0 compatibility
  * Fixed - Traslation issue
  * Fixed - Minor issues
- 
+
 = 5.0.0 =
  * Changed - Management of OneClick payments: 3DSecure is required in subsequent payments.
  * Changed - Alias management in the configuration section: only one alias is required for both simple and OneClick payments.
  * Fixed - Format of the "Country" parameter sent in 3D Secure 2.0 with the ISO 3166-1 alpha-3 charset.
  * Fixed - Minor issues.
- 
+
 = 5.0.1 =
- * Fixed - Minor issues	
- 
+ * Fixed - Minor issues
+
 = 5.0.2 =
  * Fixed - 3D Secure 2.0 parameters format
- 
+
 = 5.1.0 =
  * Changed management of alternative payment methods available to the merchant
  * Fixed multisite issue
  * Fixed minor issues
- 
+
 = 5.2.0 =
  * Added - New payment methods Skrill, PayU, Blik, Multibanco, PoLi
- * Fixed minor issues	
- 
+ * Fixed minor issues
+
 = 6.0.0 =
  * Added - New payment method PagoDIL
  * Code refactoring
- 
+
 = 7.0.0 =
  * Added - Payment management via Api-Key
  * Code refactoring
@@ -239,22 +239,22 @@ This payment method doesn't support transaction refunds. In case of a refund, th
 
 = 7.1.1 =
  * Fixed - Minor issues
- 
+
 = 7.2.0 =
  * Added - OneClick feature via Api-Key
  * Added - APM (Alternative Payment Method) support via Api-Key
  * Added - Multicurrency support for Payment Cards via Api-Key
  * Added - Multilanguage feature via Api-Key, keeps the language (if supported) between the shop and the payment gateway
- 
+
 = 7.2.1 =
  * Fixed - installation issue
- 
+
 = 7.2.2 =
  * Fixed - Minor issues
 
 = 7.2.3 =
  * Fixed - Empty checkout fieldset
- 
+
 = 7.3.0 =
  * Added - Order lock for orders via Api-Key
  * Changed - Management of bcmath PHP library
@@ -268,20 +268,20 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Added - Multicurrency with Apple Pay and Google Pay
  * Added - Installment payments for the Greek market
  * Fixed - Minor issues
- 
+
 = 7.3.3 =
  * Fixed - Minor issues
- 
+
 = 7.3.4 =
  * Fixed - Minor issues
- 
+
 = 7.4.0 =
  * Added - New payment methods HeyLight, Klarna, PayPal Pay in 3 Installments
  * Fixed - Minor issues
 
 = 7.4.1 =
  * Fixed - Minor issues
- 
+
 = 7.5.0 =
  * Added - New payment method: Click to Pay
  * Added - Language compatibility: German, Czech, Romanian, Slovak, Hungarian, Polish
@@ -296,11 +296,11 @@ This payment method doesn't support transaction refunds. In case of a refund, th
 
 = 7.6.2 =
  * Fixed - Minor issues
- 
+
 = 8.0.0 =
  * XPay Build plugin features
  * Server-to-server payment method with Apple Pay and Google Pay
- 
+
 = 8.1.0 =
  * Changed - Card logos
  * Added - New payment method available for Greek merchants only: Iris.
@@ -314,9 +314,12 @@ This payment method doesn't support transaction refunds. In case of a refund, th
  * Added - Translations for Croatian and Albanian languages
  * Added - New invoiceId parameter (only for API key credential type)
  * Fixed - Minor issues
- 
+
 = 8.3.0 =
  * Changed - Test mode endpoint (from stg-ta to xpaysandbox)
  * Added - Greek translation for Payment Cards
  * Added - Province code management for foreign countries (EE) with 3DSecure 2
  * Fixed - Minor issues
+
+= 8.3.2 =
+ * Fixed - Issues reported by the WordPress team

@@ -12,6 +12,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
 {
 
@@ -79,7 +83,18 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
 
     public static function build_payment_payload()
     {
-        $token_id = $_REQUEST['token_id'];
+        $token_id = isset($_REQUEST['token_id']) ? (int) $_REQUEST['token_id'] : null;
+
+        if (!is_user_logged_in()) {
+            $token_id = null;
+        } else if ($token_id) {
+            $token = \WC_Payment_Tokens::get($token_id);
+            $customerId = (int) get_current_user_id();
+
+            if (!$token || (int) $token->get_user_id() !== $customerId) {
+                $token_id = null;
+            }
+        }
 
         wp_send_json(\Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(WC()->cart->total, $token_id));
     }
@@ -89,15 +104,15 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
         global $wp;
 
         if (is_add_payment_method_page() && isset($wp->query_vars['add-payment-method'])) {
-            echo __('New payment methods can only be added during checkout', 'woocommerce-gateway-nexi-xpay');
+            echo esc_html__('New payment methods can only be added during checkout', 'woocommerce-gateway-nexi-xpay');
             return;
         }
 
         $this->tokenization_script();   //hides 'Use new payment card' flag if there aren't saved cards and checks if user is logged in to display the save card option
 
-        echo "<p>" . $this->description . "</p>";
+        echo wp_kses_post('<p>' . $this->description . '</p>');
 
-        echo $this->get_xpay_cards_icon();
+        echo wp_kses_post($this->get_xpay_cards_icon());
 
         $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 
@@ -116,33 +131,33 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
             </script>
 
             <input type="hidden" id="xpay_msg_err"
-                value="<?php echo __("The transaction has been declined, please retry.", 'woocommerce-gateway-nexi-xpay') ?>">
+                value="<?php echo esc_attr(__("The transaction has been declined, please retry.", 'woocommerce-gateway-nexi-xpay')); ?>">
 
-            <input type="hidden" id="xpay_new_payment_info" value="<?php echo htmlentities(json_encode($payment_payload)) ?>">
-            <input type="hidden" name="divisa" value="<?php echo htmlentities($payment_payload["divisa"]) ?>">
+            <input type="hidden" id="xpay_new_payment_info" value="<?php echo esc_attr(wp_json_encode($payment_payload)); ?>">
+            <input type="hidden" name="divisa" value="<?php echo esc_attr($payment_payload["divisa"]); ?>">
             <input type="hidden" name="transactionId" id="xpay_transactionId"
-                data-new-card-value="<?php echo htmlentities($payment_payload["transactionId"]) ?>">
-            <input type="hidden" id="xpay_style" value="<?php echo htmlentities(self::getBuildStyle()); ?>">
+                data-new-card-value="<?php echo esc_attr($payment_payload["transactionId"]); ?>">
+            <input type="hidden" id="xpay_style" value="<?php echo esc_attr(self::getBuildStyle()); ?>">
             <input type="hidden" id="xpay_border_color_default"
-                value="<?php echo htmlentities($currentConfig['border_color_ok']); ?>">
+                value="<?php echo esc_attr($currentConfig['border_color_ok']); ?>">
             <input type="hidden" id="xpay_border_color_error"
-                value="<?php echo htmlentities($currentConfig['border_color_ko']); ?>">
+                value="<?php echo esc_attr($currentConfig['border_color_ko']); ?>">
             <input type="hidden" id="xpay_3ds"
-                value="<?php echo $currentConfig['nexi_xpay_3ds20_enabled'] == 'yes' ? 1 : 0; ?>">
+                value="<?php echo esc_attr($currentConfig['nexi_xpay_3ds20_enabled'] == 'yes' ? 1 : 0); ?>">
 
             <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
 
             <!-- Contiene il form dei dati carta -->
             <div style='display:table; margin-bottom:30px;'>
                 <div id="xpay-pan"
-                    style='max-width: 300px; width: 100%; border: 1px solid <?php echo $currentConfig['border_color_ok']; ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; margin-bottom:5px;'>
+                    style='max-width: 300px; width: 100%; border: 1px solid <?php echo esc_attr($currentConfig['border_color_ok']); ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; margin-bottom:5px;'>
                 </div>
                 <div style="display: flex; flex-direction: row;">
                     <div id="xpay-expiry"
-                        style='max-width: 147.5px; width: 100%; border: 1px solid <?php echo $currentConfig['border_color_ok']; ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; border-top-width: 1; border-right-width: 1; margin-right:5px;'>
+                        style='max-width: 147.5px; width: 100%; border: 1px solid <?php echo esc_attr($currentConfig['border_color_ok']); ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; border-top-width: 1; border-right-width: 1; margin-right:5px;'>
                     </div>
                     <div id="xpay-cvv"
-                        style='max-width: 147.5px; width: 100%; border: 1px solid <?php echo $currentConfig['border_color_ok']; ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; border-top-width: 1;'>
+                        style='max-width: 147.5px; width: 100%; border: 1px solid <?php echo esc_attr($currentConfig['border_color_ok']); ?>; padding: 4px 2px 0px 10px; box-sizing: border-box; border-top-width: 1;'>
                     </div>
                 </div>
             </div>
@@ -164,13 +179,13 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
             <?php
             if ($isRecurring) {
                 ?> <input type="hidden" id="nexi-xpay-is-recurring-payment" /><?php
-                 echo __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
+                 echo esc_html__('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
             } else if ($currentConfig["nexi_xpay_oneclick_enabled"] == "yes" && get_current_user_id()) {
                 ?>
                     <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
                         <input id="save-card" name="save-card" type="checkbox" value="1" style="width:auto;" />
                         <label for="save-card"
-                            style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
+                            style="display:inline;"><?php echo esc_html__('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
                     </p>
             <?php }
             ?>
@@ -329,8 +344,8 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
     {
         global $woocommerce;
 
-        // Translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year
         $display = sprintf(
+            // translators: 1: credit card type, 2: last 4 digits, 3: expiry month, 4: expiry year.
             __('%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce-gateway-nexi-xpay'),
             wc_get_credit_card_type_label($token->get_card_type()),
             $token->get_last4(),
@@ -338,7 +353,7 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
             substr($token->get_expiry_year(), 2)
         );
 
-        $codTransCvv = substr("BR-" . date('ysdim') . $token->get_id() . "-" . time(), 0, 30);
+        $codTransCvv = substr("BR-" . gmdate('ysdim') . $token->get_id() . "-" . time(), 0, 30);
         $timestampCvv = time() * 1000;
         $importoCvv = WC_Nexi_Helper::mul_bcmul(floatval(preg_replace('#[^\d.]#', '', $woocommerce->cart->total)), 100, 0);
 

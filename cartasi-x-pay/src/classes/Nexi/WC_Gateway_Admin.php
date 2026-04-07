@@ -12,6 +12,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class WC_Gateway_Admin extends \WC_Payment_Gateway
 {
 
@@ -61,7 +65,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
     {
         ?>
         <div class="error notice">
-            <p><?php echo __('Invalid credentials. Check and try again.', 'woocommerce-gateway-nexi-xpay'); ?></p>
+            <p><?php echo esc_html__('Invalid credentials. Check and try again.', 'woocommerce-gateway-nexi-xpay'); ?></p>
         </div>
         <?php
     }
@@ -70,7 +74,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
     {
         ?>
         <div class="error notice">
-            <p><?php echo __('Invalid API Key. Check and try again.', 'woocommerce-gateway-nexi-xpay'); ?></p>
+            <p><?php echo esc_html__('Invalid API Key. Check and try again.', 'woocommerce-gateway-nexi-xpay'); ?></p>
         </div>
         <?php
     }
@@ -82,26 +86,50 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
         }
 
         if (!empty($_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate']['tmp_name'])) {
-            $uploaded = wp_handle_upload($_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate'], ['test_form' => false, 'test_type' => false]);
+            $uploaded = wp_handle_upload(
+                $_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate'],
+                [
+                    'test_form' => false,
+                    'test_type' => false
+                ]
+            );
 
             if (!isset($uploaded['error'])) {
                 update_option('nexi_applepay_merchant_identifier_certificate', $uploaded['file']);
+            } else {
+                Log::actionWarning(__FUNCTION__ . ' error during merchant_identifier uploading: ' . $uploaded['error']);
             }
         }
 
         if (!empty($_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate_key']['tmp_name'])) {
-            $uploaded = wp_handle_upload($_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate_key'], ['test_form' => false, 'test_type' => false]);
+            $uploaded = wp_handle_upload(
+                $_FILES['woocommerce_xpay_applepay_merchant_identifier_certificate_key'],
+                [
+                    'test_form' => false,
+                    'test_type' => false
+                ]
+            );
 
             if (!isset($uploaded['error'])) {
                 update_option('nexi_applepay_merchant_identifier_certificate_key', $uploaded['file']);
+            } else {
+                Log::actionWarning(__FUNCTION__ . ' error during merchant_identifier_key uploading: ' . $uploaded['error']);
             }
         }
 
         if (!empty($_FILES['woocommerce_xpay_applepay_ca_root_certificate']['tmp_name'])) {
-            $uploaded = wp_handle_upload($_FILES['woocommerce_xpay_applepay_ca_root_certificate'], ['test_form' => false, 'test_type' => false]);
+            $uploaded = wp_handle_upload(
+                $_FILES['woocommerce_xpay_applepay_ca_root_certificate'],
+                [
+                    'test_form' => false,
+                    'test_type' => false
+                ]
+            );
 
             if (!isset($uploaded['error'])) {
                 update_option('nexi_applepay_ca_root_certificate', $uploaded['file']);
+            } else {
+                Log::actionWarning(__FUNCTION__ . ' error during ca_root_certificate uploading: ' . $uploaded['error']);
             }
         }
     }
@@ -400,14 +428,14 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                 'description' => __('Button type', 'woocommerce-gateway-nexi-xpay'),
                 'type' => 'select',
                 'options' => [
-                    "buy" => __("Buy", "woocommerce-gateway-nexi-xpay"),
-                    "book" => __("Book", "woocommerce-gateway-nexi-xpay"),
-                    "checkout" => __("Checkout", "woocommerce-gateway-nexi-xpay"),
-                    "donate" => __("Donate", "woocommerce-gateway-nexi-xpay"),
-                    "order" => __("Order", "woocommerce-gateway-nexi-xpay"),
-                    "pay" => __("Pay", "woocommerce-gateway-nexi-xpay"),
-                    "plain" => __("Plain", "woocommerce-gateway-nexi-xpay"),
-                    "subscribe" => __("Subscribe", "woocommerce-gateway-nexi-xpay"),
+                    "buy" => __("Buy", 'woocommerce-gateway-nexi-xpay'),
+                    "book" => __("Book", 'woocommerce-gateway-nexi-xpay'),
+                    "checkout" => __("Checkout", 'woocommerce-gateway-nexi-xpay'),
+                    "donate" => __("Donate", 'woocommerce-gateway-nexi-xpay'),
+                    "order" => __("Order", 'woocommerce-gateway-nexi-xpay'),
+                    "pay" => __("Pay", 'woocommerce-gateway-nexi-xpay'),
+                    "plain" => __("Plain", 'woocommerce-gateway-nexi-xpay'),
+                    "subscribe" => __("Subscribe", 'woocommerce-gateway-nexi-xpay'),
                 ],
                 'default' => 'buy',
                 'desc_tip' => true,
@@ -418,9 +446,9 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                 'description' => __('Button color', 'woocommerce-gateway-nexi-xpay'),
                 'type' => 'select',
                 'options' => [
-                    "default" => __("Default", "woocommerce-gateway-nexi-xpay"),
-                    "black" => __("Black", "woocommerce-gateway-nexi-xpay"),
-                    "white" => __("White", "woocommerce-gateway-nexi-xpay"),
+                    "default" => __("Default", 'woocommerce-gateway-nexi-xpay'),
+                    "black" => __("Black", 'woocommerce-gateway-nexi-xpay'),
+                    "white" => __("White", 'woocommerce-gateway-nexi-xpay'),
                 ],
                 'default' => 'default',
                 'desc_tip' => true,
@@ -720,7 +748,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
             <td class="forminp <?php echo esc_attr($data['class']); ?>">
                 <fieldset>
                     <div>
-                        <?php echo $html; ?>
+                        <?php echo wp_kses_post($html); ?>
                     </div>
                 </fieldset>
             </td>
@@ -779,7 +807,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
             <td class="forminp <?php echo esc_attr($data['class']); ?>">
                 <fieldset>
                     <div>
-                        <?php echo $html; ?>
+                        <?php echo wp_kses_post($html); ?>
                     </div>
                 </fieldset>
             </td>
@@ -817,8 +845,8 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                         <table>
                             <thead>
                                 <tr>
-                                    <th><?php echo __('Up to an amount of', 'woocommerce-gateway-nexi-xpay'); ?></th>
-                                    <th><?php echo __('Maximum installments', 'woocommerce-gateway-nexi-xpay'); ?></th>
+                                    <th><?php echo esc_html__('Up to an amount of', 'woocommerce-gateway-nexi-xpay'); ?></th>
+                                    <th><?php echo esc_html__('Maximum installments', 'woocommerce-gateway-nexi-xpay'); ?></th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -828,11 +856,11 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
 
                     <div>
                         <button class="button"
-                            id="add-ranges-variation"><?php echo __('Add rule', 'woocommerce-gateway-nexi-xpay'); ?></button>
+                            id="add-ranges-variation"><?php echo esc_html__('Add rule', 'woocommerce-gateway-nexi-xpay'); ?></button>
                     </div>
 
                     <input type="hidden" id="ranges-delete-label"
-                        value="<?php echo __('Delete', 'woocommerce-gateway-nexi-xpay'); ?>" />
+                        value="<?php echo esc_attr__('Delete', 'woocommerce-gateway-nexi-xpay'); ?>" />
 
                     <input type="hidden" id="<?php echo esc_attr($key); ?>" name="<?php echo esc_attr($field); ?>"
                         value="<?php echo esc_attr($value); ?>" />
@@ -881,7 +909,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                 <fieldset>
                     <label for="<?php echo esc_attr($field); ?>"><?php echo wp_kses_post($data['label']); ?></label>
 
-                    <?php echo $this->get_description_html($data); ?>
+                    <?php echo wp_kses_post($this->get_description_html($data)); ?>
 
                     <div>
                         <?php include_once plugin_dir_path(WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE) . 'templates/build_preview.php'; ?>
@@ -915,7 +943,7 @@ class WC_Gateway_Admin extends \WC_Payment_Gateway
                     <label for="<?php echo esc_attr($field); ?>"
                         class="<?php echo wp_kses_post($data['class']); ?>"><?php echo wp_kses_post($data['label']); ?></label>
 
-                    <?php echo $this->get_description_html($data); ?>
+                    <?php echo wp_kses_post($this->get_description_html($data)); ?>
                 </fieldset>
             </td>
         </tr>

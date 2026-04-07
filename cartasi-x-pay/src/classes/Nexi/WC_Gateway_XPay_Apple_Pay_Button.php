@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_Apple_Pay_Button extends WC_Gateway_XPay_Generic_Method
 {
 
@@ -60,7 +64,7 @@ class WC_Gateway_XPay_Apple_Pay_Button extends WC_Gateway_XPay_Generic_Method
 
     public function payment_fields()
     {
-        echo $this->description;
+        echo wp_kses_post($this->description);
 
         ?>
         <script>
@@ -73,7 +77,7 @@ class WC_Gateway_XPay_Apple_Pay_Button extends WC_Gateway_XPay_Generic_Method
             });
         </script>
 
-        <input type="hidden" id="xpay_admin_url" value="<?php echo admin_url() ?>" />
+        <input type="hidden" id="xpay_admin_url" value="<?php echo esc_url(admin_url()); ?>" />
 
         <input type="hidden" id="applePayJson" name="apple_pay_json" />
 
@@ -89,7 +93,7 @@ class WC_Gateway_XPay_Apple_Pay_Button extends WC_Gateway_XPay_Generic_Method
 
         try {
             $applePay = json_decode(filter_input(INPUT_POST, 'apple_pay_json') ?? $_POST['apple_pay_json'], true);
-            $codTrans = substr("AP-" . date('ysdim') . "-" . time(), 0, 30);
+            $codTrans = substr("AP-" . gmdate('ysdim') . "-" . time(), 0, 30);
             $divisa = get_woocommerce_currency();
             $amount = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
 

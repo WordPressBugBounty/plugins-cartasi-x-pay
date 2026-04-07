@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 use Exception;
 
 class WC_Klarna_Data_Provider

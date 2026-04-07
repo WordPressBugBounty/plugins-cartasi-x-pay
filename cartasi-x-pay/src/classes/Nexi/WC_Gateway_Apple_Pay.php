@@ -13,8 +13,29 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class WC_Gateway_Apple_Pay
 {
+    private static function isAllowedAppleValidationHost($host)
+    {
+        $allowedSuffixes = [
+            'apple.com',
+            'apple-pay-gateway.apple.com',
+            'apple-pay-gateway-cert.apple.com',
+        ];
+
+        $host = strtolower((string) $host);
+        foreach ($allowedSuffixes as $suffix) {
+            if ($host === $suffix || substr($host, -strlen('.' . $suffix)) === '.' . $suffix) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public static function apple_pay_configuration()
     {
@@ -70,15 +91,44 @@ class WC_Gateway_Apple_Pay
         wp_send_json($data);
     }
 
-    public static function apple_pay_validate_merchant()
+    public static function add_apple_pay_certificates(&$handle, $args)
     {
-        $connection = curl_init();
-
-        if (!$connection) {
-            throw new \Exception(__('Can\'t connect!', 'woocommerce-gateway-nexi-xpay'));
+        if (!isset($args['_add_certs'])) {
+            return;
         }
 
+        $certs = [
+            'cert' => \WC_Admin_Settings::get_option('nexi_applepay_merchant_identifier_certificate'), // file path or string blob
+            'key' => \WC_Admin_Settings::get_option('nexi_applepay_merchant_identifier_certificate_key'), // same as above
+            'cainfo' => \WC_Admin_Settings::get_option('nexi_applepay_ca_root_certificate'), // same as above
+        ];
+
+        curl_setopt($handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+        curl_setopt($handle, is_readable($certs['cert']) ? CURLOPT_SSLCERT : CURLOPT_SSLCERT_BLOB, $certs['cert']);
+        curl_setopt($handle, is_readable($certs['key']) ? CURLOPT_SSLKEY : CURLOPT_SSLKEY_BLOB, $certs['key']);
+        curl_setopt($handle, is_readable($certs['key']) ? CURLOPT_SSLKEY : CURLOPT_SSLKEY_BLOB, $certs['key']);
+        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, 2);
+    }
+
+    public static function apple_pay_validate_merchant()
+    {
         $validationUrl = filter_input(INPUT_POST, 'validation_url') ?? $_POST['validation_url'];
+        $parsedUrl = wp_parse_url($validationUrl);
+
+        if (
+            !$parsedUrl ||
+            !isset($parsedUrl['scheme']) ||
+            !isset($parsedUrl['host']) ||
+            strtolower($parsedUrl['scheme']) !== 'https' ||
+            !self::isAllowedAppleValidationHost($parsedUrl['host'])
+        ) {
+            wp_send_json_error(['message' => __('Invalid validation URL.', 'woocommerce-gateway-nexi-xpay')], 400);
+        }
+
+        $baseHeaders = [
+            'Content-Type' => 'application/json'
+        ];
 
         $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
@@ -89,30 +139,30 @@ class WC_Gateway_Apple_Pay
             'initiativeContext' => str_replace(["http://", "https://", "/"], "", get_site_url()),
         ];
 
-        curl_setopt_array($connection, [
-            CURLOPT_URL => $validationUrl,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS => json_encode($request),
-            CURLOPT_TIMEOUT => 25,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-            CURLOPT_SSLCERT => \WC_Admin_Settings::get_option('nexi_applepay_merchant_identifier_certificate'),
-            CURLOPT_SSLKEY => \WC_Admin_Settings::get_option('nexi_applepay_merchant_identifier_certificate_key'),
-            CURLOPT_CAINFO => \WC_Admin_Settings::get_option('nexi_applepay_ca_root_certificate'),
+        $args = [
+            'method' => 'POST',
+            'timeout' => 25,
+            'headers' => $baseHeaders,
+            'body' => json_encode($request),
+        ];
+
+        $parsedArgs = wp_parse_args($args, [
+            '_add_certs' => true,
         ]);
 
-        $response = curl_exec($connection);
+        add_action('http_api_curl', '\Nexi\WC_Gateway_Apple_Pay::add_apple_pay_certificates', 10, 2);
 
-        if ($response == false) {
-            throw new \Exception(sprintf(__('CURL exec error: %s', 'woocommerce-gateway-nexi-xpay'), curl_error($connection)));
+        try {
+            Log::actionInfo(__FUNCTION__ . ' executing wp_remote_request()');
+            $response = wp_remote_request($validationUrl, $parsedArgs);
+        } catch (\Exception $e) {
+            // translators: 1: exception message.
+            throw new \Exception(esc_html(sprintf(__('CURL exec error: %1$s', 'woocommerce-gateway-nexi-xpay'), $e->getMessage())));
         }
 
-        curl_close($connection);
+        remove_action('http_api_curl', '\Nexi\WC_Gateway_Apple_Pay::add_apple_pay_certificates', 10);
 
-        wp_send_json(json_decode($response));
+        wp_send_json(json_decode($response['body'], true));
     }
 
 }

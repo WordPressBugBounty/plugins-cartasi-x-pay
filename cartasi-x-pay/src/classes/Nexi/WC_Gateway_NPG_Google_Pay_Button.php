@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_NPG_Google_Pay_Button extends WC_Gateway_NPG_Generic_Method
 {
 
@@ -60,10 +64,10 @@ class WC_Gateway_NPG_Google_Pay_Button extends WC_Gateway_NPG_Generic_Method
 
     public function payment_fields()
     {
-        echo $this->description;
+        echo wp_kses_post($this->description);
 
         ?>
-        <input type="hidden" id="xpay_admin_url" value="<?php echo admin_url() ?>" />
+        <input type="hidden" id="xpay_admin_url" value="<?php echo esc_url(admin_url()); ?>" />
 
         <input type="hidden" id="googlePayJson" name="google_pay_json" />
 

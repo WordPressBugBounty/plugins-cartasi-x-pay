@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
 {
 
@@ -35,19 +39,19 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
         global $wp;
 
         if (is_add_payment_method_page() && isset($wp->query_vars['add-payment-method'])) {
-            echo __('New payment methods can only be added during checkout', 'woocommerce-gateway-nexi-xpay');
+            echo esc_html__('New payment methods can only be added during checkout', 'woocommerce-gateway-nexi-xpay');
             return;
         }
 
         $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 
-        echo "<p>" . $this->description . "<br /></p>";
+        echo wp_kses_post('<p>' . $this->description . '<br /></p>');
 
         if ($isRecurring) {
-            echo "<p><br />" . __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay') . "<br /></p>";
+            echo wp_kses_post('<p><br />' . esc_html__('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay') . '<br /></p>');
         }
 
-        echo $this->get_npg_cards_icon();
+        echo wp_kses_post($this->get_npg_cards_icon());
 
         include_once WC_Nexi_Helper::get_nexi_template_path('npg_build_payment.php');
     }
@@ -57,21 +61,21 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
         $orderId = WC()->session->get('npg_build_order_id');
 
         try {
-            if (!\Nexi\OrderHelper::getOrderMeta($orderId, '_npg_orderId', true) || !\Nexi\OrderHelper::getOrderMeta($orderId, '_npg_is_build', true)) {
-                throw new \Exception('Order id not found or not a build order: ' . $orderId);
+            if (!\Nexi\OrderHelper::getPostMeta($orderId, '_npg_orderId', true) || !\Nexi\OrderHelper::getPostMeta($orderId, '_npg_is_build', true)) {
+                throw new \Exception(esc_html('Order id not found or not a build order: ' . $orderId));
             }
 
-            $sessionId = \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_sessionId', true);
+            $sessionId = \Nexi\OrderHelper::getPostMeta($orderId, '_npg_sessionId', true);
 
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_wc_order_id", $order_id);
+            \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_wc_order_id", $order_id);
 
             \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_is_build", true);
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_orderId", \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_orderId', true));
-            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_securityToken", \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_securityToken', true));
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_orderId", \Nexi\OrderHelper::getPostMeta($orderId, '_npg_orderId', true));
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_securityToken", \Nexi\OrderHelper::getPostMeta($orderId, '_npg_securityToken', true));
             \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_sessionId", $sessionId);
 
-            if (\Nexi\OrderHelper::getOrderMeta($orderId, '_npg_recurringContractId', true)) {
-                \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_recurringContractId", \Nexi\OrderHelper::getOrderMeta($orderId, '_npg_recurringContractId', true));
+            if (\Nexi\OrderHelper::getPostMeta($orderId, '_npg_recurringContractId', true)) {
+                \Nexi\OrderHelper::updateOrderMeta($order_id, "_npg_recurringContractId", \Nexi\OrderHelper::getPostMeta($orderId, '_npg_recurringContractId', true));
             }
 
             $buildState = WC_Gateway_NPG_API::getInstance()->build_state($sessionId);
@@ -82,7 +86,7 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
                 $res = WC_Gateway_NPG_API::getInstance()->build_payment_finalize(WC(), $sessionId);
 
                 if (!in_array($res['state'], ['REDIRECTED_TO_EXTERNAL_DOMAIN', 'PAYMENT_COMPLETE'])) {
-                    throw new \Exception('Invalid state returned from payment finalize: ' . json_encode($res));
+                    throw new \Exception(esc_html('Invalid state returned from payment finalize: ' . json_encode($res)));
                 }
 
                 if ($res['state'] === "REDIRECTED_TO_EXTERNAL_DOMAIN") {
@@ -102,7 +106,7 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
         } catch (\Throwable $th) {
             Log::actionWarning(__FUNCTION__ . ': ' . $th->getMessage());
 
-            wc_add_notice(__("Error during payment proccess", "woocommerce-gateway-nexi-xpay"), "error");
+            wc_add_notice(__("Error during payment proccess", 'woocommerce-gateway-nexi-xpay'), "error");
 
             $order = new \WC_Order($order_id);
 

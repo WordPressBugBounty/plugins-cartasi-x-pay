@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_Cards extends WC_Gateway_XPay_Generic_Method
 {
 

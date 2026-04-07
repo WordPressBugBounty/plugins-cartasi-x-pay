@@ -13,6 +13,10 @@
 
 namespace Nexi\BlockSupport;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_NPG_APM_Blocks_Support extends WC_Gateway_NPG_Blocks_Support
 {
 

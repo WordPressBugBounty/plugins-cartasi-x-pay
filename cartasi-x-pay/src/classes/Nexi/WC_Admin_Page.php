@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Admin_Page
 {
 
@@ -177,7 +181,7 @@ class WC_Admin_Page
         $transactionCodTrans = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
 
         if ($transactionCodTrans == "") {
-            echo __("Missing codTrans", 'woocommerce-gateway-nexi-xpay');
+            echo esc_html__("Missing codTrans", 'woocommerce-gateway-nexi-xpay');
             return;
         }
         $transactionNumContratto = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'num_contratto');

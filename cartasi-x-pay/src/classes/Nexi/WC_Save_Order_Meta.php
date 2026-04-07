@@ -13,8 +13,40 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Save_Order_Meta
 {
+    private static function maskPaymentInstrumentInfo($value)
+    {
+        $value = (string) $value;
+        $digits = preg_replace('/\D+/', '', $value);
+
+        if (strlen($digits) >= 4) {
+            return '****' . substr($digits, -4);
+        }
+
+        return $value;
+    }
+
+    private static function normalizeCustomerInfo($customerInfo)
+    {
+        if (!is_array($customerInfo)) {
+            return [];
+        }
+
+        $ret = [];
+        foreach (['cardHolderName', 'cardHolderEmail'] as $key) {
+            if (isset($customerInfo[$key])) {
+                $ret[$key] = $customerInfo[$key];
+            }
+        }
+
+        return $ret;
+    }
+
 
     public static function saveSuccessXPay($order_id, $alias, $num_contratto, $codTrans, $scadenza_pan)
     {
@@ -57,6 +89,14 @@ class WC_Save_Order_Meta
     public static function saveSuccessNpg($order_id, $authorization)
     {
         $metaPrefix = "_npg_";
+        $authorizationSafe = $authorization;
+
+        if (isset($authorizationSafe['paymentInstrumentInfo'])) {
+            $authorizationSafe['paymentInstrumentInfo'] = self::maskPaymentInstrumentInfo($authorizationSafe['paymentInstrumentInfo']);
+        }
+        if (isset($authorizationSafe['customerInfo'])) {
+            $authorizationSafe['customerInfo'] = self::normalizeCustomerInfo($authorizationSafe['customerInfo']);
+        }
 
         \Nexi\OrderHelper::deleteOrderMeta($order_id, $metaPrefix . "last_error");
 
@@ -76,8 +116,8 @@ class WC_Save_Order_Meta
                     $subscription_id = $subscription->get_id();
 
                     foreach (["orderId", "paymentMethod", "paymentCircuit", "operationCurrency", "customerInfo"] as $var_name) {
-                        if (\Nexi\WC_Nexi_Helper::nexi_array_key_exists($authorization, $var_name)) {
-                            \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . $var_name, $authorization[$var_name]);
+                        if (\Nexi\WC_Nexi_Helper::nexi_array_key_exists($authorizationSafe, $var_name)) {
+                            \Nexi\OrderHelper::updateOrderMeta($subscription_id, $metaPrefix . $var_name, $authorizationSafe[$var_name]);
                         }
                     }
 
@@ -87,7 +127,9 @@ class WC_Save_Order_Meta
         }
 
         foreach (["orderId", "operationId", "operationType", "operationResult", "operationTime", "paymentMethod", "paymentCircuit", "paymentInstrumentInfo", "paymentEndToEndId", "cancelledOperationId", "operationAmount", "operationCurrency", "customerInfo"] as $var_name) {
-            \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . $var_name, $authorization[$var_name]);
+            if (\Nexi\WC_Nexi_Helper::nexi_array_key_exists($authorizationSafe, $var_name)) {
+                \Nexi\OrderHelper::updateOrderMeta($order_id, $metaPrefix . $var_name, $authorizationSafe[$var_name]);
+            }
         }
 
     }

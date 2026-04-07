@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_NPG_Cards_Redirect extends WC_Gateway_NPG_Cards
 {
 
@@ -80,15 +84,15 @@ class WC_Gateway_NPG_Cards_Redirect extends WC_Gateway_NPG_Cards
         global $wp;
 
         if (is_add_payment_method_page() && isset($wp->query_vars['add-payment-method'])) {
-            echo '<b>' . __('New payment methods can only be added during checkout.', 'woocommerce-gateway-nexi-xpay') . '</b>';
+            echo wp_kses_post('<b>' . esc_html__('New payment methods can only be added during checkout.', 'woocommerce-gateway-nexi-xpay') . '</b>');
             return;
         }
 
         $this->tokenization_script();
 
-        echo "<p>" . $this->description . '<br /></p>';
+        echo wp_kses_post('<p>' . $this->description . '<br /></p>');
 
-        echo $this->get_npg_cards_icon();
+        echo wp_kses_post($this->get_npg_cards_icon());
 
         $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 
@@ -98,7 +102,7 @@ class WC_Gateway_NPG_Cards_Redirect extends WC_Gateway_NPG_Cards
             ?>
             <fieldset id="wc-<?php echo esc_attr($this->id) ?>-cc-form">
                 <?php
-                echo __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
+                echo esc_html__('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay');
                 ?>
             </fieldset>
             <?php
@@ -111,7 +115,7 @@ class WC_Gateway_NPG_Cards_Redirect extends WC_Gateway_NPG_Cards
                     <p class="form-row woocommerce-SavedPaymentMethods-saveNew">
                         <input id="save-card-npg" name="save-card-npg" type="checkbox" value="1" style="width:auto;" />
                         <label for="save-card-npg"
-                            style="display:inline;"><?php echo __('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
+                            style="display:inline;"><?php echo esc_html__('Remember the payment option.', 'woocommerce-gateway-nexi-xpay'); ?></label>
                     </p>
                 </fieldset>
                 <?php
@@ -121,12 +125,12 @@ class WC_Gateway_NPG_Cards_Redirect extends WC_Gateway_NPG_Cards
                 ?>
                 <fieldset>
                     <label for="nexi-xpay-installments-number" style="display: block;">
-                        <?php echo __('Installments', 'woocommerce-gateway-nexi-xpay'); ?>
+                        <?php echo esc_html__('Installments', 'woocommerce-gateway-nexi-xpay'); ?>
                     </label>
                     <select id="nexi-xpay-installments-number" name="nexi-xpay-installments-number">
-                        <option value=""><?php echo __('One time solution', 'woocommerce-gateway-nexi-xpay'); ?></option>
+                        <option value=""><?php echo esc_html__('One time solution', 'woocommerce-gateway-nexi-xpay'); ?></option>
                         <?php foreach ($installmentsInfo['max_installments'] as $installmentsNumber) { ?>
-                            <option value="<?php echo $installmentsNumber; ?>"><?php echo $installmentsNumber; ?></option>
+                            <option value="<?php echo esc_attr($installmentsNumber); ?>"><?php echo esc_html($installmentsNumber); ?></option>
                         <?php } ?>
                     </select>
                 </fieldset>

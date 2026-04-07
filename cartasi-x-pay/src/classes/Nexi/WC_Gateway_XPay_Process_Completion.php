@@ -13,8 +13,57 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class WC_Gateway_XPay_Process_Completion
 {
+    private static function getGpayAllowedHtml()
+    {
+        return [
+            'html' => ['lang' => true],
+            'head' => [],
+            'body' => ['onload' => true],
+            'meta' => ['http-equiv' => true, 'content' => true, 'charset' => true, 'name' => true],
+            'title' => [],
+            'script' => ['type' => true, 'src' => true, 'id' => true, 'nonce' => true, 'async' => true, 'defer' => true],
+            'style' => ['type' => true, 'media' => true, 'id' => true],
+            'noscript' => [],
+            'form' => ['method' => true, 'action' => true, 'enctype' => true, 'name' => true, 'id' => true],
+            'input' => ['type' => true, 'name' => true, 'value' => true, 'id' => true, 'class' => true],
+            'button' => ['type' => true, 'name' => true, 'value' => true, 'id' => true, 'class' => true],
+            'iframe' => ['src' => true, 'name' => true, 'id' => true, 'width' => true, 'height' => true, 'frameborder' => true, 'allow' => true, 'allowfullscreen' => true],
+            'div' => ['id' => true, 'class' => true, 'style' => true, 'data-*' => true],
+            'span' => ['id' => true, 'class' => true, 'style' => true, 'data-*' => true],
+            'p' => ['id' => true, 'class' => true, 'style' => true],
+            'a' => ['href' => true, 'target' => true, 'rel' => true, 'id' => true, 'class' => true],
+            'br' => [],
+        ];
+    }
+
+    private static function sanitizeMessage($message)
+    {
+        return \sanitize_text_field((string) $message);
+    }
+
+    private static function isExpectedCodTrans($order_id, $codTrans)
+    {
+        if ($order_id === '') {
+            return false;
+        }
+
+        $expectedCodTrans = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_transaction_id", true);
+
+        if ($expectedCodTrans == null) {
+            $expectedCodTrans = \Nexi\WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
+        }
+
+        Log::actionDebug("expectedCodTrans: " . (string) $expectedCodTrans . "\nsavedCodTrans: " . $codTrans);
+
+        return \hash_equals((string) $expectedCodTrans, (string) $codTrans);
+    }
+
 
     public static function action_template_redirect()
     {
@@ -102,9 +151,17 @@ class WC_Gateway_XPay_Process_Completion
 
         $gpayHtml = \Nexi\OrderHelper::getOrderMeta($order_id, 'gpay_html', true);
 
+        $expectedToken = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_gpay_redirect_token', true);
+        $providedToken = (string) ($params['token'] ?? '');
+
+        if ($expectedToken && !\hash_equals((string) $expectedToken, $providedToken)) {
+            Log::actionWarning(__FUNCTION__ . ": invalid redirect token for order id " . $order_id);
+            return new \WP_REST_Response("forbidden", 403);
+        }
+
         if ($gpayHtml) {
             header('Content-Type: text/html');
-            echo $gpayHtml;
+            echo wp_kses($gpayHtml, self::getGpayAllowedHtml());
             exit;
         } else {
             $order = new \WC_Order($order_id);
@@ -127,11 +184,18 @@ class WC_Gateway_XPay_Process_Completion
 
         Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
 
+        $errorMessage = self::sanitizeMessage($_REQUEST["messaggio"] ?? '');
+
         if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_gpay_mac($_REQUEST)) {
             $nonce = $_REQUEST["xpayNonce"];
             $importo = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
             $codiceTransazione = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_transaction_id", true);
             $divisa = \Nexi\OrderHelper::getOrderMeta($order_id, "xpay_divisa", true);
+
+            if (!self::isExpectedCodTrans($order_id, $codiceTransazione)) {
+                Log::actionWarning(__FUNCTION__ . ": codTrans mismatch for order id " . $order_id);
+                return new \WP_REST_Response("forbidden", 403);
+            }
 
             try {
                 \Nexi\WC_Gateway_XPay_API::getInstance()->paga3DS($codiceTransazione, $importo, $nonce, $divisa, $order);
@@ -160,18 +224,13 @@ class WC_Gateway_XPay_Process_Completion
                     $order->update_status('failed');
                 }
 
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_REQUEST["messaggio"]);
+                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $errorMessage);
 
-                $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_REQUEST["messaggio"]);
+                $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $errorMessage);
             }
         } else {
-            if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
-                $order->update_status('failed');
-            }
-
-            \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_REQUEST["messaggio"]);
-
-            $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_REQUEST["messaggio"]);
+            Log::actionWarning(__FUNCTION__ . ": invalid MAC for order id " . $order_id);
+            return new \WP_REST_Response("forbidden", 403);
         }
 
         return new \WP_REST_Response(
@@ -194,60 +253,73 @@ class WC_Gateway_XPay_Process_Completion
             "order_id" => $order_id,
         );
 
-        try {
-            if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_return_mac($_POST)) {
-                $order = new \WC_Order($order_id);
+        if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_return_mac($_POST)) {
+            $order = new \WC_Order($order_id);
+            $errorMessage = self::sanitizeMessage($_POST["messaggio"] ?? '');
 
-                if ($_POST['esito'] == "OK") {
-                    if (!in_array($order->get_status(), ['completed', 'processing'])) {
-                        WC_Save_Order_Meta::saveSuccessXPay(
-                            $order_id,
-                            $_POST['alias'],
-                            WC_Nexi_Helper::nexi_array_key_exists($_POST, 'num_contratto') ? $_POST['num_contratto'] : '',
-                            $_POST['codTrans'],
-                            WC_Nexi_Helper::nexi_array_key_exists($_POST, 'scadenza_pan') ? $_POST['scadenza_pan'] : ''
-                        );
+            if (!self::isExpectedCodTrans($order_id, $_POST["codTrans"] ?? '')) {
+                Log::actionWarning(__FUNCTION__ . ": codTrans mismatch for order id " . $order_id);
+                return new \WP_REST_Response("forbidden", 403, []);
+            }
 
-                        $completed = $order->payment_complete($_POST["codTrans"]);
-                    }
-
-                    if (!isset($completed) || $completed) {
-                        $status = "200";
-                        $payload = array(
-                            "outcome" => "OK",
-                            "order_id" => $order_id,
-                        );
-                    }
-                } else if ($_POST['esito'] == "PEN") {
-                    if ($order->get_status() != 'pd-pending-status') {
-                        $order->update_status('pd-pending-status');
-                    }
-
-                    $status = "200";
-                    $payload = array(
-                        "outcome" => "OK",
-                        "order_id" => $order_id,
+            if ($_POST['esito'] == "OK") {
+                if (!in_array($order->get_status(), ['completed', 'processing'])) {
+                    WC_Save_Order_Meta::saveSuccessXPay(
+                        $order_id,
+                        $_POST['alias'],
+                        WC_Nexi_Helper::nexi_array_key_exists($_POST, 'num_contratto') ? $_POST['num_contratto'] : '',
+                        $_POST['codTrans'],
+                        WC_Nexi_Helper::nexi_array_key_exists($_POST, 'scadenza_pan') ? $_POST['scadenza_pan'] : ''
                     );
-                } else {
-                    if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
-                        $order->update_status('failed');
-                    }
 
-                    \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $_POST["messaggio"]);
+                    $completed = $order->payment_complete($_POST["codTrans"]);
+                }
 
-                    $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $_POST["messaggio"]);
-
+                if (!isset($completed) || $completed) {
                     $status = "200";
                     $payload = array(
                         "outcome" => "OK",
                         "order_id" => $order_id,
                     );
                 }
-            }
+            } elseif ($_POST['esito'] == "PEN") {
+                if (!in_array($order->get_status(), ['completed', 'processing'])) {
+                    if ($order->get_status() != 'pd-pending-status') {
+                        $order->update_status('pd-pending-status');
+                    }
+                    $status = "200";
+                    $payload = array(
+                        "outcome" => "OK",
+                        "order_id" => $order_id,
+                    );
+                } else {
+                    Log::actionError(__FUNCTION__ . ' payment status can\'t be downgraded');
+                    $status = "400";
+                    $payload = array(
+                        "outcome" => "KO",
+                        "order_id" => $order_id,
+                        "message" => "Payment status can't be downgraded"
+                    );
+                }
+            } else {
+                if (!in_array($order->get_status(), ['failed', 'cancelled', 'completed', 'processing'])) {
+                    $order->update_status('failed');
+                }
 
+                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $errorMessage);
+
+                $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $errorMessage);
+
+                $status = "200";
+                $payload = array(
+                    "outcome" => "OK",
+                    "order_id" => $order_id,
+                );
+            }
             \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_post_notification_timestamp', time());
-        } catch (\Exception $exc) {
-            Log::actionInfo(__FUNCTION__ . ": " . $exc->getTraceAsString());
+        } else {
+            Log::actionWarning(__FUNCTION__ . ": security violation, mac code not correct");
+            return new \WP_REST_Response("forbidden", 403, []);
         }
 
         return new \WP_REST_Response($payload, $status, []);
@@ -262,35 +334,48 @@ class WC_Gateway_XPay_Process_Completion
         $post_notification_timestamp = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_post_notification_timestamp', true);
 
         //s2s not recived, so we need to update the order based the data recived in params
-        if ($post_notification_timestamp == "") {
-            Log::actionInfo(__FUNCTION__ . ": s2s notification for order id " . $order_id . " not recived, changing oreder status from request params");
 
-            if ($params['esito'] == "OK") {
-                if (!\in_array($order->get_status(), ['completed', 'processing'])) {
-                    WC_Save_Order_Meta::saveSuccessXPay(
-                        $order_id,
-                        $params['alias'],
-                        WC_Nexi_Helper::nexi_array_key_exists($params, 'num_contratto') ? $params['num_contratto'] : '',
-                        $params['codTrans'],
-                        $params['scadenza_pan']
-                    );
+        if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_return_mac($params)) {
+            if ($post_notification_timestamp == "") {
+                Log::actionInfo(__FUNCTION__ . ": s2s notification for order id " . $order_id . " not recived, changing oreder status from request params");
+                $errorMessage = self::sanitizeMessage($params["messaggio"] ?? '');
 
-                    $order->payment_complete($params["codTrans"]);
+                if (!self::isExpectedCodTrans($order_id, $params['codTrans'] ?? '')) {
+                    Log::actionWarning(__FUNCTION__ . ": codTrans mismatch in redirect for order id " . $order_id);
+                } elseif ($params['esito'] == "OK") {
+                    if (!\in_array($order->get_status(), ['completed', 'processing'])) {
+                        WC_Save_Order_Meta::saveSuccessXPay(
+                            $order_id,
+                            $params['alias'],
+                            WC_Nexi_Helper::nexi_array_key_exists($params, 'num_contratto') ? $params['num_contratto'] : '',
+                            $params['codTrans'],
+                            $params['scadenza_pan']
+                        );
+
+                        $order->payment_complete($params["codTrans"]);
+                    }
+                } elseif ($params['esito'] == "PEN") {
+                    if ($order->get_status() != 'pd-pending-status') {
+                        // if order in this status, it is considerated as completed/payed
+                        $order->update_status('pd-pending-status');
+                    }
+                } else {
+                    if (!\in_array($order->get_status(), ['failed', 'cancelled', 'completed', 'processing'])) {
+                        $order->update_status('failed');
+                    }
+
+                    \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $errorMessage);
+
+                    $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $errorMessage);
                 }
-            } else if ($params['esito'] == "PEN") {
-                if ($order->get_status() != 'pd-pending-status') {
-                    // if order in this status, it is considerated as completed/payed
-                    $order->update_status('pd-pending-status');
-                }
-            } else {
-                if (!\in_array($order->get_status(), ['failed', 'cancelled'])) {
-                    $order->update_status('failed');
-                }
-
-                \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_last_error', $params["messaggio"]);
-
-                $order->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay') . ": " . $params["messaggio"]);
             }
+        } else {
+            Log::actionError(__FUNCTION__ . ": security violation, mac code not correct");
+            wp_send_json([
+                'status' => 'error',
+                'message' => 'forbidden'
+            ], 403);
+            exit;
         }
 
         Log::actionInfo(__FUNCTION__ . ": user redirect for order id " . $order_id . ' - ' . (array_key_exists('esito', $params) ? $params['esito'] : ''));
@@ -351,7 +436,7 @@ class WC_Gateway_XPay_Process_Completion
             $amount = WC_Nexi_Helper::mul_bcmul($_POST['amount'], 100, 0);
 
             if (!is_numeric($amount)) {
-                throw new \Exception(__('Invalid amount.', 'woocommerce-gateway-nexi-xpay'));
+                throw new \Exception(esc_html(__('Invalid amount.', 'woocommerce-gateway-nexi-xpay')));
             }
 
             $order = new \WC_Order($order_id);
@@ -359,7 +444,8 @@ class WC_Gateway_XPay_Process_Completion
             $codTrans = WC_Nexi_Helper::get_xpay_post_meta($order_id, 'codTrans');
 
             if (empty($codTrans)) {
-                throw new \Exception(\sprintf(__('Unable to capture order %s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id));
+                // translators: 1: WooCommerce order ID.
+                throw new \Exception(esc_html(\sprintf(__('Unable to capture order %1$s. Order does not have XPay capture reference.', 'woocommerce-gateway-nexi-xpay'), $order_id)));
             }
 
             return WC_Gateway_XPay_API::getInstance()->account($codTrans, $amount, $order->get_currency());

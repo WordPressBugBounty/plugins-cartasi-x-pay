@@ -10,6 +10,11 @@
  * @copyright   Copyright (c) 2019 Nexi Payments S.p.A. (https://ecommerce.nexi.it)
  * @license     GNU General Public License v3.0
  */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 spl_autoload_register('nexi_xpay_autoloader');
 
 function nexi_xpay_autoloader($class_name)

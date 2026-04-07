@@ -1,13 +1,19 @@
-<input type="hidden" id="xpay_admin_url" value="<?php echo admin_url() ?>">
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+?>
+
+<input type="hidden" id="xpay_admin_url" value="<?php echo esc_url(admin_url()); ?>">
 
 <div class="loader-container">
     <p class="loading"></p>
 </div>
 
 <input type="hidden" id="validation-error"
-    value="<?php echo __('Incorrect or missing data', 'woocommerce-gateway-nexi-xpay'); ?>">
+    value="<?php echo esc_attr__('Incorrect or missing data', 'woocommerce-gateway-nexi-xpay'); ?>">
 <input type="hidden" id="session-error"
-    value="<?php echo __('XPay Build session expired', 'woocommerce-gateway-nexi-xpay'); ?>">
+    value="<?php echo esc_attr__('XPay Build session expired', 'woocommerce-gateway-nexi-xpay'); ?>">
 
 <fieldset id="card-fieldset-build" class="form--fieldset">
     <div class="form--input__row">

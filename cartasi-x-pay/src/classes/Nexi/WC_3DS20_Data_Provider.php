@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 use Exception;
 
 class WC_3DS20_Data_Provider
@@ -272,7 +276,7 @@ class WC_3DS20_Data_Provider
 
     private static function get3ds20AccountDateIndicator($date)
     {
-        $today = date("Y-m-d");
+        $today = gmdate("Y-m-d");
 
         if ($date == false) {
             // Account not registred

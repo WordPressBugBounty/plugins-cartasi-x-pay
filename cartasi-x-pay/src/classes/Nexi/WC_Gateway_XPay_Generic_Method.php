@@ -12,6 +12,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 {
 
@@ -54,7 +58,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         $img_list = "";
 
         foreach (\Nexi\WC_Nexi_Helper::get_xpay_cards() as $am) {
-            $img_list .= '<div class="img-container"><img src="' . $am['pngImage'] . '" alt="' . $am['description'] . '"></div>';
+            $img_list .= '<div class="img-container"><img src="' . esc_url($am['pngImage']) . '" alt="' . esc_attr($am['description']) . '"></div>';
         }
 
         if ($img_list != "") {
@@ -87,14 +91,16 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         global $wp;
 
         if (is_add_payment_method_page() && isset($wp->query_vars['add-payment-method'])) {
-            echo '<b>' . __('New payment methods can only be added during checkout.', 'woocommerce-gateway-nexi-xpay') . '</b>';
+            $addPaymentMethodMessage = '<b>' . esc_html__('New payment methods can only be added during checkout.', 'woocommerce-gateway-nexi-xpay') . '</b>';
+            echo wp_kses_post($addPaymentMethodMessage);
             return;
         }
 
         if (WC_Nexi_Helper::cart_contains_subscription()) {
-            echo "<p>" . __('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay') . "</p>";
+            $recurringMessage = '<p>' . esc_html__('Attention, the order for which you are making payment contains recurring payments, payment data will be stored securely by Nexi.', 'woocommerce-gateway-nexi-xpay') . '</p>';
+            echo wp_kses_post($recurringMessage);
         } else {
-            echo "<p>" . $this->description . "</p>";
+            echo wp_kses_post('<p>' . $this->description . '</p>');
         }
     }
 
@@ -108,17 +114,12 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
         $order_form = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_form($order, $this->selectedCard, $recurringPaymentRequired);
 
-        echo "<form ";
-        echo " action=\"" . htmlentities($order_form["target_url"]) . "\" ";
-        echo " id=\"nexi_xpay_receipt_form\" ";
-        echo " method=\"post\" ";
-        echo " enctype=\"application/www-x-form-urlencoded\" ";
-        echo " >";
+        echo '<form action="' . esc_url($order_form["target_url"]) . '" id="nexi_xpay_receipt_form" method="post" enctype="application/www-x-form-urlencoded">';
         foreach ($order_form["fields"] as $name => $value) {
-            echo "<input type=\"hidden\" name=\"" . htmlentities($name) . "\" value=\"" . htmlentities($value) . "\" />";
+            echo '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" />';
         }
-        echo "<input type=\"submit\" />";
-        echo "</form>";
+        echo '<input type="submit" />';
+        echo '</form>';
     }
 
     /**
@@ -211,7 +212,7 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
                 <fieldset>
                     <label for="<?php echo esc_attr($field); ?>"><?php echo wp_kses_post($data['label']); ?></label>
 
-                    <?php echo $this->get_description_html($data); ?>
+                    <?php echo wp_kses_post($this->get_description_html($data)); ?>
                 </fieldset>
             </td>
         </tr>

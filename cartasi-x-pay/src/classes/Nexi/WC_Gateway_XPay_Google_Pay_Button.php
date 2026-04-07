@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_Google_Pay_Button extends WC_Gateway_XPay_Generic_Method
 {
 
@@ -60,7 +64,7 @@ class WC_Gateway_XPay_Google_Pay_Button extends WC_Gateway_XPay_Generic_Method
 
     public function payment_fields()
     {
-        echo $this->description;
+        echo wp_kses_post($this->description);
 
         ?>
         <script>
@@ -71,7 +75,7 @@ class WC_Gateway_XPay_Google_Pay_Button extends WC_Gateway_XPay_Generic_Method
             });
         </script>
 
-        <input type="hidden" id="xpay_admin_url" value="<?php echo admin_url() ?>" />
+        <input type="hidden" id="xpay_admin_url" value="<?php echo esc_url(admin_url()); ?>" />
 
         <input type="hidden" id="googlePayJson" name="google_pay_json" />
 
@@ -87,7 +91,7 @@ class WC_Gateway_XPay_Google_Pay_Button extends WC_Gateway_XPay_Generic_Method
 
         try {
             $googlePayJson = filter_input(INPUT_POST, 'google_pay_json') ?? $_POST['google_pay_json'];
-            $codTrans = substr("GP-" . date('ysdim') . "-" . time(), 0, 30);
+            $codTrans = substr("GP-" . gmdate('ysdim') . "-" . time(), 0, 30);
             $divisa = get_woocommerce_currency();
             $amount = WC_Nexi_Helper::mul_bcmul($order->get_total(), 100, 0);
             $url = get_rest_url(null, "woocommerce-gateway-nexi-xpay/xpay/gpay/result/" . $order->get_id());
@@ -116,7 +120,12 @@ class WC_Gateway_XPay_Google_Pay_Button extends WC_Gateway_XPay_Generic_Method
             }
 
             $result = 'success';
-            $redirect = get_rest_url(null, "woocommerce-gateway-nexi-xpay/gpay/redirect/" . $order->get_id());
+            $redirectToken = wp_generate_password(32, false, false);
+            \Nexi\OrderHelper::updateOrderMeta($order_id, "_xpay_gpay_redirect_token", $redirectToken);
+            $redirect = add_query_arg(
+                ['token' => $redirectToken],
+                get_rest_url(null, "woocommerce-gateway-nexi-xpay/gpay/redirect/" . $order->get_id())
+            );
         } catch (\Throwable $th) {
             Log::actionWarning(__FUNCTION__ . ": error: " . $th->getMessage());
 

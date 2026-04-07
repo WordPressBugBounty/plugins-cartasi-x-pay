@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_APM extends WC_Gateway_XPay_Generic_Method
 {
 
@@ -70,14 +74,15 @@ class WC_Gateway_XPay_APM extends WC_Gateway_XPay_Generic_Method
             if (count($installmentsNumber) === 1) {
                 $installmentsAmount = \Nexi\WC_Pagodil_Widget::calcInstallmentsAmount(WC_Nexi_Helper::mul_bcmul(WC()->cart->total, 100, 1), end($installmentsNumber));
 
-                $oneInstallmentInfo = sprintf(__('Amount: %s installments of %s€', 'woocommerce-gateway-nexi-xpay'), end($installmentsNumber), $installmentsAmount);
+                // translators: 1: installments number, 2: installment amount.
+                $oneInstallmentInfo = sprintf(__('Amount: %1$s installments of %2$s€', 'woocommerce-gateway-nexi-xpay'), end($installmentsNumber), $installmentsAmount);
             }
 
             $path = plugin_dir_path(WC_ECOMMERCE_GATEWAY_NEXI_MAIN_FILE);
 
             include_once $path . 'templates/pagodil_checkout.php';
         } else {
-            echo $this->description;
+            echo wp_kses_post($this->description);
         }
     }
 

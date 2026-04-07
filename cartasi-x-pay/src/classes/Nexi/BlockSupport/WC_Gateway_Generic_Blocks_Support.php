@@ -13,6 +13,10 @@
 
 namespace Nexi\BlockSupport;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 abstract class WC_Gateway_Generic_Blocks_Support extends AbstractPaymentMethodType

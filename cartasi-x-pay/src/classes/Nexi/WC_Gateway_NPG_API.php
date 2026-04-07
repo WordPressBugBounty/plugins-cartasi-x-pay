@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class WC_Gateway_NPG_API extends \WC_Settings_API
 {
 
@@ -76,13 +80,13 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_get('payment_methods');
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Credentials error - ' . json_encode($response));
+                throw new \Exception(esc_html('Credentials error - ' . json_encode($response)));
             }
 
             $payment_methods_data = $response['response'];
 
             if (!isset($payment_methods_data['paymentMethods'])) {
-                throw new \Exception('Missing paymentMethods - ' . json_encode($response));
+                throw new \Exception((esc_html('Missing paymentMethods - ' . json_encode($response))));
             }
 
             update_option('xpay_npg_available_methods', json_encode($payment_methods_data['paymentMethods']));
@@ -93,7 +97,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Error while checking credentials.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Error while checking credentials.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -194,7 +198,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_post("orders/hpp", $payload);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while initializing the payment - ' . json_encode($response));
+                throw new \Exception(esc_html('Error while initializing the payment - ' . json_encode($response)));
             }
 
             \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", $response['response']['securityToken']);
@@ -208,7 +212,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -308,7 +312,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to retrive customer related info.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to retrive customer related info.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         return $ret;
@@ -321,15 +325,15 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception($exc->getMessage());
+            throw new \Exception(esc_html($exc->getMessage()));
         }
 
         if ($response['status_code'] === 404) {
-            throw new \Exception(__('Customer not found.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Customer not found.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         if ($response['status_code'] !== 200) {
-            throw new \Exception(__('Unable to retrive customer related info.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to retrive customer related info.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         return $response['response'];
@@ -341,22 +345,22 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $npgOrderId = \Nexi\OrderHelper::getOrderMeta($order_id, "_npg_orderId", true);
 
             if (!$npgOrderId) {
-                throw new \Exception(__('NPG orderId not found for order: ', 'woocommerce-gateway-nexi-xpay') . $order_id);
+                throw new \Exception(esc_html(__('NPG orderId not found for order: ', 'woocommerce-gateway-nexi-xpay') . $order_id));
             }
 
             $response = $this->exec_get('orders/' . $npgOrderId);
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to retrive order related info.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to retrive order related info.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         if ($response['status_code'] === 404) {
-            throw new \Exception(__('Order not found.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Order not found.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         if ($response['status_code'] !== 200) {
-            throw new \Exception(__('Unable to retrive order related info.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to retrive order related info.', 'woocommerce-gateway-nexi-xpay')));
         }
 
         return $response['response'];
@@ -370,7 +374,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $orderInfo = $this->get_order_info($order_id);
 
             if (!array_key_exists('operations', $orderInfo) || !is_array($orderInfo['operations'])) {
-                throw new \Exception('Missing operations for order: ' . $order_id . ' - response: ' . json_encode($orderInfo));
+                throw new \Exception(esc_html('Missing operations for order: ' . $order_id . ' - response: ' . json_encode($orderInfo)));
             }
 
             foreach ($orderInfo["operations"] as $operation) {
@@ -409,7 +413,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $operationId = $this->get_refund_operation_id($orderInfo['operations']);
 
             if ($operationId === null) {
-                throw new \Exception('Operation related to order could not be found. Orderinfo: ' . json_encode($orderInfo));
+                throw new \Exception(esc_html('Operation related to order could not be found. Orderinfo: ' . json_encode($orderInfo)));
             }
 
             $currency = $orderInfo['orderStatus']['order']['currency'];
@@ -419,14 +423,14 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 'currency' => $currency
             ];
 
-            $extraHeaders = array(
-                'Idempotency-Key: ' . self::generate_uuid()
-            );
+            $extraHeaders = [
+                "Idempotency-Key" => self::generate_uuid()
+            ];
 
             $response = $this->exec_post('operations/' . $operationId . '/refunds', $payload, $extraHeaders);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while proccessing refund request - ' . json_encode(['payload' => $payload, 'response' => $response]));
+                throw new \Exception(esc_html('Error while proccessing refund request - ' . json_encode(['payload' => $payload, 'response' => $response])));
             }
 
             return true;
@@ -434,7 +438,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
         }
 
-        throw new \Exception(__('Unable to complete refund operation.', 'woocommerce-gateway-nexi-xpay'));
+        throw new \Exception(esc_html(__('Unable to complete refund operation.', 'woocommerce-gateway-nexi-xpay')));
     }
 
     /**
@@ -475,7 +479,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $operationId = $this->get_account_operation_id($orderInfo['operations']);
 
             if ($operationId === null) {
-                throw new \Exception('Operation related to order could not be found. Orderinfo: ' . json_encode($orderInfo));
+                throw new \Exception(esc_html('Operation related to order could not be found. Orderinfo: ' . json_encode($orderInfo)));
             }
 
             $currency = $orderInfo['orderStatus']['order']['currency'];
@@ -485,14 +489,14 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
                 'currency' => $currency
             ];
 
-            $extraHeaders = array(
-                'Idempotency-Key: ' . self::generate_uuid()
-            );
+            $extraHeaders = [
+                'Idempotency-Key' => self::generate_uuid()
+            ];
 
             $response = $this->exec_post('operations/' . $operationId . '/captures', $payload, $extraHeaders);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Unablee to performe capture - ' . json_encode(['payload' => $payload, 'response' => $response]));
+                throw new \Exception(esc_html('Unable to perform capture - ' . json_encode(['payload' => $payload, 'response' => $response])));
             }
 
             return true;
@@ -500,7 +504,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
         }
 
-        throw new \Exception(__('Unable to complete capture operation.', 'woocommerce-gateway-nexi-xpay'));
+        throw new \Exception(esc_html(__('Unable to complete capture operation.', 'woocommerce-gateway-nexi-xpay')));
     }
 
     public function recurring_payment($order, $contractId, $amount)
@@ -532,11 +536,11 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_post("orders/mit", $payload);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while performing the recurring payment - ' . json_encode($response));
+                throw new \Exception(esc_html('Error while performing the recurring payment - ' . json_encode($response)));
             }
 
             if (!isset($response['response']['operation'])) {
-                throw new \Exception('Invalid response, "operation" not found - ' . json_encode($response));
+                throw new \Exception(esc_html('Invalid response, "operation" not found - ' . json_encode($response)));
             }
 
             $operation = $response['response']['operation'];
@@ -544,14 +548,14 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             if (in_array($operation['operationResult'], NPG_PAYMENT_SUCCESSFUL)) {
                 return $orderId;
             } else if (in_array($operation['operationResult'], NPG_PAYMENT_FAILURE)) {
-                throw new \Exception('Payment failed - ' . json_encode($response));
+                throw new \Exception(esc_html('Payment failed - ' . json_encode($response)));
             } else {
-                throw new \Exception('Invalid operationResult - ' . json_encode($response));
+                throw new \Exception(esc_html('Invalid operationResult - ' . json_encode($response)));
             }
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to perform the recurring payment.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to perform the recurring payment.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -563,7 +567,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_post($url, []);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error deactivation contract ' . $contractId . ' - response: ' . json_encode($response));
+                throw new \Exception(esc_html('Error deactivation contract ' . $contractId . ' - response: ' . json_encode($response)));
             }
 
             return true;
@@ -639,23 +643,23 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             \Nexi\Log::actionDebug("DEBUG: " . json_encode($response));
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while initializing the payment - ' . json_encode($response));
+                throw new \Exception(esc_html('Error while initializing the payment - ' . json_encode($response)));
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_is_build", true);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_orderId", $orderId);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_securityToken", $response['response']['securityToken']);
-            \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_sessionId", $response['response']['sessionId']);
+            \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_is_build", true);
+            \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_orderId", $orderId);
+            \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_securityToken", $response['response']['securityToken']);
+            \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_sessionId", $response['response']['sessionId']);
 
             if ($recurringPayment) {
-                \Nexi\OrderHelper::updateOrderMeta($orderId, "_npg_recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
+                \Nexi\OrderHelper::updatePostMeta($orderId, "_npg_recurringContractId", $payload['paymentSession']['recurrence']['contractId']);
             }
 
             return $response['response'];
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -671,14 +675,14 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $wc->session->__unset('npg_build_order_id');
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while finalizing the payment - ' . json_encode($response));
+                throw new \Exception(esc_html('Error while finalizing the payment - ' . json_encode($response)));
             }
 
             return $response['response'];
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to finalize the payment.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to finalize the payment.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -747,17 +751,23 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
             $response = $this->exec_post("orders/googlepay", $payload);
 
             if ($response['status_code'] !== 200) {
-                throw new \Exception('Error while initializing the payment - ' . json_encode($response));
+                throw new \Exception(esc_html('Error while initializing the payment - ' . json_encode($response)));
             }
 
-            \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", "noCheck");
+            if (!isset($response['response']['iframe']['securityToken']) || $response['response']['iframe']['securityToken'] === '') {
+                Log::actionWarning('Missing securityToken in googlepay initialization response');
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", '');
+            } else {
+                \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_securityToken", $response['response']['iframe']['securityToken']);
+            }
+
             \Nexi\OrderHelper::updateOrderMeta($order->get_id(), "_npg_orderId", $orderId);
 
             return $response['response'];
         } catch (\Exception $exc) {
             Log::actionWarning(__FUNCTION__ . ': ' . $exc->getMessage());
 
-            throw new \Exception(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay'));
+            throw new \Exception(esc_html(__('Unable to initialize the payment.', 'woocommerce-gateway-nexi-xpay')));
         }
     }
 
@@ -787,6 +797,42 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         return $this->exec_rest_curl('POST', $url, $payload, $extraHeaders);
     }
 
+    private function redactForLog($data)
+    {
+        $sensitiveKeys = [
+            'x-api-key',
+            'securityToken',
+            'googlePayPaymentData',
+            'googlePay',
+            'xpayNonce',
+            'customerInfo',
+            'paymentInstrumentInfo',
+            'additionalData',
+            'mail',
+            'nome',
+            'cognome',
+            'apiKey',
+            'mac',
+        ];
+
+        if (!is_array($data)) {
+            return $data;
+        }
+
+        foreach ($data as $key => $value) {
+            if (in_array((string) $key, $sensitiveKeys, true)) {
+                $data[$key] = '***';
+                continue;
+            }
+
+            if (is_array($value)) {
+                $data[$key] = $this->redactForLog($value);
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * executes curl request and returns an array with the response and the status code
      *
@@ -798,92 +844,78 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
      */
     public function exec_rest_curl($method, $url, $payload = [], $extraHeaders = [])
     {
-        $connection = curl_init();
-
-        if (!$connection) {
-            throw new \Exception('Curl connection error');
-        }
-
         $requestUrl = $this->base_url . '/api/phoenix-0.0/psp/api/v1/' . $url;
 
-        if ($method === "GET" && \count($payload) > 0) {
+        if ($method === 'GET' && \count($payload) > 0) {
             $requestUrl = \sprintf("%s?%s", $requestUrl, http_build_query($payload));
-        } else if ($method === "POST") {
-            curl_setopt($connection, CURLOPT_POST, 1);
-
-            curl_setopt($connection, CURLOPT_POSTFIELDS, json_encode($payload));
+            $body = null;
+        } elseif ($method === 'POST') {
+            $body = json_encode($payload);
         }
 
-        $httpHeader = [
-            'x-api-key: ' . $this->nexi_npg_api_key,
-            'x-plugin-name: Woocommerce ' . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . ' - nexixpay ' . WC_GATEWAY_XPAY_VERSION,
-            'Correlation-Id: ' . self::generate_uuid(),
-            'Content-Type: application/json'
+        $baseHeaders = [
+            'x-api-key' => $this->nexi_npg_api_key,
+            'x-plugin-name' => 'Woocommerce ' . WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION . ' - nexixpay ' . WC_GATEWAY_XPAY_VERSION,
+            'Correlation-Id' => self::generate_uuid(),
+            'Content-Type' => 'application/json'
         ];
 
-        $options = [
-            CURLOPT_URL => $requestUrl,
-            CURLOPT_HTTPHEADER => array_merge($httpHeader, $extraHeaders),
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLINFO_HEADER_OUT => true
-        ];
+        $headers = array_merge($baseHeaders, $extraHeaders);
+
+        $args = wp_parse_args([
+            'method' => $method,
+            'headers' => $headers,
+            'body' => $body
+        ]);
 
         Log::actionInfo(__FUNCTION__ . ' - Request : ' . json_encode([
             'method' => $method,
             'requestUrl' => $requestUrl,
-            'httpHeader' => array_splice($httpHeader, 1),
-            'payload' => $payload,
-            'extraHeaders' => $extraHeaders
+            'httpHeader' => array_splice($baseHeaders, 1),
+            'payload' => $this->redactForLog($payload),
+            'extraHeaders' => $this->redactForLog($extraHeaders)
         ]));
 
-        curl_setopt_array($connection, $options);
-
-        $response = curl_exec($connection);
-
-        if ($response === false) {
+        try {
+            $response = wp_remote_request($requestUrl, $args);
+        } catch (\Exception $e) {
             Log::actionWarning(
                 __FUNCTION__ . ': Curl connection error - ' . json_encode(
                     [
                         'url' => $requestUrl,
-                        'pay_load' => $payload,
-                        'response' => $response
+                        'payload' => $this->redactForLog($payload),
+                        'message' => $e->getMessage()
                     ]
                 )
             );
-
-            throw new \Exception(curl_error($connection));
+            throw new \Exception($e);
         }
 
-        $curlInfo = curl_getinfo($connection);
+        $json = json_decode($response['body'], true);
 
-        curl_close($connection);
-
-        $json = json_decode($response, true);
-
-        if ($curlInfo['http_code'] == 200 || $curlInfo['http_code'] == 500) {
+        if ($response['response']['code'] == 200 || $response['response']['code'] == 500) {
             if (!(is_array($json) && json_last_error() === JSON_ERROR_NONE)) {
                 Log::actionWarning(
                     __FUNCTION__ . ': Curl - JSON error - ' . json_encode(
                         [
                             'url' => $requestUrl,
-                            'pay_load' => $payload,
+                            'payload' => $this->redactForLog($payload),
                             'response' => $response,
-                            'status' => $curlInfo['http_code']
+                            'status' => $response['response']['code']
                         ]
                     )
                 );
-
                 throw new \Exception('JSON error');
             }
         }
 
         Log::actionInfo(__FUNCTION__ . ' - Response : ' . json_encode([
-            'status_code' => $curlInfo['http_code'],
-            'response' => $json
+            'status_code' => $response['response']['code'],
+            'response' => $this->redactForLog($json)
         ]));
 
         return [
-            'status_code' => $curlInfo['http_code'],
+            'status_code' => $response['response']['code'],
             'response' => $json
         ];
     }
@@ -915,7 +947,7 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
         $id .= (new \DateTime())->format('uvsB');
 
         while (strlen($id) < $length) {
-            $id .= (int) ((rand() * rand()) / rand());
+            $id .= (int) ((wp_rand() * wp_rand()) / wp_rand());
         }
 
         return substr($id, 0, $length);

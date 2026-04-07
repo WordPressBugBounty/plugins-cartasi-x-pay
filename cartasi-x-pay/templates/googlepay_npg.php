@@ -1,9 +1,15 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+?>
+
 <html>
 
 <head>
     <title>Nexi XPay</title>
 
-    <script src="<?php echo $urlBuildSdk; ?>"></script>
+    <script src="<?php echo esc_url($urlBuildSdk); ?>"></script>
 
     <style>
         #googlepay-iframe-container {
@@ -26,7 +32,7 @@
         <?php if ($googlePayResponse['iframe']['state'] == 'GDI_VERIFICATION') { ?>
             <?php foreach ($googlePayResponse['iframe']['fields'] as $field) { ?>
                 <?php if ($field['type'] == 'GDI') { ?>
-                    <iframe src="<?php echo $field['src']; ?>"></iframe>
+                    <iframe src="<?php echo esc_url($field['src']); ?>"></iframe>
                 <?php } ?>
             <?php } ?>
         <?php } ?>

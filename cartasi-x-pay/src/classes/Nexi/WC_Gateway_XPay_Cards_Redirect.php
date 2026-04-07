@@ -13,6 +13,10 @@
 
 namespace Nexi;
 
+if (!defined('ABSPATH') ) {
+    exit;
+}
+
 class WC_Gateway_XPay_Cards_Redirect extends WC_Gateway_XPay_Cards
 {
 
@@ -25,7 +29,7 @@ class WC_Gateway_XPay_Cards_Redirect extends WC_Gateway_XPay_Cards
     {
         parent::payment_fields();
 
-        echo $this->get_xpay_cards_icon();
+        echo wp_kses_post($this->get_xpay_cards_icon());
     }
 
 }

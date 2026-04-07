@@ -1,54 +1,60 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+?>
+
 <div id="order_xpay_details" class="panel">
     <div class="order_data_column_container">
         <div class="order_data_column">
-            <h3><?php echo __("Cardholder", 'woocommerce-gateway-nexi-xpay') ?></h3>
+            <h3><?php echo esc_html__("Cardholder", 'woocommerce-gateway-nexi-xpay'); ?></h3>
             <p>
                 <?php if ($custumerDisplayName != "") { ?>
-                    <strong><?php echo __("Name: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($custumerDisplayName) ?> <br>
+                    <strong><?php echo esc_html__("Name: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($custumerDisplayName); ?> <br>
                 <?php } ?>
 
                 <?php if ($custumerEmail != '') { ?>
-                    <strong>Mail:</strong> <?php echo htmlentities($custumerEmail) ?> <br>
+                    <strong><?php echo esc_html__("Mail: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($custumerEmail); ?> <br>
                 <?php } ?>
             </p>
         </div>
 
         <div class="order_data_column">
-            <h3><?php echo __("Card detail", 'woocommerce-gateway-nexi-xpay') ?></h3>
+            <h3><?php echo esc_html__("Card detail", 'woocommerce-gateway-nexi-xpay'); ?></h3>
             <p>
                 <?php if ($paymentCardBrand != '') { ?>
-                    <strong><?php echo __("Card: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($paymentCardBrand) ?> <br>
+                    <strong><?php echo esc_html__("Card: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($paymentCardBrand); ?> <br>
                 <?php } ?>
                 <?php if ($paymentCardBrandNazionalita != '') { ?>
-                    <strong><?php echo __("Nationality: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($paymentCardBrandNazionalita) ?> <br>
+                    <strong><?php echo esc_html__("Nationality: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($paymentCardBrandNazionalita); ?> <br>
                 <?php } ?>
                 <?php if ($paymentCardBrandPan != '') { ?>
-                    <strong><?php echo __("Card pan: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($paymentCardBrandPan) ?> <br>
+                    <strong><?php echo esc_html__("Card pan: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($paymentCardBrandPan); ?> <br>
                 <?php } ?>
                 <?php if ($paymentCardBrandExpiration != '') { ?>
-                    <strong><?php echo __("Expiry date: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($paymentCardBrandExpiration) ?> <br>
+                    <strong><?php echo esc_html__("Expiry date: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($paymentCardBrandExpiration); ?> <br>
                 <?php } ?>
             </p>
         </div>
 
         <div class="order_data_column">
-            <h3><?php echo __("Transaction detail", 'woocommerce-gateway-nexi-xpay') ?></h3>
+            <h3><?php echo esc_html__("Transaction detail", 'woocommerce-gateway-nexi-xpay'); ?></h3>
             <p>
                 <?php if ($transactionDate != '') { ?>
-                    <strong><?php echo __("Date: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($transactionDate) ?><br>
+                    <strong><?php echo esc_html__("Date: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($transactionDate); ?><br>
                 <?php } ?>
                 <?php if ($transactionValue) { ?>
-                    <strong><?php echo __("Amount: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo number_format($transactionValue, 2, ',', '.') . " " . $currencySign ?><br>
+                    <strong><?php echo esc_html__("Amount: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html(number_format($transactionValue, 2, ',', '.')); ?> <?php echo wp_kses_post($currencySign); ?><br>
                 <?php } ?>
                 <?php if ($transactionCodTrans != '') { ?>
-                    <strong> <?php echo __("Transaction code: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($transactionCodTrans) ?><br>
+                    <strong> <?php echo esc_html__("Transaction code: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($transactionCodTrans); ?><br>
                 <?php } ?>
                 <?php if ($transactionNumContratto != '') {
                 ?>
-                    <strong> <?php echo __("Contract number: ", 'woocommerce-gateway-nexi-xpay') ?></strong> <?php echo htmlentities($transactionNumContratto) ?><br>
+                    <strong> <?php echo esc_html__("Contract number: ", 'woocommerce-gateway-nexi-xpay'); ?></strong> <?php echo esc_html($transactionNumContratto); ?><br>
                 <?php } ?>
                 <?php if ($transactionStatus != '') { ?>
-                    <strong><?php echo __("Status: ", 'woocommerce-gateway-nexi-xpay') ?> </strong><?php echo htmlentities($transactionStatus) ?><br>
+                    <strong><?php echo esc_html__("Status: ", 'woocommerce-gateway-nexi-xpay'); ?> </strong><?php echo esc_html($transactionStatus); ?><br>
                 <?php } ?>
             </p>
         </div>
@@ -59,9 +65,9 @@
     if ($showOperations || $canAccount) {
     ?>
         <?php if ($showOperations) { ?>
-            <h3><?php echo __("Accounting operations", 'woocommerce-gateway-nexi-xpay') ?></h3>
+            <h3><?php echo esc_html__("Accounting operations", 'woocommerce-gateway-nexi-xpay'); ?></h3>
         <?php } else if ($canAccount) { ?>
-            <h3><?php echo __("New accounting operation", 'woocommerce-gateway-nexi-xpay') ?></h3>
+            <h3><?php echo esc_html__("New accounting operation", 'woocommerce-gateway-nexi-xpay'); ?></h3>
         <?php } ?>
         <div class="woocommerce_subscriptions_related_orders operation-detail-container">
             <?php if ($showOperations) { ?>
@@ -69,9 +75,9 @@
                     <table class="wp-list-table widefat fixed striped table-view-list posts">
                         <thead>
                             <tr>
-                                <th><?php echo __("Date", 'woocommerce-gateway-nexi-xpay') ?></th>
-                                <th><?php echo __("Type of operation", 'woocommerce-gateway-nexi-xpay') ?></th>
-                                <th><?php echo __("Amount", 'woocommerce-gateway-nexi-xpay') ?></th>
+                                <th><?php echo esc_html__("Date", 'woocommerce-gateway-nexi-xpay'); ?></th>
+                                <th><?php echo esc_html__("Type of operation", 'woocommerce-gateway-nexi-xpay'); ?></th>
+                                <th><?php echo esc_html__("Amount", 'woocommerce-gateway-nexi-xpay'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,11 +87,11 @@
                                     <td>
                                         <?php
                                         $oData = new \DateTime($operazione['dataOperazione']);
-                                        echo $oData->format("d/m/Y H:i")
+                                        echo esc_html($oData->format("d/m/Y H:i"));
                                         ?>
                                     </td>
-                                    <td><?php echo $operazione['tipoOperazione'] ?></td>
-                                    <td><?php echo number_format(\Nexi\WC_Nexi_Helper::div_bcdiv($operazione['importo'], 100), 2, ",", ".") . ' ' . $this->get_currency_sign($operazione['divisa']) ?></td>
+                                    <td><?php echo esc_html($operazione['tipoOperazione']) ?></td>
+                                    <td><?php echo esc_html(number_format(\Nexi\WC_Nexi_Helper::div_bcdiv($operazione['importo'], 100), 2, ",", ".") . ' ' . $this->get_currency_sign($operazione['divisa'])) ?></td>
                                 </tr>
 
                             <?php } ?>
@@ -97,21 +103,22 @@
                 <div class="accounting-container">
                     <div class="accounting-action-container">
                         <div class="input-group">
-                            <input class="wc_input_price" id="xpay_account_account_input" value="" type="number" min="0.00" max="<?php echo number_format($transactionValue, 2, ".", ""); ?>" step="0.01">
+                            <input class="wc_input_price" id="xpay_account_account_input" value="" type="number" min="0.00" max="<?php echo esc_attr(number_format($transactionValue, 2, ".", "")); ?>" step="0.01">
                             <div class="input-currency">
                                 <?php
-                                echo $currencySign;
+                                echo wp_kses_post($currencySign);
                                 ?>
                             </div>
                         </div>
 
-                        <input type="hidden" id="xpay_account_form_api_url" value=" <?php echo $accountUrl . ''; ?>">
-                        <input type="hidden" id="xpay_account_form_currency_label" value="<?php echo $currencyLabel . ''; ?>">
-                        <input type="hidden" id="xpay_account_form_question" value=" <?php echo htmlentities(__('Do you confirm to capture', 'woocommerce-gateway-nexi-xpay')); ?>">
-                        <input type="hidden" id="xpay_account_form_success_message" value="<?php echo htmlentities(sprintf(__("Capture of transaction %s successful", 'woocommerce-gateway-nexi-xpay'), $transactionCodTrans)) . ''; ?>">
+                        <input type="hidden" id="xpay_account_form_api_url" value="<?php echo esc_url($accountUrl . ''); ?>">
+                        <input type="hidden" id="xpay_account_form_currency_label" value="<?php echo esc_attr($currencyLabel . ''); ?>">
+                        <input type="hidden" id="xpay_account_form_question" value="<?php echo esc_attr(__('Do you confirm to capture', 'woocommerce-gateway-nexi-xpay')); ?>">
+                        <?php // translators: %s: transaction code. ?>
+                        <input type="hidden" id="xpay_account_form_success_message" value="<?php echo esc_attr(sprintf(__("Capture of transaction %s successful", 'woocommerce-gateway-nexi-xpay'), $transactionCodTrans)); ?>">
 
                         <button type="button" id="xpay_account_form_btn" class="button button-primary accounting-btn">
-                            <?php echo __("Capture", 'woocommerce-gateway-nexi-xpay') ?>
+                            <?php echo esc_html__("Capture", 'woocommerce-gateway-nexi-xpay'); ?>
                         </button>
                     </div>
                 </div>
