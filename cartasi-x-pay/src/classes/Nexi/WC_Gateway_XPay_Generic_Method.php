@@ -12,7 +12,7 @@
 
 namespace Nexi;
 
-if (!defined('ABSPATH') ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -70,6 +70,8 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
     public function process_payment($order_id)
     {
+        \Nexi\Log::actionDebug(__METHOD__ . ":: --> " . json_encode($order_id));
+
         $order = new \WC_Order($order_id);
 
         if (!empty($_REQUEST['installments'])) {
@@ -77,6 +79,14 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
         } else if (isset($_POST['nexi_xpay_number_of_installments'])) {
             \Nexi\OrderHelper::updateOrderMeta($order_id, "installments", sanitize_text_field($_POST['nexi_xpay_number_of_installments']));
         }
+
+        $recurringPaymentRequired = WC_Nexi_Helper::order_or_cart_contains_subscription($order);
+
+        \Nexi\Log::actionDebug("recurring payment: " . json_encode($recurringPaymentRequired));
+
+        $order_form = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_form($order, $this->selectedCard, $recurringPaymentRequired);
+
+        \Nexi\OrderHelper::updateOrderMeta($order_id, "payment_redirect_data", json_encode($order_form));
 
         $resultArray = [
             'result' => 'success',
@@ -106,13 +116,9 @@ abstract class WC_Gateway_XPay_Generic_Method extends \WC_Payment_Gateway
 
     public function exec_payment($order_id)
     {
-        $order = new \WC_Order($order_id);
+        \Nexi\Log::actionDebug(__METHOD__ . ":: --> " . json_encode($order_id));
 
-        $recurringPaymentRequired = WC_Nexi_Helper::order_or_cart_contains_subscription($order);
-
-        \Nexi\Log::actionDebug("recurring payment: " . json_encode($recurringPaymentRequired));
-
-        $order_form = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_form($order, $this->selectedCard, $recurringPaymentRequired);
+        $order_form = json_decode(\Nexi\OrderHelper::getOrderMeta($order_id, 'payment_redirect_data', true), true);
 
         echo '<form action="' . esc_url($order_form["target_url"]) . '" id="nexi_xpay_receipt_form" method="post" enctype="application/www-x-form-urlencoded">';
         foreach ($order_form["fields"] as $name => $value) {

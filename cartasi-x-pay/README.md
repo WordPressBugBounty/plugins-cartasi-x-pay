@@ -7,7 +7,7 @@ Requires at least: 4.6
 Tested up to: 6.9.4
 WC Requires at least: 2.7.0
 WC Tested up to: 10.6.2
-Stable tag: 8.3.2
+Stable tag: 8.3.3
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -323,3 +323,6 @@ This payment method doesn't support transaction refunds. In case of a refund, th
 
 = 8.3.2 =
  * Fixed - Issues reported by the WordPress team
+
+= 8.3.3 =
+ * Fixed - Minor issues

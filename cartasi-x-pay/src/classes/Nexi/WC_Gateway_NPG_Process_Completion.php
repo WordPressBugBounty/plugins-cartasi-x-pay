@@ -227,7 +227,7 @@ class WC_Gateway_NPG_Process_Completion
             if (!\hash_equals($securityToken, (string) $params['securityToken'])) {
                 Log::actionWarning(__FUNCTION__ . ': Invalid securityToken for order: ' . $order_id . ' - Request: ' . json_encode(self::sanitizeCallbackLog($params)));
 
-                return new \WP_REST_Response($payload, "403", []);
+                return new \WP_REST_Response($payload, $status, []);
             }
         }
 
@@ -235,7 +235,7 @@ class WC_Gateway_NPG_Process_Completion
         $operationOrderId = (string) $params['operation']['orderId'];
         if ($expectedOrderId !== '' && !\hash_equals($expectedOrderId, $operationOrderId)) {
             Log::actionWarning(__FUNCTION__ . ': operation orderId mismatch for order: ' . $order_id);
-            return new \WP_REST_Response($payload, "403", []);
+            return new \WP_REST_Response($payload, $status, []);
         }
 
         if (!WC_Gateway_NPG_Lock_Handler::check_and_take_lock($order_id, __FUNCTION__)) {
@@ -474,9 +474,9 @@ class WC_Gateway_NPG_Process_Completion
         } else {
             Log::actionError(__FUNCTION__ . ": security violation, order status is not canceled");
             wp_send_json([
-                'status' => 'error',
-                'message' => 'forbidden'
-            ], 403);
+                'outcome' => 'KO',
+                'order_id' => $order_id
+            ], 500);
         }
 
         exit;

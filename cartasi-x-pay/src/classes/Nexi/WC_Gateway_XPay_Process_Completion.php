@@ -149,6 +149,12 @@ class WC_Gateway_XPay_Process_Completion
 
         Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
 
+        $status = "500";
+        $payload = [
+            "outcome" => "KO",
+            "order_id" => $order_id,
+        ];
+
         $gpayHtml = \Nexi\OrderHelper::getOrderMeta($order_id, 'gpay_html', true);
 
         $expectedToken = \Nexi\OrderHelper::getOrderMeta($order_id, '_xpay_gpay_redirect_token', true);
@@ -156,7 +162,7 @@ class WC_Gateway_XPay_Process_Completion
 
         if ($expectedToken && !\hash_equals((string) $expectedToken, $providedToken)) {
             Log::actionWarning(__FUNCTION__ . ": invalid redirect token for order id " . $order_id);
-            return new \WP_REST_Response("forbidden", 403);
+            return new \WP_REST_Response($payload, $status, []);
         }
 
         if ($gpayHtml) {
@@ -184,6 +190,12 @@ class WC_Gateway_XPay_Process_Completion
 
         Log::actionInfo(__FUNCTION__ . ": for order id " . $order_id);
 
+        $status = "500";
+        $payload = [
+            "outcome" => "KO",
+            "order_id" => $order_id,
+        ];
+
         $errorMessage = self::sanitizeMessage($_REQUEST["messaggio"] ?? '');
 
         if (\Nexi\WC_Gateway_XPay_API::getInstance()->validate_gpay_mac($_REQUEST)) {
@@ -194,7 +206,7 @@ class WC_Gateway_XPay_Process_Completion
 
             if (!self::isExpectedCodTrans($order_id, $codiceTransazione)) {
                 Log::actionWarning(__FUNCTION__ . ": codTrans mismatch for order id " . $order_id);
-                return new \WP_REST_Response("forbidden", 403);
+                return new \WP_REST_Response($payload, $status, []);
             }
 
             try {
@@ -230,7 +242,7 @@ class WC_Gateway_XPay_Process_Completion
             }
         } else {
             Log::actionWarning(__FUNCTION__ . ": invalid MAC for order id " . $order_id);
-            return new \WP_REST_Response("forbidden", 403);
+            return new \WP_REST_Response($payload, $status, []);
         }
 
         return new \WP_REST_Response(
@@ -259,7 +271,7 @@ class WC_Gateway_XPay_Process_Completion
 
             if (!self::isExpectedCodTrans($order_id, $_POST["codTrans"] ?? '')) {
                 Log::actionWarning(__FUNCTION__ . ": codTrans mismatch for order id " . $order_id);
-                return new \WP_REST_Response("forbidden", 403, []);
+                return new \WP_REST_Response($payload, $status, []);
             }
 
             if ($_POST['esito'] == "OK") {
@@ -319,7 +331,7 @@ class WC_Gateway_XPay_Process_Completion
             \Nexi\OrderHelper::updateOrderMeta($order_id, '_xpay_post_notification_timestamp', time());
         } else {
             Log::actionWarning(__FUNCTION__ . ": security violation, mac code not correct");
-            return new \WP_REST_Response("forbidden", 403, []);
+            return new \WP_REST_Response($payload, $status, []);
         }
 
         return new \WP_REST_Response($payload, $status, []);
@@ -372,9 +384,9 @@ class WC_Gateway_XPay_Process_Completion
         } else {
             Log::actionError(__FUNCTION__ . ": security violation, mac code not correct");
             wp_send_json([
-                'status' => 'error',
-                'message' => 'forbidden'
-            ], 403);
+                'outcome' => 'KO',
+                'order_id' => $order_id
+            ], 500);
             exit;
         }
 
