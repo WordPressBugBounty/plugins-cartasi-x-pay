@@ -366,7 +366,7 @@ class WC_Gateway_NPG_Process_Completion
         switch ($operation['operationResult']) {
             case NPG_OR_AUTHORIZED:
             case NPG_OR_EXECUTED:
-                if (!in_array($order->get_status(), ['completed', 'processing'])) {
+                if (!\in_array($order->get_status(), ['completed', 'processing'])) {
                     $completed = $order->payment_complete(\Nexi\OrderHelper::getOrderMeta($order_id, "_npg_orderId", true));
 
                     if ($completed) {
@@ -385,14 +385,18 @@ class WC_Gateway_NPG_Process_Completion
             case NPG_OR_PENDING: // if operationResult is pending, the final operation status isn't sure and the order is set in pending
                 Log::actionWarning(__FUNCTION__ . ': operation not in a final status');
 
-                if ($order->get_status() != 'pending') {
-                    $order->update_status('pending');   // not using 'pd-pending-status' because in this status the order is considered as paid and completed
+                if ($order->get_status() != 'pd-pending-status') {
+                    $order->update_status('pd-pending-status');   // not using 'pd-pending-status' because in this status the order is considered as paid and completed
                 }
                 break;
 
             case NPG_OR_CANCELED:
             case NPG_OR_CANCELLED:
                 Log::actionInfo(__FUNCTION__ . ': payment canceled');
+
+                if ($order->get_status() != 'cancelled') {
+                    $order->update_status('cancelled');
+                }
                 break;
 
             case NPG_OR_DECLINED:
@@ -400,7 +404,7 @@ class WC_Gateway_NPG_Process_Completion
             case NPG_OR_THREEDS_FAILED:
             case NPG_OR_3DS_FAILED:
             case NPG_OR_FAILED:
-                if (!in_array($order->get_status(), ['failed', 'cancelled'])) {
+                if (!\in_array($order->get_status(), ['failed', 'cancelled'])) {
                     $order->update_status('failed');
                 }
 
@@ -434,7 +438,7 @@ class WC_Gateway_NPG_Process_Completion
 
                     $foundC = false;
 
-                    if ($contracts['has_contracts'] && count($contracts['contracts']) > 0) {
+                    if ($contracts['has_contracts'] && \count($contracts['contracts']) > 0) {
                         foreach ($contracts['contracts'] as $contract) {
                             if ($contract['contractId'] == $token) {
                                 $foundC = true;

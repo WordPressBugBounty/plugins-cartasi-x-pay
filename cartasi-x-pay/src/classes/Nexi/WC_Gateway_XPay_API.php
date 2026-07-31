@@ -451,15 +451,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'codiceGruppo' => $this->nexi_xpay_group,
             'timeStamp' => $timeStamp,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION,
-                'TCONTAB' => $this->nexi_xpay_accounting
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         $payment_data = $this->exec_curl_post_json("ecomm/api/recurring/pagamentoRicorrente", $payload);
@@ -651,6 +643,10 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
 
         try {
             $response = wp_remote_request($requestUrl, $args);
+
+            if (is_wp_error($response)) {
+                throw new \Exception(implode(" - ", $response->get_error_codes()) . " - " . implode(" - ", $response->get_error_messages()));
+            }
         } catch (\Exception $e) {
             // translators: 1: exception message.
             throw new \Exception(esc_html(sprintf(__('CURL exec error: %1$s', 'woocommerce-gateway-nexi-xpay'), $e->getMessage())));
@@ -697,15 +693,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'numeroContratto' => $numeroContratto,
             'codiceGruppo' => $this->nexi_xpay_group,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'TCONTAB' => $this->nexi_xpay_accounting,
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         $operation_info = $this->exec_curl_post_json("ecomm/api/hostedPayments/pagaNonceCreazioneContratto", $pay_load);
@@ -757,15 +745,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'xpayNonce' => $nonce,
             'timeStamp' => $timeStamp,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'TCONTAB' => $this->nexi_xpay_accounting,
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode(self::redactForLog($pay_load)));
@@ -826,15 +806,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'urlRisposta' => $url,
             'timeStamp' => $timeStamp,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'TCONTAB' => $this->nexi_xpay_accounting,
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode(self::redactForLog($pay_load)));
@@ -886,15 +858,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'applePay' => $applePay,
             'timeStamp' => $timeStamp,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'TCONTAB' => $this->nexi_xpay_accounting,
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode(self::redactForLog($pay_load)));
@@ -947,15 +911,7 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
             'xpayNonce' => $nonce,
             'timeStamp' => $timeStamp,
             'mac' => $mac,
-            'parametriAggiuntivi' => array(
-                'mail' => $order->get_billing_email(),
-                'nome' => $order->get_billing_first_name(),
-                'cognome' => $order->get_billing_last_name(),
-                'TCONTAB' => $this->nexi_xpay_accounting,
-                'Note1' => 'woocommerce',
-                'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
-                'Note3' => WC_GATEWAY_XPAY_VERSION
-            )
+            'parametriAggiuntivi' => $this->get_parametri_aggiuntivi($order),
         );
 
         \Nexi\Log::actionDebug("DEBUG - payload: " . json_encode($pay_load));
@@ -986,6 +942,20 @@ class WC_Gateway_XPay_API extends \WC_Settings_API
         }
 
         return $operation_info;
+    }
+
+    private function get_parametri_aggiuntivi($order)
+    {
+        return [
+            'mail' => $order->get_billing_email(),
+            'nome' => $order->get_billing_first_name(),
+            'cognome' => $order->get_billing_last_name(),
+            'TCONTAB' => $this->nexi_xpay_accounting,
+            'descrizione' => "WC Order: " . $order->get_order_number(),
+            'Note1' => 'woocommerce',
+            'Note2' => WC_WOOCOMMERCE_GATEWAY_NEXI_XPAY_WOOCOMMERCE_VERSION,
+            'Note3' => WC_GATEWAY_XPAY_VERSION,
+        ];
     }
 
     public function calculate_mac_for_build_oneclick($codTransCvv, $divisa, $importoCvv)

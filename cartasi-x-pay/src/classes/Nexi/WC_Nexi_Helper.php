@@ -276,4 +276,35 @@ class WC_Nexi_Helper
         return $safe_vars;
     }
 
+    /**
+     * Returns the amount to use when initializing a checkout payment session.
+     * On order-pay uses the order total; otherwise the recalculated cart total.
+     *
+     * @return float
+     */
+    public static function get_checkout_payment_total()
+    {
+        if (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-pay')) {
+            global $wp;
+
+            $order_id = isset($wp->query_vars['order-pay']) ? absint($wp->query_vars['order-pay']) : 0;
+
+            if ($order_id > 0) {
+                $order = wc_get_order($order_id);
+
+                if ($order) {
+                    return (float) $order->get_total();
+                }
+            }
+        }
+
+        if (isset(WC()->cart)) {
+            WC()->cart->calculate_totals();
+
+            return (float) WC()->cart->get_total('edit');
+        }
+
+        return 0.0;
+    }
+
 }

@@ -392,17 +392,38 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
     public function get_refund_operation_id($operations)
     {
+        $authorizedOperationId = null;
+        $capturedOperationId = null;
+
         foreach ($operations as $operation) {
-            if (!in_array($operation['operationType'], [NPG_OT_AUTHORIZATION, NPG_OT_CAPTURE])) {
-                continue;
+            $isAuthorization = (
+                isset($operation['operationType'])
+                && $operation['operationType'] === NPG_OT_AUTHORIZATION
+            );
+            $isCapture = (
+                isset($operation['operationType'])
+                && $operation['operationType'] === NPG_OT_CAPTURE
+            );
+            $isSuccessful = (
+                isset($operation['operationResult'])
+                && in_array($operation['operationResult'], [NPG_OR_AUTHORIZED, NPG_OR_EXECUTED], true)
+            );
+            $hasOperationId = isset($operation['operationId']) && !empty($operation['operationId']);
+
+            if ($isSuccessful && $hasOperationId && $isAuthorization && $authorizedOperationId === null) {
+                $authorizedOperationId = $operation['operationId'];
             }
 
-            if (in_array($operation['operationResult'], array(NPG_OR_AUTHORIZED, NPG_OR_EXECUTED))) {
-                return $operation['operationId'];
+            if ($isSuccessful && $hasOperationId && $isCapture) {
+                $capturedOperationId = $operation['operationId'];
             }
         }
 
-        return null;
+        if ($capturedOperationId !== null) {
+            return $capturedOperationId;
+        }
+
+        return $authorizedOperationId;
     }
 
     public function refund($orderId, $amount)
@@ -845,10 +866,10 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
     public function exec_rest_curl($method, $url, $payload = [], $extraHeaders = [])
     {
         $requestUrl = $this->base_url . '/api/phoenix-0.0/psp/api/v1/' . $url;
+        $body = null;
 
         if ($method === 'GET' && \count($payload) > 0) {
             $requestUrl = \sprintf("%s?%s", $requestUrl, http_build_query($payload));
-            $body = null;
         } elseif ($method === 'POST') {
             $body = json_encode($payload);
         }
@@ -878,6 +899,10 @@ class WC_Gateway_NPG_API extends \WC_Settings_API
 
         try {
             $response = wp_remote_request($requestUrl, $args);
+
+            if (is_wp_error($response)) {
+                throw new \Exception(implode(" - ", $response->get_error_codes()) . " - " . implode(" - ", $response->get_error_messages()));
+            }
         } catch (\Exception $e) {
             Log::actionWarning(
                 __FUNCTION__ . ': Curl connection error - ' . json_encode(

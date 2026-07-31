@@ -127,7 +127,7 @@ class WC_Gateway_NPG_Cards_Build extends WC_Gateway_NPG_Cards
     public static function get_build_fields()
     {
         try {
-            $total = floatval(WC()->cart->total);
+            $total = \Nexi\WC_Nexi_Helper::get_checkout_payment_total();
 
             $isRecurring = WC_Nexi_Helper::cart_contains_subscription();
 

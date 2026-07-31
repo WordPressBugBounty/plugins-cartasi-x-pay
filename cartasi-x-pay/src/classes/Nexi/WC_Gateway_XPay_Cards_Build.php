@@ -96,7 +96,10 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
             }
         }
 
-        wp_send_json(\Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(WC()->cart->total, $token_id));
+        wp_send_json(\Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(
+            \Nexi\WC_Nexi_Helper::get_checkout_payment_total(),
+            $token_id
+        ));
     }
 
     public function payment_fields()
@@ -118,7 +121,9 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
 
         $currentConfig = \Nexi\WC_Nexi_Helper::get_nexi_settings();
 
-        $payment_payload = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(WC()->cart->total);
+        $payment_payload = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(
+            \Nexi\WC_Nexi_Helper::get_checkout_payment_total()
+        );
 
         if (!$isRecurring && $currentConfig["nexi_xpay_oneclick_enabled"] == "yes") {
             $this->saved_payment_methods();
@@ -355,7 +360,7 @@ class WC_Gateway_XPay_Cards_Build extends WC_Gateway_XPay_Cards
 
         $codTransCvv = substr("BR-" . gmdate('ysdim') . $token->get_id() . "-" . time(), 0, 30);
         $timestampCvv = time() * 1000;
-        $importoCvv = WC_Nexi_Helper::mul_bcmul(floatval(preg_replace('#[^\d.]#', '', $woocommerce->cart->total)), 100, 0);
+        $importoCvv = WC_Nexi_Helper::mul_bcmul(\Nexi\WC_Nexi_Helper::get_checkout_payment_total(), 100, 0);
 
         $macCvv = WC_Gateway_XPay_API::getInstance()->calculate_mac_for_build_oneclick($codTransCvv, get_woocommerce_currency(), $importoCvv);
 

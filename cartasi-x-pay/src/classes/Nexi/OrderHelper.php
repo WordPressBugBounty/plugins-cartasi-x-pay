@@ -115,32 +115,72 @@ class OrderHelper
 
     public static function get3ds20OrderInLastSixMonth()
     {
-        $orders = null;
+        $customerId = get_current_user_id();
+        $customerEmail = '';
+
+        if ($customerId <= 0) {
+            $customerEmail = self::getCheckoutCustomerEmail();
+
+            if ($customerEmail === '') {
+                return 0;
+            }
+        }
+
+        $orders = [];
+
         if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
             $args = [
                 'limit' => -1,
                 'orderby' => 'date',
                 'order' => 'desc',
-                'customer_id' => get_current_user_id(),
+                'return' => 'ids',
                 'date_created' => '>' . gmdate('Y-m-d', strtotime('- 6 month')),
             ];
+
+            if ($customerId > 0) {
+                $args['customer_id'] = $customerId;
+            } else {
+                $args['billing_email'] = $customerEmail;
+            }
+
             $orders = wc_get_orders($args);
         } else {
-            $args = array(
+            $args = [
                 'numberposts' => -1,
-                'meta_key' => '_customer_user',
                 'orderby' => 'date',
                 'order' => 'DESC',
-                'meta_value' => get_current_user_id(),
+                'fields' => 'ids',
                 'post_type' => wc_get_order_types(),
                 'post_status' => array_keys(wc_get_order_statuses()),
-                'date_query' => array(
+                'date_query' => [
                     'after' => gmdate('Y-m-d', strtotime('- 6 month'))
-                )
-            );
+                ]
+            ];
+
+            if ($customerId > 0) {
+                $args['meta_key'] = '_customer_user';
+                $args['meta_value'] = $customerId;
+            } else {
+                $args['meta_key'] = '_billing_email';
+                $args['meta_value'] = $customerEmail;
+            }
+
             $orders = get_posts($args);
         }
-        return count($orders);
+
+        return \count($orders);
+    }
+
+    private static function getCheckoutCustomerEmail()
+    {
+        if (function_exists('WC') && WC() && WC()->customer) {
+            $billingEmail = (string) WC()->customer->get_billing_email();
+            if ($billingEmail !== '') {
+                return $billingEmail;
+            }
+        }
+
+        return '';
     }
 
 }

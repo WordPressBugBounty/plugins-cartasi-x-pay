@@ -4,7 +4,7 @@
  * Plugin Name: Nexi XPay
  * Plugin URI:
  * Description: Payment plugin for payment cards and alternative methods. Powered by Nexi.
- * Version: 8.3.3
+ * Version: 8.4.0
  * Author: Nexi SpA
  * Author URI: https://www.nexi.it
  * Domain Path: /lang
@@ -26,7 +26,7 @@ add_action('plugins_loaded', 'nexi_xpay_plugins_loaded');
 function nexi_xpay_plugins_loaded()
 {
     if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_plugin_active_for_network('woocommerce/woocommerce.php')) {
-        define("WC_GATEWAY_XPAY_VERSION", "8.3.3");
+        define("WC_GATEWAY_XPAY_VERSION", "8.4.0");
 
         define("GATEWAY_XPAY", "xpay");
         define("GATEWAY_NPG", "npg");
@@ -130,7 +130,7 @@ function nexi_xpay_plugins_loaded()
                 wp_enqueue_script('apple-pay-js', 'https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js');
             }
 
-            if (!wooommerce_has_block_checkout()) {
+            if (!wooommerce_has_block_checkout() || (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-pay'))) {
                 $isBuild = \Nexi\WC_Nexi_Helper::nexi_is_build();
                 $isNpg = \Nexi\WC_Nexi_Helper::nexi_is_gateway_NPG();
                 $isXPay = \Nexi\WC_Nexi_Helper::nexi_is_gateway_XPay();
@@ -187,7 +187,6 @@ function nexi_xpay_plugins_loaded()
         function wp_nexi_polling_executor()
         {
             $args = array(
-                'payment_method' => 'xpay',
                 'status' => ['wc-pending'],
                 'orderby' => 'date',
                 'order' => 'ASC',
@@ -196,60 +195,34 @@ function nexi_xpay_plugins_loaded()
             $orders = wc_get_orders($args);
 
             foreach ($orders as $order) {
-                $authorizationRecord = \Nexi\WC_Gateway_NPG_API::getInstance()->get_order_status($order->get_id());
+                $paymentMethod = $order->get_payment_method();
 
-                if ($authorizationRecord === null) {
-                    \Nexi\Log::actionWarning(__FUNCTION__ . ': authorization operation not found for order: ' . $order->get_id());
-                    continue;
-                }
+                $isNexiPaymentMethod = (
+                    ($paymentMethod === 'xpay' || substr($paymentMethod, 0, 5) === 'xpay_')
+                    && strpos($paymentMethod, 'googlepay') === false
+                    && strpos($paymentMethod, 'applepay') === false
+                );
 
-                $orderObj = new \WC_Order($order->get_id());
+                if ($isNexiPaymentMethod) {
+                    $authorizationRecord = \Nexi\WC_Gateway_NPG_API::getInstance()->get_order_status($order->get_id());
 
-                switch ($authorizationRecord['operationResult']) {
-                    case NPG_OR_AUTHORIZED:
-                    case NPG_OR_EXECUTED:
-                        $completed = $orderObj->payment_complete(\Nexi\OrderHelper::getOrderMeta($order->get_id(), "_npg_orderId", true));
+                    if ($authorizationRecord === null) {
+                        \Nexi\Log::actionWarning(__FUNCTION__ . ': authorization operation not found for order: ' . $order->get_id());
+                    } else {
+                        $orderId = $order->get_id();
 
-                        if ($completed) {
-                            \Nexi\WC_Save_Order_Meta::saveSuccessNpg(
-                                $order->get_id(),
-                                $authorizationRecord
-                            );
+                        if (!\Nexi\WC_Gateway_NPG_Lock_Handler::check_and_take_lock($orderId, __FUNCTION__)) {
+                            \Nexi\Log::actionWarning(__FUNCTION__ . ': Couldn\'t get execution lock - ' . $orderId);
                         } else {
-                            \Nexi\Log::actionWarning(__FUNCTION__ . ': unable to change order status: ' . $orderObj->get_status());
+                            \Nexi\Log::actionInfo(__FUNCTION__ . ': got lock - ' . $orderId . ' - ' . gmdate('d-m-Y H:i:s'));
+
+                            \Nexi\WC_Gateway_NPG_Process_Completion::change_order_status_by_operation($orderId, $authorizationRecord);
+
+                            \Nexi\Log::actionInfo(__FUNCTION__ . ': release lock - ' . $orderId . ' - ' . gmdate('d-m-Y H:i:s'));
+
+                            \Nexi\WC_Gateway_NPG_Lock_Handler::release_lock($orderId);
                         }
-                        break;
-
-                    case NPG_OR_PENDING:
-                        \Nexi\Log::actionWarning(__FUNCTION__ . ': operation not in a final status yet');
-                        break;
-
-                    case NPG_OR_CANCELED:
-                    case NPG_OR_CANCELLED:
-                        \Nexi\Log::actionWarning(__FUNCTION__ . ': payment canceled');
-
-                        if ($order->get_status() != 'cancelled') {
-                            $order->update_status('cancelled');
-                        }
-                        break;
-
-                    case NPG_OR_DECLINED:
-                    case NPG_OR_DENIED_BY_RISK:
-                    case NPG_OR_THREEDS_FAILED:
-                    case NPG_OR_3DS_FAILED:
-                    case NPG_OR_FAILED:
-                        \Nexi\Log::actionWarning(__FUNCTION__ . ': payment error - operation: ' . json_encode($authorizationRecord));
-
-                        if ($order->get_status() != 'cancelled') {
-                            $orderObj->update_status('failed');
-                        }
-
-                        $orderObj->add_order_note(__('Payment error', 'woocommerce-gateway-nexi-xpay'));
-                        break;
-
-                    default:
-                        \Nexi\Log::actionWarning(__FUNCTION__ . ': payment error - not managed operation status: ' . json_encode($authorizationRecord));
-                        break;
+                    }
                 }
             }
         }

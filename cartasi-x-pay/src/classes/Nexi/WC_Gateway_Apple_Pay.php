@@ -19,6 +19,7 @@ if (!defined('ABSPATH')) {
 
 class WC_Gateway_Apple_Pay
 {
+
     private static function isAllowedAppleValidationHost($host)
     {
         $allowedSuffixes = [
@@ -154,7 +155,12 @@ class WC_Gateway_Apple_Pay
 
         try {
             Log::actionInfo(__FUNCTION__ . ' executing wp_remote_request()');
+
             $response = wp_remote_request($validationUrl, $parsedArgs);
+
+            if (is_wp_error($response)) {
+                throw new \Exception(implode(" - ", $response->get_error_codes()) . " - " . implode(" - ", $response->get_error_messages()));
+            }
         } catch (\Exception $e) {
             // translators: 1: exception message.
             throw new \Exception(esc_html(sprintf(__('CURL exec error: %1$s', 'woocommerce-gateway-nexi-xpay'), $e->getMessage())));

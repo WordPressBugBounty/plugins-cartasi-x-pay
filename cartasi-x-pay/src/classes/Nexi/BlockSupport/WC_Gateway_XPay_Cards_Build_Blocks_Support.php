@@ -171,7 +171,9 @@ class WC_Gateway_XPay_Cards_Build_Blocks_Support extends AbstractPaymentMethodTy
                 "transactionid" => "000000000"
             ];
         } else {
-            $payment_payload = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(WC()->cart->total);
+            $payment_payload = \Nexi\WC_Gateway_XPay_API::getInstance()->get_payment_build_payload(
+                \Nexi\WC_Nexi_Helper::get_checkout_payment_total()
+            );
         }
 
         $build_style = \Nexi\WC_Gateway_XPay_Cards_Build::getBuildStyle();

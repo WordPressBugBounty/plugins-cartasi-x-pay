@@ -13,7 +13,7 @@
 
 namespace Nexi;
 
-if (!defined('ABSPATH') ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -63,28 +63,22 @@ class WC_NPG_3DS20_Data_Provider
             if ($user_id != 0) {
                 $user = new \WC_Customer($user_id);
 
+                $destinationAddressUsageDate = static::get3ds20FirstUsagedestinationAddress(
+                    $order->get_id(),
+                    $order->get_shipping_city(),
+                    $order->get_shipping_country(),
+                    $order->get_shipping_address_1(),
+                    $order->get_shipping_address_2(),
+                    $order->get_shipping_postcode(),
+                    $order->get_shipping_state()
+                );
+
                 $params['cardHolderAcctInfo'] = [
                     "chAccDate" => $user->get_date_created() ? $user->get_date_created()->format("Y-m-d") : null,
                     "chAccAgeIndicator" => static::get3ds20AccountDateIndicator($user->get_date_created() ? $user->get_date_created() : false),
                     "nbPurchaseAccount" => \Nexi\OrderHelper::get3ds20OrderInLastSixMonth(),
-                    "destinationAddressUsageDate" => static::get3ds20LastUsagedestinationAddress(
-                        $order->get_id(),
-                        $order->get_shipping_city(),
-                        $order->get_shipping_country(),
-                        $order->get_shipping_address_1(),
-                        $order->get_shipping_address_2(),
-                        $order->get_shipping_postcode(),
-                        $order->get_shipping_state()
-                    ),
-                    "destinationAddressUsageIndicator" => static::get3ds20FirstUsagedestinationAddress(
-                        $order->get_id(),
-                        $order->get_shipping_city(),
-                        $order->get_shipping_country(),
-                        $order->get_shipping_address_1(),
-                        $order->get_shipping_address_2(),
-                        $order->get_shipping_postcode(),
-                        $order->get_shipping_state()
-                    ),
+                    "destinationAddressUsageDate" => $destinationAddressUsageDate,
+                    "destinationAddressUsageIndicator" => static::get3ds20FirstUsagedestinationAddressIndicator($destinationAddressUsageDate),
                     "destinationNameIndicator" => static::get3ds20CheckName($user, $order->get_shipping_first_name(), $order->get_shipping_last_name()),
                 ];
             }
@@ -137,10 +131,28 @@ class WC_NPG_3DS20_Data_Provider
         return '02';
     }
 
+    private static function get3ds20FirstUsagedestinationAddressIndicator($date)
+    {
+        if ($date === null) {
+            //Account Created in this transaction
+            return "01";
+        }
+
+        if ($date >= (new \DateTime('now - 30 day'))->format("Y-m-d")) {
+            // Account created in last 30 days
+            return '02';
+        } else if ($date >= (new \DateTime('now - 60 day'))->format("Y-m-d")) {
+            // Account created from 30 to 60 days ago
+            return '03';
+        } else {
+            // Account created more then 60 days ago
+            return '04';
+        }
+    }
+
     private static function get3ds20FirstUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
     {
         $args = [
-            'numberposts' => 1,
             'orderby' => 'date',
             'order' => 'ASC',
             'exclude' => array($order_id),
@@ -192,83 +204,8 @@ class WC_NPG_3DS20_Data_Provider
 
         $customer_orders = wc_get_orders($args);
 
-        if (count($customer_orders) == 0) {
-            //Account Created in this transaction
-            return "01";
-        }
-
-        $date = $customer_orders[0]->get_date_created()->date("Y-m-d");
-
-        if ($date >= (new \DateTime('now - 30 day'))->format("Y-m-d")) {
-            // Account created in last 30 days
-            return '02';
-        } else if ($date >= (new \DateTime('now - 60 day'))->format("Y-m-d")) {
-            // Account created from 30 to 60 days ago
-            return '03';
-        } else {
-            // Account created more then 60 days ago
-            return '04';
-        }
-        return "";
-    }
-
-    private static function get3ds20LastUsagedestinationAddress($order_id, $city, $country, $street_1, $street_2, $postcode, $state)
-    {
-        $args = [
-            'numberposts' => 1,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'exclude' => array($order_id),
-            'meta_query' => array(
-                'relation' => 'AND',
-                array(
-                    'key' => 'customer_user',
-                    'value' => get_current_user_id(),
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_country',
-                    'value' => $country,
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_city',
-                    'value' => $city,
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_address_1',
-                    'value' => $street_1,
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_address_2',
-                    'value' => $street_2,
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_postcode',
-                    'value' => $postcode,
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'shipping_state',
-                    'value' => $state,
-                    'compare' => '=',
-                ),
-            )
-        ];
-
-        if (\Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
-            $args['limit'] = 1;
-        } else {
-            $args['numberposts'] = 1;
-        }
-
-        $customer_orders = wc_get_orders($args);
-
-        if (count($customer_orders) == 0) {
-            //Account Created in this transaction
+        if (\count($customer_orders) == 0) {
+            // Account Created in this transaction
             return null;
         }
 
@@ -356,7 +293,7 @@ class WC_NPG_3DS20_Data_Provider
             !empty($wc->customer->get_shipping_postcode()) &&
             !empty($wc->customer->get_shipping_state())
         ) {
-            $params["cardHolderAcctInfo"]["destinationAddressUsageDate"] = static::get3ds20LastUsagedestinationAddress(
+            $params["cardHolderAcctInfo"]["destinationAddressUsageDate"] = static::get3ds20FirstUsagedestinationAddress(
                 null,
                 $wc->customer->get_shipping_city(),
                 $wc->customer->get_shipping_country(),
@@ -366,15 +303,7 @@ class WC_NPG_3DS20_Data_Provider
                 $wc->customer->get_shipping_state()
             );
 
-            $params["cardHolderAcctInfo"]["destinationAddressUsageIndicator"] = static::get3ds20FirstUsagedestinationAddress(
-                null,
-                $wc->customer->get_shipping_city(),
-                $wc->customer->get_shipping_country(),
-                $wc->customer->get_shipping_address_1(),
-                $wc->customer->get_shipping_address_2(),
-                $wc->customer->get_shipping_postcode(),
-                $wc->customer->get_shipping_state()
-            );
+            $params["cardHolderAcctInfo"]["destinationAddressUsageIndicator"] = static::get3ds20FirstUsagedestinationAddressIndicator($params["cardHolderAcctInfo"]["destinationAddressUsageDate"]);
         }
 
         if (!empty($wc->customer->get_shipping_first_name()) && !empty($wc->customer->get_shipping_last_name())) {
