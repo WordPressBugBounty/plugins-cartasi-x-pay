@@ -4,9 +4,9 @@ Tags: nexi, nexi payments, xpay, payment gateway, e-commerce
 Author URI: https://ecommerce.nexi.it
 Author: Nexi Payments SpA
 Requires at least: 4.6
-Tested up to: 6.9.4
+Tested up to: 7.0.2
 WC Requires at least: 2.7.0
-WC Tested up to: 10.6.2
+WC Tested up to: 10.9.4
 Stable tag: 8.4.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
